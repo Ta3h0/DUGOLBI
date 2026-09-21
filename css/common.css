@@ -6,4 +6,1109 @@ input,
 select,
 textarea {
   font-family: "Pretendard", sans-serif;
+  font-weight: 500;
+}
+
+:root {
+  --container-width: 1440px;
+  --page-gap: 40px;
+  --main-color: #0E3880;
+  --font-black: #1E2732;
+}
+
+.container {
+  width: min(var(--container-width),
+      calc(100% - (var(--page-gap) * 2)));
+  margin-inline: auto;
+}
+
+/* 1rem > 10px */
+html {
+  font-size: 62.5%;
+  letter-spacing: -2.5%;
+}
+
+body {
+  font-size: 1.6rem;
+  line-height: 1.6;
+}
+
+.w-fit {
+  width: fit-content;
+}
+
+section {
+  width: 100%;
+  margin: 14rem 0;
+}
+
+.section-title-box {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.section-title {
+  font-size: 3.8rem;
+  font-weight: bold;
+  line-height: 140%;
+  margin-top: 8px;
+  margin-bottom: 24px;
+  color: var(--font-black);
+}
+
+
+.section-desc {
+  font-size: 1.8rem;
+  color: var(--font-black);
+  line-height: 160%;
+}
+
+.section-title strong {
+  color: var(--main-color);
+}
+
+
+.section-eyebrow {
+  display: block;
+
+  font-size: 1.8rem;
+  font-weight: 400;
+  line-height: 140%;
+
+  color: #17478c;
+}
+
+
+.txt-white {
+  color: white;
+}
+
+.header {
+  height: 100px;
+  background-color: transparent;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+}
+
+.header.action {
+  background-color: white;
+  border-bottom: 1px solid #E4E9EF;
+}
+
+.hero-section {
+  position: relative;
+  margin: 0px;
+  background-color: black;
+  height: 100vh;
+  min-height: 919px;
+}
+
+.hero-text-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero-title {
+  font-size: 4rem;
+  color: white;
+}
+
+.hero-desc {
+  font-size: 1.8rem;
+  line-height: 1.6;
+  color: white;
+  margin-top: 16px;
+  margin-bottom: 40px;
+}
+
+.cta-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px 24px;
+  border-radius: 1.6rem;
+  font-size: 1.8rem;
+  font-weight: bold;
+  background-color: white;
+  color: var(--main-color);
+  border: none;
+  cursor: pointer;
+}
+
+.cta-button .arrow {
+  margin-left: 12px;
+}
+
+.section02 {
+  position: relative;
+  background-color: #FDFCFC;
+  height: 300vh;
+  margin: 0;
+}
+
+.section02 .inner {
+  position: sticky;
+  top: 0;
+
+  height: 100vh;
+  min-height: 919px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 4.8rem;
+  font-weight: bold;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.section02 .scroll-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.section02 .scroll-line {
+  display: grid;
+}
+
+.section02 .scroll-line__base,
+.section02 .scroll-line__fill {
+  grid-area: 1 / 1;
+
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: -0.04em;
+
+  white-space: nowrap;
+}
+
+.section02 .scroll-line__base {
+  color: #CCCFD3;
+}
+
+.section02 .scroll-line__fill {
+  color: #111;
+  clip-path: inset(0 100% 0 0);
+}
+
+.section02 .scroll-line__fill .point {
+  color: #123F83;
+}
+
+
+
+/* =========================================================
+   SECTION 03
+========================================================= */
+
+.section03 {
+  position: relative;
+
+  height: 773px;
+  margin: 0;
+
+  background:
+    url("../images/main/section03-bg.jpg") center center / cover no-repeat;
+
+  display: flex;
+  align-items: center;
+
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   GRID
+   1440px / 12 column / gutter 24px
+
+   LEFT  : 1 ~ 6
+   EMPTY : 7
+   RIGHT : 8 ~ 12
+========================================================= */
+
+.section03-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 2.4rem;
+
+  align-items: center;
+  height: 100%;
+}
+
+
+/* =========================================================
+   LEFT : VISUAL
+========================================================= */
+
+.section03-visual {
+  grid-column: 1 / span 6;
+
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+}
+
+
+/* =========================================================
+   SKULL
+   section03 높이에 정확히 맞춤
+========================================================= */
+
+.section03-skull {
+  position: absolute;
+
+  left: 0;
+  bottom: 0;
+
+  /*
+        section03 = 773px
+        부모 높이를 그대로 사용
+    */
+  height: 100%;
+  width: auto;
+
+  max-width: none;
+
+  display: block;
+
+  object-fit: contain;
+  object-position: left bottom;
+
+  z-index: 1;
+}
+
+
+/* =========================================================
+   POINT SVG
+   원 + 점 + 텍스트를 한 장으로 처리
+========================================================= */
+
+.section03-point {
+  position: absolute;
+
+  /*
+        좌측 6컬럼의 오른쪽 중앙에 고정
+    */
+  top: 50%;
+  right: 0;
+
+  /*
+        세로 크기를 section03에 비례해서 설정.
+        이 값 하나만 조절하면 전체 SVG가 같이 움직임.
+    */
+  height: 82%;
+  width: auto;
+
+  max-width: none;
+
+  display: block;
+
+  transform: translateY(-50%);
+
+  z-index: 2;
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   RIGHT : CONTENT
+========================================================= */
+
+.section03-content {
+  grid-column: 8 / span 5;
+
+  min-width: 0;
+}
+
+
+/* =========================================================
+   TITLE LINE
+========================================================= */
+
+.section03-title-line {
+  display: block;
+
+  width: 3rem;
+  height: 1px;
+
+  margin: 2.4rem 0;
+
+  background-color: #d5deeb;
+}
+
+
+/* =========================================================
+   SUBTITLE
+========================================================= */
+
+.section03-subtitle {
+  margin: 0 0 2.6rem;
+
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1.5;
+
+  letter-spacing: -0.03em;
+
+  color: #17478c;
+}
+
+
+/* =========================================================
+   DESCRIPTION
+========================================================= */
+
+.section03-desc {
+  font-size: 1.8rem;
+  font-weight: 400;
+  line-height: 1.6;
+
+  letter-spacing: -0.025em;
+
+  color: #343a43;
+}
+
+.section03-desc p {
+  margin: 0;
+}
+
+.section03-desc strong {
+  font-weight: 700;
+
+  color: #17478c;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1200px) {
+
+  .section03 {
+    height: 700px;
+  }
+
+  .section03-grid {
+    column-gap: 2rem;
+  }
+
+  .section03-skull {
+    height: 100%;
+  }
+
+  .section03-point {
+    height: 78%;
+    right: 0;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .section03 {
+    height: auto;
+    min-height: auto;
+
+    padding: 8rem 0;
+
+    background-position: center;
+  }
+
+  .section03-grid {
+    display: flex;
+    flex-direction: column;
+
+    gap: 6rem;
+  }
+
+
+  /* CONTENT */
+
+  .section03-content {
+    width: 100%;
+
+    order: 1;
+  }
+
+  .section03-desc br {
+    display: none;
+  }
+
+
+  /* VISUAL */
+
+  .section03-visual {
+    width: 100%;
+    height: 52rem;
+
+    order: 2;
+  }
+
+  .section03-skull {
+    left: 0;
+    bottom: 0;
+
+    height: 100%;
+    width: auto;
+  }
+
+  .section03-point {
+    top: 50%;
+    right: 0;
+
+    height: 76%;
+
+    transform: translateY(-50%);
+  }
+
+}
+
+
+/* =========================================================
+   MARQUEE
+========================================================= */
+
+.section-carousel {
+  position: relative;
+  width: 100%;
+  height: 15.5rem;
+  margin: 14rem 0;
+
+  overflow: hidden;
+}
+
+.carousel-wrapper {
+  display: flex;
+  width: max-content;
+
+  animation-name: marqueeMove;
+  animation-duration: 60s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-play-state: running;
+
+  will-change: transform;
+}
+
+.carousel-group {
+  display: flex;
+  flex: none;
+}
+
+.carousel-item {
+  flex: none;
+
+  padding-right: 8rem;
+
+  white-space: nowrap;
+
+  font-size: 12rem;
+  font-weight: 700;
+  line-height: 1;
+
+  color: var(--main-color);
+  opacity: 0.05;
+}
+
+@keyframes marqueeMove {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+
+/* =========================================================
+   SECTION 04 - GROWTH SWIPER
+========================================================= */
+
+.growth-swiper {
+  position: relative;
+
+  width: 100%;
+  margin-left: 0;
+
+  overflow: hidden;
+
+  padding-bottom: 4rem;
+}
+
+
+/* =========================================================
+   WRAPPER
+========================================================= */
+
+.growth-swiper .swiper-wrapper {
+  align-items: stretch;
+}
+
+
+/* =========================================================
+   SLIDE
+
+   1440px 안에 카드 4개
+   gap 24px × 3
+   (1440 - 72) / 4 = 342px
+========================================================= */
+
+.growth-swiper .swiper-slide {
+  position: relative;
+
+  width: calc((min(var(--container-width),
+          calc(100vw - (var(--page-gap) * 2))) - (2.4rem * 3)) / 4);
+
+  height: auto;
+
+  flex-shrink: 0;
+
+  overflow: hidden;
+
+  border-radius: 1.6rem;
+
+  cursor: grab;
+  user-select: none;
+}
+
+.growth-swiper .swiper-slide:active {
+  cursor: grabbing;
+}
+
+
+/* =========================================================
+   IMAGE
+========================================================= */
+
+.growth-swiper .swiper-slide>img {
+  display: block;
+
+  width: 100%;
+  height: auto;
+
+  max-width: none;
+
+  pointer-events: none;
+  user-select: none;
+}
+
+
+/* =========================================================
+   GRADIENT
+========================================================= */
+
+.growth-swiper .swiper-slide::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(to bottom,
+      rgba(0, 0, 0, 0) 42%,
+      rgba(0, 0, 0, 0.72) 100%);
+
+  z-index: 1;
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   CARD TEXT
+========================================================= */
+
+.growth-card {
+  position: absolute;
+
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 30px;
+
+  z-index: 2;
+
+  color: #fff;
+  background: linear-gradient(to bottom,
+      #06183600 0%,
+      #061836 100%);
+
+  transform: translateY(4.2rem);
+
+  transition: transform 0.45s ease;
+}
+
+.growth-card-title {
+  margin: 0;
+
+  font-size: 2.5rem;
+  font-weight: bold;
+  line-height: 140%;
+}
+
+.growth-card-desc {
+  margin-top: 0.8rem;
+
+  font-size: 1.8rem;
+  font-weight: 300;
+  line-height: 140%;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+
+  word-break: keep-all;
+
+  opacity: 0;
+
+  transition: opacity 0.3s ease 0.08s;
+}
+
+
+/* hover */
+.growth-swiper .swiper-slide:hover .growth-card {
+  transform: translateY(0);
+}
+
+.growth-swiper .swiper-slide:hover .growth-card-desc {
+  opacity: 1;
+}
+
+
+/* =========================================================
+   PROGRESS BAR
+========================================================= */
+
+.growth-pagination.swiper-pagination-progressbar {
+  position: absolute;
+
+  /*
+        진행바 자체는 1440px 그리드에 맞춤
+    */
+  left: max(var(--page-gap),
+      calc((100vw - var(--container-width)) / 2));
+
+  right: max(var(--page-gap),
+      calc((100vw - var(--container-width)) / 2));
+
+  bottom: 0;
+  top: auto;
+
+  width: auto;
+  height: 0.4rem;
+
+  background-color: rgba(14, 56, 128, 0.1);
+
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.growth-pagination .swiper-pagination-progressbar-fill {
+  background-color: var(--main-color);
+
+  border-radius: inherit;
+
+  transform-origin: left center;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1200px) {
+
+  .growth-swiper .swiper-slide {
+    width: calc((100vw - (var(--page-gap) * 2) - (2rem * 2)) / 3);
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .growth-swiper {
+    padding-bottom: 3rem;
+  }
+
+  .growth-swiper .swiper-slide {
+    width: calc(100vw - 6rem);
+  }
+
+  .growth-pagination.swiper-pagination-progressbar {
+    left: 2rem;
+    right: 2rem;
+  }
+
+}
+
+.section05 {
+  background-color: #121A32;
+  padding-top: 60px;
+  position: relative;
+  margin-bottom: 0;
+}
+
+.section05 .container {
+  display: flex;
+  margin: 0 auto;
+  max-width: 1070px;
+  width: 100%;
+  align-items: center;
+}
+
+.section05 .container .img-box {
+  width: 50%;
+  display: flex;
+  justify-content: center;
+}
+
+.section05 .container .img-box img {
+  width: 400px;
+  height: fit-content;
+}
+
+.section05 .container .profile-box {
+  height: fit-content;
+  margin-left: 100px;
+}
+
+.section05 .container .profile-box hr {
+  width: 100%;
+  margin: 24px 0;
+  opacity: .5;
+}
+
+.section05 .container .profile-position {
+  font-size: 1.6rem;
+  line-height: 130%;
+}
+
+.section05 .container .profile-name {
+  font-size: 3.5rem;
+  line-height: 130%;
+  margin-top: 8px;
+  letter-spacing: 30%;
+}
+
+.section05 .container .career-panel {
+  display: flex;
+  height: 22rem;
+  overflow: hidden;
+  font-weight: 200;
+  font-size: 1.6rem;
+  position: relative;
+}
+
+.section05 .container .career-panel::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 90%;
+  background: linear-gradient(to bottom, rgba(18, 26, 50, 0) 0%, rgba(18, 26, 50, 1) 100%);
+}
+
+.section05 .container .career-panel li {
+  margin-bottom: 4px;
+}
+
+.section05 .container .cta-button {
+  border-radius: 10000px;
+  background-color: transparent;
+  border: 1px solid white;
+  margin: 12px auto 0 auto;
+  color: white;
+}
+
+.section05 .container .cta-button:hover img {
+  transform: rotate(-45deg);
+}
+
+.section05 .container .cta-button img {
+  margin-left: 40px;
+  transition: 0.3s;
+}
+
+.section05 .bg-line {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  z-index: 0;
+}
+
+.section06 {
+  padding: 120px 0;
+  margin-top: 0;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.3),
+      rgba(255, 255, 255, 0.3)),
+    url("../images/main/section06-bg.jpg") center center / cover no-repeat;
+}
+
+.section06 .container .inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section06 .container .inner .item {
+  width: calc(50% - 12px);
+  margin-bottom: 24px;
+  border-radius: 40px;
+  color: white;
+  height: 355px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+
+.section06 .container .inner .item:nth-of-type(1) {
+  background: url("/images/main/section06-item-bg01.jpg") center center / cover no-repeat;
+}
+
+.section06 .container .inner .item:nth-of-type(2) {
+  background: url("/images/main/section06-item-bg02.jpg") center center / cover no-repeat;
+}
+
+.section06 .container .inner .item:nth-of-type(3) {
+  background: url("/images/main/section06-item-bg03.jpg") center center / cover no-repeat;
+}
+
+.section06 .container .inner .item:nth-of-type(4) {
+  background: url("/images/main/section06-item-bg04.jpg") center center / cover no-repeat;
+}
+
+.section06 .container .inner .item:nth-of-type(5) {
+  background: url("/images/main/section06-item-bg05.jpg") center center / cover no-repeat;
+}
+
+.section06 .container .inner .item:nth-of-type(6) {
+  background: url("/images/main/section06-item-bg06.jpg") center center / cover no-repeat;
+}
+
+.section06 .container .inner .item .item-title {
+  font-size: 3rem;
+  margin: 8px 0 10px 0;
+  line-height: 160%;
+}
+
+.section06 .container .inner .item .item-desc {
+  font-size: 1.6rem;
+  line-height: 160%;
+}
+
+.section06 .container .inner .item .chip {
+  background-color: white;
+  color: var(--main-color);
+  padding: 5px 19px;
+  border-radius: 1000px;
+  font-weight: bold;
+  margin-right: 16px;
+}
+
+/* =========================================================
+   SECTION 07 - REVIEW
+========================================================= */
+
+.section07 {
+  overflow: hidden;
+}
+
+.section07 .section-title-box {
+  text-align: left;
+}
+
+
+/* =========================================================
+   REVIEW MARQUEE
+========================================================= */
+
+.review-marquee {
+  width: 100%;
+  overflow: hidden;
+  padding: 30px 0;
+}
+
+.review-marquee-track {
+  display: flex;
+
+  width: max-content;
+
+  animation: reviewMarquee 60s linear infinite;
+
+  will-change: transform;
+}
+
+
+/* =========================================================
+   MARQUEE GROUP
+========================================================= */
+
+.review-marquee-group {
+  display: flex;
+
+  gap: 2.4rem;
+
+  /* 그룹 사이에도 동일한 간격 유지 */
+  padding-right: 2.4rem;
+
+  flex-shrink: 0;
+}
+
+
+/* =========================================================
+   ITEM
+========================================================= */
+
+.review-marquee-item {
+  flex-shrink: 0;
+  width: 340px;
+  overflow: hidden;
+  border-radius: 4rem;
+  box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.review-marquee-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+}
+
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+@keyframes reviewMarquee {
+
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .review-marquee-group {
+    gap: 1.6rem;
+    padding-right: 1.6rem;
+  }
+
+  .review-marquee-item {
+    width: 18rem;
+    height: 17rem;
+
+    border-radius: 1.6rem;
+  }
+
+  .review-marquee-track {
+    animation-duration: 28s;
+  }
+
+}
+
+.section08 .container .section-title-box {
+  text-align: left;
+}
+
+.section08 .container .inner {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 2.4rem;
+    align-items: center;
+}
+
+.section08 .container .img-box {
+    grid-column: 1 / span 5;
+}
+
+.section08 .container .img-box img {
+  width: 100%;
+  height: 333px;
+  display: block;
+  margin-bottom: 24px;
+  border-radius: 40px;
+  object-fit: cover;
+}
+
+.section08 .container .list-panel {
+    grid-column: 7 / span 6;
+}
+
+.section08 .container .list-panel .item {
+  width: 100%;
+  padding: 30px;
+  border-bottom: 1px solid #E4E9EF;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.section08 .container .list-panel .item .date {
+  font-size: 1.6rem;
+  line-height: 130%;
+  color: #667085;
+  font-weight:400;
+  display: block;
+}
+
+.section08 .container .list-panel .item .title {
+  width: 100%;
+  font-size: 2rem;
+  line-height: 130%;
+  color: var(--font-black);
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  -webkit-line-clamp: 1;
 }
