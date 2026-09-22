@@ -134,25 +134,22 @@ section {
 
 
 .hero-text-box {
-position: absolute;
-
+  position: absolute;
   top: 50%;
   left: 50%;
-
   transform: translate(-50%, -50%);
-
-  width: 100%;
-
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
   text-align: center;
-
   z-index: 5;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none
 }
-
+ 
 
 .hero-controls {
   position: absolute;
@@ -248,15 +245,13 @@ position: absolute;
 
 .hero-prev span {
   transform:
-    translate(-35%, -50%)
-    rotate(-135deg);
+    translate(-35%, -50%) rotate(-135deg);
 }
 
 
 .hero-next span {
   transform:
-    translate(-65%, -50%)
-    rotate(45deg);
+    translate(-65%, -50%) rotate(45deg);
 }
 
 
