@@ -368,6 +368,20 @@ section {
   text-align: center;
 }
 
+.section02 .mob {
+    display: none;
+  }
+
+@media screen and (max-width: 768px) {
+  .section02 .inner {
+    font-size: 2rem;
+  }
+
+  .section02 .mob {
+    display: block;
+  }
+}
+
 .section02 .scroll-text {
   display: flex;
   flex-direction: column;

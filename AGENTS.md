@@ -73,9 +73,14 @@ Avoid unnecessary fixed positioning and excessive absolute positioning.
 
 Inspect and reuse the existing project layout rules.
 
+The existing `.container` is the primary common width/container system.
+
+`.inner` is not a universal width class.
+Use it only when it matches the existing section structure.
+
 Reuse existing:
 
-- `.inner`
+- `.container`
 - grid systems
 - section structures
 - typography patterns
@@ -118,9 +123,13 @@ Do not rewrite unrelated existing JavaScript.
 
 ## 8. Header / Footer / Common UI
 
-Reuse existing common header and footer implementations.
+Reuse the existing header, mega menu, responsive menu and footer markup,
+styles and JavaScript patterns for new pages.
 
-Do not recreate them for individual pages unless explicitly requested.
+Do not redesign or independently reimplement these common components.
+
+When creating a standalone static HTML page,
+copy the existing common markup as required by the current project structure.
 
 Do not unnecessarily modify working common components.
 
@@ -130,8 +139,159 @@ Do not unnecessarily modify working common components.
 
 Only modify files necessary for the requested task.
 
-Before changing an existing common file, confirm that the change is actually required.
+Before changing an existing common file,
+verify that the change is strictly required for the requested page.
+
+Prefer page-specific files whenever possible.
 
 Do not perform unrelated cleanup or refactoring.
 
 When an existing project convention conflicts with your preferred implementation, follow the existing project convention.
+
+
+# New Page Implementation Workflow
+
+When the user asks to implement a new page, follow this workflow automatically.
+
+## Page paths
+
+If the requested page slug is `{page}`:
+
+Design references:
+`ai/reference/{page}/`
+
+Source assets:
+`ai/assets/{page}/`
+
+Production HTML:
+`{page}.html`
+
+Page CSS:
+`css/{page}.css`
+
+Production assets:
+`images/{page}/`
+
+Do not reference files inside `/ai` from production HTML or CSS.
+Copy only required assets into the production asset directory.
+
+---
+
+## Implementation references
+
+Before implementing a new subpage, inspect:
+
+- AGENTS.md
+- index.html
+- css/common.css
+- introduce.html
+- css/introduce.css
+
+`introduce.html` and `css/introduce.css` are the primary examples
+for how DUGOLBI subpages should be implemented.
+
+Reuse the existing:
+
+- header
+- mega menu
+- responsive menu
+- footer
+- container system
+- typography
+- buttons
+- CSS variables
+- JavaScript patterns
+
+Do not unnecessarily modify completed pages or common files.
+
+---
+
+## Design implementation
+
+The files inside:
+
+`ai/reference/{page}/`
+
+are the final visual source of truth.
+
+Use the full-page reference for overall composition
+and section references for detailed implementation.
+
+The files inside:
+
+`ai/assets/{page}/`
+
+are implementation source assets.
+
+Do not insert reference screenshots directly into the webpage.
+
+Reproduce the supplied design as accurately as possible.
+
+Do not invent UI, animation, hover effects, shadows,
+border radius or other visual elements that are not in the reference.
+
+---
+
+## Current responsive policy
+
+Unless the user explicitly requests otherwise,
+new page implementation is DESKTOP PC ONLY.
+
+Use the 1920px reference as the primary visual target.
+
+Do not create new responsive layouts.
+
+However, use normal document flow, Grid and Flex
+so responsive CSS can be added later.
+
+Avoid unnecessary absolute positioning.
+
+---
+
+## Asset naming
+
+When moving files from `/ai/assets` to production:
+
+- use lowercase English filenames
+- use kebab-case
+- do not use Korean filenames
+- do not use spaces
+- do not use special characters
+
+Update HTML/CSS paths accordingly.
+
+Copy assets from `/ai/assets`.
+Do not move, rename or delete the original files inside `/ai`.
+
+---
+
+## Default workflow
+
+For normal static subpages:
+
+1. inspect existing project rules
+2. inspect references and assets
+3. determine section structure
+4. implement immediately
+5. compare against references
+6. correct obvious discrepancies
+7. report results
+
+Do not stop after analysis unless the user explicitly asks for analysis only.
+
+For complex pages involving significant interaction, animation,
+sticky sections, tabs, sliders or unusual JavaScript,
+explain the implementation plan before making large structural changes.
+
+---
+
+## Completion report
+
+After implementation, report only:
+
+1. created files
+2. modified existing files
+3. copied/renamed assets
+4. parts that require human visual review
+
+Keep the report concise.
