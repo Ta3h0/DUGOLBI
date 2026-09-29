@@ -1,0 +1,97 @@
+.montly-detail-section { margin: 0; padding: 90px 0 60px; letter-spacing: -0.025em; }
+.montly-back { display: inline-block; margin-bottom: 36px; color: #667180; font-size: 1.6rem; text-decoration: underline; text-underline-offset: 5px; }
+.montly-detail-overview { display: grid; grid-template-columns: 600px minmax(0, 1fr); gap: 100px; align-items: center; }
+.montly-detail-info h2 { font-size: 3.8rem; font-weight: 700; line-height: 1.4; margin: 14px 0 24px; }
+.montly-detail-lead { font-size: 1.8rem; color: #667180; line-height: 1.7; }
+.montly-detail-facts { border-top: 1px solid #dfe5ed; border-bottom: 1px solid #dfe5ed; padding: 28px 0; margin-top: 32px; }
+.montly-detail-facts > div { display: grid; grid-template-columns: 100px 1fr; gap: 20px; align-items: baseline; font-size: 1.8rem; }
+.montly-detail-facts > div + div { margin-top: 18px; }
+.montly-detail-facts dt { color: #667180; font-size: 1.6rem; }
+.montly-detail-info .montly-price { padding-top: 28px; text-align: left; }
+.montly-detail-info .montly-price-values { justify-content: flex-start; }
+.montly-detail-info .montly-price-values > strong, .montly-detail-info .montly-discount { font-size: 3.8rem; }
+.montly-detail-body { margin: 120px auto 0; max-width: 1120px; }
+.montly-detail-body section { margin: 0; }
+.montly-detail-body h2 { font-size: 3.2rem; font-weight: 700; line-height: 1.5; }
+.montly-detail-intro { text-align: center; padding: 80px 0 100px; border-top: 1px solid #dfe5ed; }
+.montly-detail-prose { margin-top: 40px; font-size: 1.8rem; line-height: 1.9; color: #667180; }
+.montly-detail-prose p + p { margin-top: 26px; }
+.montly-detail-prose strong { color: var(--main-color); }
+.montly-detail-curriculum > h2 { padding-bottom: 32px; border-bottom: 2px solid var(--main-color); }
+.montly-detail-part { display: grid; grid-template-columns: 280px 1fr; gap: 40px; padding: 44px 0; border-bottom: 1px solid #dfe5ed; }
+.montly-detail-part span { font-size: 1.5rem; color: var(--main-color); }
+.montly-detail-part h3 { font-size: 2.4rem; font-weight: 700; margin-top: 10px; }
+.montly-detail-part h4 { font-size: 2rem; font-weight: 700; }
+.montly-detail-part p { font-size: 1.8rem; line-height: 1.8; color: #667180; }
+.montly-detail-part .montly-part-question { margin: 20px 0 12px; color: var(--main-color); }
+.montly-detail-body .montly-detail-contact { padding-top: 90px; text-align: center; }
+.montly-contact-number { font-size: 2.4rem; color: var(--main-color); margin-top: 12px; }
+.montly-booking-actions { display: flex; justify-content: center; gap: 16px; margin-top: 32px; }
+.montly-booking-actions .cta-button { gap: 10px; min-width: 240px; padding: 18px 36px; border-radius: 100px; }
+.montly-booking-naver { border: 1px solid var(--main-color); }
+.montly-booking-phone { background: var(--main-color); color: #fff; }
+.montly-phone-status { min-height: 26px; margin-top: 18px; color: #667180; font-size: 1.6rem; }
+.montly-phone-copy { width: 230px; padding: 8px; margin: 12px auto 0; border: 1px solid #dfe5ed; text-align: center; }
+.montly-phone-copy[hidden] { display: none; }
+.montly-detail-section a:focus-visible { outline: 2px solid var(--main-color); outline-offset: 5px; }
+
+.montly-booking-actions img { flex-shrink: 0; object-fit: contain; }
+.montly-booking-naver img { width: 26px; height: 26px; }
+.montly-booking-phone img { width: 22px; height: 22px; filter: brightness(0) invert(1); }
+
+/* Detail-only responsive layout; the course listing keeps its existing styles. */
+.montly-detail-info, .montly-detail-part > div, .montly-detail-facts dd { min-width: 0; }
+.montly-detail-section { word-break: keep-all; overflow-wrap: anywhere; }
+@media (max-width: 1439px) {
+  .montly-detail-overview { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; }
+  .montly-detail-info h2 { font-size: 3.2rem; }
+  .montly-detail-lead br { display: none; }
+  .montly-detail-facts > div { grid-template-columns: 80px minmax(0, 1fr); gap: 16px; }
+  .montly-detail-facts .montly-date-note { display: block; margin-left: 0; margin-top: 4px; }
+  .montly-detail-part { grid-template-columns: 230px minmax(0, 1fr); gap: 32px; }
+}
+@media (max-width: 1024px) {
+  .montly-detail .montly-hero { height: 640px; padding-top: 190px; }
+  .montly-detail-section { padding-top: 64px; }
+  .montly-detail-overview { grid-template-columns: minmax(0, 1fr); gap: 40px; max-width: 700px; margin-inline: auto; }
+  .montly-detail-overview .montly-poster { width: min(100%, 600px); margin-inline: auto; }
+  .montly-detail-body { margin-top: 80px; }
+  .montly-detail-intro { padding: 64px 0 80px; }
+  .montly-detail-part { grid-template-columns: 200px minmax(0, 1fr); gap: 24px; }
+  .montly-detail .montly-statement { height: 200px; }
+  .montly-detail .montly-statement .carousel-item { font-size: 8rem; }
+}
+@media (max-width: 768px) {
+  .montly-detail .montly-hero { height: 540px; padding-top: 155px; }
+  .montly-detail .montly-hero h1 img { width: min(76vw, 300px); }
+  .montly-detail .montly-hero-message { font-size: 1.8rem; margin-top: 22px; }
+  .montly-detail .montly-hero-line { height: 48px; margin: 24px auto; }
+  .montly-detail .montly-hero-desc { font-size: 1.5rem; }
+  .montly-detail-section { margin: 0; padding: 40px 0; }
+  .montly-back { font-size: 1.4rem; margin-bottom: 24px; }
+  .montly-detail-overview { gap: 30px; }
+  .montly-detail-info h2 { font-size: 2.8rem; margin: 12px 0 18px; }
+  .montly-detail-lead { font-size: 1.6rem; }
+  .montly-detail-facts { margin-top: 24px; padding: 22px 0; }
+  .montly-detail-facts > div { font-size: 1.6rem; grid-template-columns: 68px minmax(0, 1fr); gap: 12px; }
+  .montly-detail-facts dt { font-size: 1.4rem; }
+  .montly-detail-info .montly-price-values > strong, .montly-detail-info .montly-discount { font-size: 3.2rem; }
+  .montly-detail-body { margin-top: 60px; }
+  .montly-detail-body h2 { font-size: 2.6rem; }
+  .montly-detail-intro { padding: 48px 0 64px; }
+  .montly-detail-prose { margin-top: 28px; font-size: 1.6rem; line-height: 1.8; }
+  .montly-detail-prose br { display: none; }
+  .montly-detail-curriculum > h2 { padding-bottom: 22px; }
+  .montly-detail-part { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 30px 0; }
+  .montly-detail-part h3 { font-size: 2.2rem; margin-top: 6px; }
+  .montly-detail-part h4 { font-size: 1.8rem; }
+  .montly-detail-part p { font-size: 1.6rem; }
+  .montly-detail-part p br { display: none; }
+  .montly-detail-body .montly-detail-contact { padding-top: 56px; }
+  .montly-contact-number { font-size: 2.2rem; }
+  .montly-booking-actions { gap: 12px; margin-top: 26px; }
+  .montly-booking-actions .cta-button { min-width: 0; flex: 1; max-width: 240px; padding: 15px 12px; font-size: 1.6rem; gap: 8px; }
+  .montly-phone-status { font-size: 1.4rem; }
+  .montly-detail .montly-statement { height: 140px; }
+  .montly-detail .montly-statement .carousel-item { font-size: 5.6rem; }
+}

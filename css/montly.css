@@ -1,0 +1,54 @@
+/* MONTLY PC — existing common header / footer and container retained. */
+body.montly {
+  color: var(--font-black);
+  background: #fff;
+}
+.montly-hero { letter-spacing: -0.025em; }
+
+body.montly .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) {
+  background: transparent;
+  border-bottom-color: transparent;
+}
+body.montly .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .logo-white { opacity: 1; }
+body.montly .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .logo-black { opacity: 0; }
+body.montly .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link { color: #fff; }
+body.montly .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link::after,
+body.montly .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-menu-toggle span { background: #fff; }
+body.montly .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-cta { background: #fff; color: var(--main-color); }
+body.montly .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-cta .arrow { filter: none; }
+
+.montly-hero {
+  height: 728px;
+  margin: 0;
+  padding-top: 230px;
+  background: url('../images/montly/top-section-bg.png') center / cover no-repeat;
+  color: #fff;
+  text-align: center;
+}
+.montly-hero h1 img { width: 359px; height: auto; margin: 0 auto; }
+.montly-hero-message { margin-top: 24px; font-size: 2.2rem; font-weight: 700; line-height: 1.6; }
+.montly-hero-line { width: 1px; height: 80px; margin: 28px auto 40px; background: #fff; }
+.montly-hero-desc { font-size: 1.8rem; line-height: 1.6; font-weight: 400; }
+
+
+.montly-education { margin: 0; padding: 120px 0 130px; letter-spacing: -0.025em; }
+.montly-education .section-title-box { margin-bottom: 60px; }
+.montly-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 60px 24px; }
+.montly-preview { min-width: 0; }
+.montly-poster { display: block; position: relative; }
+.montly-earlybird-chip { position: absolute; top: 16px; right: 16px; padding: 6px 14px; border-radius: 100px; background: var(--main-color); color: #fff; font-size: 1.4rem; font-weight: 700; line-height: 1.5; }
+.montly-poster img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; }
+.montly-preview-content { padding-top: 24px; }
+.montly-preview h3 { margin: 0 0 16px; font-size: 2.4rem; font-weight: 700; line-height: 1.45; }
+.montly-facts { display: grid; gap: 6px; color: #667180; font-size: 1.5rem; }
+.montly-facts > div { display: grid; grid-template-columns: 60px minmax(0, 1fr); align-items: baseline; gap: 12px; }
+.montly-facts dt { color: #7c8796; }
+.montly-date-note { margin-left: 8px; color: #7c8796; font-size: 1.3rem; }
+.montly-price { text-align: right; padding-top: 20px; font-variant-numeric: tabular-nums; }
+.montly-original-price { display: block; text-decoration: line-through; color: #7c8796; font-size: 1.5rem; }
+.montly-price-values { display: flex; justify-content: flex-end; align-items: baseline; flex-wrap: wrap; gap: 12px; margin-top: 2px; }
+.montly-discount { color: var(--main-color); font-size: 2.8rem; font-weight: 700; }
+.montly-price-values > strong { color: var(--font-black); font-size: 2.8rem; line-height: 1.4; font-weight: 700; }
+.montly-price-values > strong > span { font-size: 1.8rem; margin-left: 2px; }
+.montly-statement { height: 280px; display: flex; align-items: center; justify-content: center; }
+.montly-statement .carousel-item { padding: 0; font-size: 12rem; letter-spacing: -0.025em; }
