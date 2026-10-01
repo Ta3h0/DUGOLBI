@@ -1,19 +1,30 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Replace entries marked temporary before publishing. Add confirmed schedules here. Dates are inclusive local calendar dates.
-    const courses = [
-        { id: "dugolbi-10", color: "schedule-color-1", title: "두골비 과정 10기 교육일정", start: "2026-10-11", end: "2026-10-28" },
-        { id: "sample-signature", color: "schedule-color-2", title: "시그니처 교육과정", start: "2026-10-03", end: "2026-10-05", temporary: true },
-        { id: "sample-decollete", color: "schedule-color-3", title: "데콜테 실전 테크닉", start: "2026-10-08", end: "2026-10-09", temporary: true },
-        { id: "sample-startup", color: "schedule-color-4", title: "창업반 실전 교육", start: "2026-10-19", end: "2026-10-23", temporary: true },
-        { id: "sample-growth", color: "schedule-color-5", title: "어린이 성장 매니지먼트", start: "2026-10-29", end: "2026-11-03", temporary: true }
-    ];
     const list = document.getElementById("schedule-list");
     const days = document.getElementById("schedule-days");
     const status = document.getElementById("schedule-selection");
-    const parseDate = value => { const [y, m, d] = value.split("-").map(Number); return new Date(y, m - 1, d); };
+    const monthLabel = document.getElementById("schedule-month");
+    const countLabel = document.getElementById("schedule-count");
+    const emptyMessage = document.getElementById("schedule-empty");
+    if (!list || !days) return;
+
+    const parseDate = value => {
+        if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+        const [y, m, d] = value.split("-").map(Number);
+        const date = new Date(y, m - 1, d);
+        return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d ? date : null;
+    };
+    // Dates in modify.js are inclusive local calendar dates.
+    const source = typeof scheduleData !== "undefined" && Array.isArray(scheduleData) ? scheduleData : [];
+    const courses = source.filter(course => {
+        return course && parseDate(course.start) && parseDate(course.end) && course.start <= course.end;
+    }).map((course, index) => ({
+        ...course,
+        id: course.id ? String(course.id) : `schedule-${index + 1}`,
+        color: /^schedule-color-[1-5]$/.test(course.color) ? course.color : `schedule-color-${index % 5 + 1}`
+    }));
     const dateKey = date => [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
     const displayDate = value => value.replaceAll("-", ".");
-    let month = parseDate(courses[0].start);
+    let month = courses.length ? parseDate(courses[0].start) : new Date();
     month.setDate(1);
     let pinned = null;
     let hovered = null;
@@ -38,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
             cell.classList.toggle("range-start", active && (cell.dataset.date === course.start || cell.cellIndex === 0));
             cell.classList.toggle("range-end", active && (cell.dataset.date === course.end || cell.cellIndex === 6));
         });
-        status.textContent = course ? `${displayDate(course.start)} ~ ${displayDate(course.end)}` : "목록에 마우스를 올려 교육 기간을 확인해 보세요.";
+        if (status) status.textContent = course ? `${displayDate(course.start)} ~ ${displayDate(course.end)}` : "목록에 마우스를 올려 교육 기간을 확인해 보세요.";
     }
 
     function render() {
@@ -46,9 +57,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const end = dateKey(new Date(month.getFullYear(), month.getMonth() + 1, 0));
         const visible = courses.filter(course => course.start <= end && course.end >= start);
         pinned = hovered = focused = null;
-        document.getElementById("schedule-month").textContent = `${month.getFullYear()}. ${String(month.getMonth() + 1).padStart(2, "0")}`;
-        document.getElementById("schedule-count").textContent = `${visible.length}개 과정`;
-        document.getElementById("schedule-empty").hidden = visible.length > 0;
+        if (monthLabel) monthLabel.textContent = `${month.getFullYear()}. ${String(month.getMonth() + 1).padStart(2, "0")}`;
+        if (countLabel) countLabel.textContent = `${visible.length}개 과정`;
+        if (emptyMessage) emptyMessage.hidden = visible.length > 0;
         list.replaceChildren();
         visible.forEach(course => {
             const li = document.createElement("li");
@@ -117,14 +128,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const picker = document.getElementById("schedule-picker");
     const pickerToggle = document.getElementById("schedule-picker-toggle");
     const monthOptions = document.getElementById("schedule-picker-months");
+    const yearLabel = document.getElementById("schedule-year");
+    const hasPicker = Boolean(picker && pickerToggle && monthOptions && yearLabel);
     let pickerYear = month.getFullYear();
     function closePicker(restoreFocus = false) {
+        if (!hasPicker) return;
         picker.hidden = true;
         pickerToggle.setAttribute("aria-expanded", "false");
         if (restoreFocus) pickerToggle.focus();
     }
     function renderPicker() {
-        document.getElementById("schedule-year").textContent = `${pickerYear}년`;
+        if (!hasPicker) return;
+        yearLabel.textContent = `${pickerYear}년`;
         monthOptions.replaceChildren();
         for (let index = 0; index < 12; index++) {
             const button = document.createElement("button");
@@ -140,25 +155,25 @@ document.addEventListener("DOMContentLoaded", function () {
             monthOptions.append(button);
         }
     }
-    pickerToggle.addEventListener("click", () => {
+    if (hasPicker) pickerToggle.addEventListener("click", () => {
         if (!picker.hidden) { closePicker(); return; }
         pickerYear = month.getFullYear();
         renderPicker();
         picker.hidden = false;
         pickerToggle.setAttribute("aria-expanded", "true");
     });
-    document.getElementById("schedule-year-prev").addEventListener("click", () => { pickerYear--; renderPicker(); });
-    document.getElementById("schedule-year-next").addEventListener("click", () => { pickerYear++; renderPicker(); });
+    document.getElementById("schedule-year-prev")?.addEventListener("click", () => { pickerYear--; renderPicker(); });
+    document.getElementById("schedule-year-next")?.addEventListener("click", () => { pickerYear++; renderPicker(); });
     document.addEventListener("click", event => {
         if (!event.target.closest(".schedule-date-select")) closePicker();
     });
     document.addEventListener("keydown", event => {
-        if (event.key === "Escape" && !picker.hidden) { closePicker(true); event.preventDefault(); }
+        if (event.key === "Escape" && hasPicker && !picker.hidden) { closePicker(true); event.preventDefault(); }
     });
     document.addEventListener("focusin", event => {
         if (!event.target.closest(".schedule-date-select")) closePicker();
     });
-    document.getElementById("schedule-prev").addEventListener("click", () => { month.setMonth(month.getMonth() - 1); render(); });
-    document.getElementById("schedule-next").addEventListener("click", () => { month.setMonth(month.getMonth() + 1); render(); });
+    document.getElementById("schedule-prev")?.addEventListener("click", () => { month.setMonth(month.getMonth() - 1); render(); });
+    document.getElementById("schedule-next")?.addEventListener("click", () => { month.setMonth(month.getMonth() + 1); render(); });
     render();
 });

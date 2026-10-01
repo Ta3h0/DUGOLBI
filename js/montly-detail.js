@@ -2,7 +2,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const phoneLink = document.getElementById("montly-phone");
     const status = document.getElementById("montly-phone-status");
     const copyField = document.getElementById("montly-phone-copy");
-    const phone = "010-3450-1662";
+    if (!phoneLink || !status || !copyField) return;
+    const phone = copyField.value;
+    if (!phone) return;
     // Device detection keeps a narrow desktop window in copy mode.
     function isMobileDevice() {
         return Boolean(navigator.userAgentData && navigator.userAgentData.mobile) ||

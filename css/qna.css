@@ -1,0 +1,52 @@
+/* MONTLY PC — existing common header / footer and container retained. */
+body.qna {
+  color: var(--font-black);
+  background: #fff;
+}
+.qna-hero { letter-spacing: -0.025em; }
+
+body.qna .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) {
+  background: transparent;
+  border-bottom-color: transparent;
+}
+body.qna .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .logo-white { opacity: 1; }
+body.qna .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .logo-black { opacity: 0; }
+body.qna .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link { color: #fff; }
+body.qna .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link::after,
+body.qna .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-menu-toggle span { background: #fff; }
+body.qna .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-cta { background: #fff; color: var(--main-color); }
+body.qna .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-cta .arrow { filter: none; }
+
+.qna-hero {
+  height: 728px;
+  margin: 0;
+  padding-top: 230px;
+  background: url('../images/montly/top-section-bg.png') center / cover no-repeat;
+  color: #fff;
+  text-align: center;
+}
+.qna-hero h1 img { width: 359px; height: auto; margin: 0 auto; }
+.qna-hero-message { margin-top: 24px; font-size: 2.2rem; font-weight: 700; line-height: 1.6; }
+.qna-hero-line { width: 1px; height: 80px; margin: 28px auto 40px; background: #fff; }
+.qna-hero-desc { font-size: 1.8rem; line-height: 1.6; font-weight: 400; }
+
+
+
+body.qna main { color: var(--font-black); }
+body.qna .community-nav { background: #f8f8fa; }
+body.qna .community-nav .container { display: flex; align-items: center; gap: 20px; height: 100px; }
+body.qna .community-nav a { padding: 8px 10px; color: #c6c6c9; font-size: 1.8rem; font-weight: 400; border-bottom: 2px solid transparent; }
+body.qna .community-nav a[aria-current="page"] { color: #171717; font-weight: 700; border-bottom-color: #171717; }
+body.qna .page-statement { margin: 0; height: 347px; display: flex; align-items: center; justify-content: center; }
+body.qna .page-statement .carousel-item { padding: 0; font-size: 12rem; letter-spacing: -0.025em; }
+body.qna .page-button { display: flex; align-items: center; justify-content: space-between; width: 170px; min-height: 64px; padding: 16px 28px; margin-inline: auto; border: 1px solid #7e899f; border-radius: 100px; color: #7e899f; font-size: 1.8rem; font-weight: 700; background: transparent; }
+
+.qna-board { margin: 0; min-height: 976px; padding: 120px 0; background: radial-gradient(ellipse 480px 300px at 88% 0%, #f7f8fa 0%, transparent 100%); }
+.qna-board .section-title-box { margin-bottom: 60px; }
+.qna-board .board-panel { max-width: 1200px; margin: 0 auto; background: #fff; padding-bottom: 46px; }
+.qna-board .board-total { margin-bottom: 20px; color: #7e899f; font-size: 1.2rem; }
+.qna-board table { width: 100%; border-collapse: collapse; table-layout: fixed; text-align: center; font-size: 1.4rem; }
+.qna-board th { height: 58px; border-top: 1px solid #eceef1; border-bottom: 1px solid #eceef1; font-weight: 400; }
+.qna-board th { width: 18.2%; }
+.qna-board th:nth-child(3) { width: 27.2%; }
+.qna-board td { height: 120px; border-bottom: 1px solid #eceef1; color: #858b95; font-weight: 400; }

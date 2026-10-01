@@ -1,0 +1,737 @@
+/* INTRODUCE PC — existing common header / footer and container retained. */
+body.brand-story {
+    color: var(--font-black);
+    background: #fff;
+
+    overflow-x: clip;
+}
+
+.brand-story-hero {
+  letter-spacing: -0.025em;
+}
+
+body.brand-story .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) {
+  background: transparent;
+  border-bottom-color: transparent;
+}
+
+body.brand-story .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .logo-white {
+  opacity: 1;
+}
+
+body.brand-story .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .logo-black {
+  opacity: 0;
+}
+
+body.brand-story .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link {
+  color: #fff;
+}
+
+body.brand-story .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link::after,
+body.brand-story .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-menu-toggle span {
+  background: #fff;
+}
+
+body.brand-story .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-cta {
+  background: #fff;
+  color: var(--main-color);
+}
+
+body.brand-story .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-cta .arrow {
+  filter: none;
+}
+
+
+body.brand-story main {
+    color: var(--font-black);
+    letter-spacing: -0.025em;
+
+    overflow: visible;
+}
+
+body.brand-story main>section {
+  margin: 0;
+}
+
+.brand-story-hero {
+  height: 921px;
+  padding-top: 264px;
+  color: #fff;
+  text-align: center;
+  position: relative;
+  background: url('../images/brand-story/section01-bg.jpg') center / cover no-repeat;
+}
+
+.brand-story-hero h1 {
+  font-size: 4.8rem;
+  line-height: 1.5;
+  font-weight: 700;
+}
+
+.brand-story-hero p {
+  font-size: 2rem;
+  line-height: 1.55;
+  font-weight: 400;
+  margin-top: 40px;
+}
+
+.brand-story-hero strong {
+  font-weight: 700;
+}
+
+.brand-story-scroll {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: 700;
+  font-size: 1.8rem;
+}
+
+.brand-story-scroll span {
+  display: block;
+  width: 34px;
+  height: 34px;
+  margin: 0 auto 10px;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+  transform: rotate(45deg);
+}
+
+.brand-principles {
+  padding: 140px 0 130px;
+  background: radial-gradient(ellipse 360px 360px at 9% 34%, #eef4ff, transparent);
+  scroll-margin-top: 100px;
+}
+
+.brand-principles-heading {
+  max-width: 1200px;
+  margin: 0 auto 60px;
+}
+
+.brand-principles .section-title {
+  line-height: 1.6;
+  margin: 16px 0 32px;
+}
+
+/* ==================================================
+   BRAND STORY — SECTION 02 CUSTOM CAROUSEL
+================================================== */
+
+.brand-points-layout {
+  position: relative;
+  max-width: 1200px;
+  height: 432px;
+  margin: 0 auto;
+}
+
+.brand-points-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+
+/* --------------------------------------------------
+   SLIDE BASE
+-------------------------------------------------- */
+
+.brand-point {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+
+/* --------------------------------------------------
+   IMAGE
+-------------------------------------------------- */
+
+.brand-point-image-wrap {
+    position: absolute;
+    overflow: hidden;
+
+    transform: scale(1);
+    transform-origin: center center;
+
+    transition:
+        left .75s cubic-bezier(.22, .61, .36, 1),
+        top .75s cubic-bezier(.22, .61, .36, 1),
+        width .75s cubic-bezier(.22, .61, .36, 1),
+        height .75s cubic-bezier(.22, .61, .36, 1),
+        border-radius .75s cubic-bezier(.22, .61, .36, 1),
+        transform .75s cubic-bezier(.22, .61, .36, 1),
+        opacity .55s ease;
+
+    will-change:
+        left,
+        top,
+        width,
+        height,
+        border-radius,
+        transform,
+        opacity;
+}
+
+.brand-point-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+/* --------------------------------------------------
+   ACTIVE — 현재 메인
+-------------------------------------------------- */
+
+.brand-point.is-active {
+  z-index: 3;
+}
+
+.brand-point.is-active .brand-point-image-wrap {
+    left: 0;
+    top: 0;
+
+    width: 586px;
+    height: 432px;
+
+    border-radius: 40px;
+
+    transform: scale(1);
+    opacity: 1;
+}
+
+
+/* --------------------------------------------------
+   NEXT — 오른쪽 원형 이미지
+-------------------------------------------------- */
+
+.brand-point.is-next {
+  z-index: 2;
+}
+
+.brand-point.is-next .brand-point-image-wrap {
+    left: calc(100% + 180px);
+    top: 34px;
+
+    width: 390px;
+    height: 390px;
+
+    border-radius: 50%;
+
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* 왼쪽 바깥으로 사라진 슬라이드 */
+.brand-point.is-hidden-left {
+    z-index: 1;
+}
+
+.brand-point.is-hidden-left .brand-point-image-wrap {
+    left: -650px;
+    top: 0;
+
+    width: 586px;
+    height: 432px;
+
+    border-radius: 40px;
+
+    transform: scale(0.1);
+    opacity: 0;
+}
+
+
+/* 오른쪽에서 대기하는 슬라이드 */
+.brand-point.is-hidden-right {
+    z-index: 0;
+}
+
+.brand-point.is-hidden-right .brand-point-image-wrap {
+    left: calc(100% + 180px);
+    top: 34px;
+
+    width: 390px;
+    height: 390px;
+
+    border-radius: 50%;
+    opacity: 0;
+}
+
+.brand-point.is-hidden-left .brand-point-copy {
+    opacity: 0;
+    transform: translateX(-40px);
+}
+
+.brand-point.is-hidden-right .brand-point-copy {
+    opacity: 0;
+    transform: translateX(40px);
+}
+
+/* --------------------------------------------------
+   COPY
+-------------------------------------------------- */
+
+.brand-point-copy {
+    position: absolute;
+
+    left: 690px;
+    top: 125px;
+
+    width: 510px;
+
+    opacity: 0;
+    transform: translateX(30px);
+
+    transition:
+        opacity .45s ease,
+        transform .55s cubic-bezier(.22, .61, .36, 1);
+
+    pointer-events: none;
+}
+
+.brand-point.is-active .brand-point-copy {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.brand-point.is-hidden-left .brand-point-copy {
+    opacity: 0;
+    transform: translateX(-70px);
+}
+
+.brand-point.is-hidden-right .brand-point-copy,
+.brand-point.is-next .brand-point-copy {
+    opacity: 0;
+    transform: translateX(40px);
+}
+
+.brand-point.is-next .brand-point-copy {
+    opacity: 0;
+    transform: translateX(40px);
+}
+/* --------------------------------------------------
+   TEXT
+-------------------------------------------------- */
+
+.brand-point-label {
+  display: inline-block;
+
+  padding: 3px 20px;
+
+  border-radius: 100px;
+
+  background: #193b62;
+  color: #fff;
+
+  font-size: 1.4rem;
+  line-height: 1.5;
+  font-weight: 700;
+}
+
+.brand-point h3 {
+  margin: 14px 0 26px;
+
+  font-size: 2.8rem;
+  line-height: 1.5;
+  font-weight: 700;
+}
+
+.brand-point p {
+  font-size: 1.8rem;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+
+/* --------------------------------------------------
+   CONTROLS — 고정
+-------------------------------------------------- */
+
+.brand-point-controls {
+  position: absolute;
+  z-index: 10;
+
+  top: 60px;
+  left: 680px;
+
+  display: flex;
+  align-items: center;
+  gap: 48px;
+
+  width: 240px;
+}
+
+.brand-point-controls button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 40px;
+
+  width: 40px;
+  height: 40px;
+
+  padding: 8px;
+
+  border: 0;
+  background: none;
+
+  color: var(--font-black);
+  cursor: pointer;
+}
+
+.brand-point-pagination {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  white-space: nowrap;
+
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #929aa5;
+}
+
+.brand-point-pagination strong {
+  color: var(--font-black);
+  font-weight: 700;
+}
+
+.brand-values {
+  min-height: 1242px;
+  padding: 80px 0 200px;
+  background: #151e34 url('../images/brand-story/section03-bg.jpg') center / cover no-repeat;
+  border-radius: 200px 0 0 0;
+}
+
+.brand-values .section-eyebrow,
+.brand-values .section-title,
+.brand-values .section-desc {
+  color: #fff;
+}
+
+.brand-values .section-title {
+  line-height: 1.6;
+  margin: 16px 0 36px;
+}
+
+.brand-values .section-title-box {
+  margin-bottom: 60px;
+}
+
+.brand-value-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+.brand-value-card {
+  background: #f7f8fa;
+  border-radius: 0 80px 0 0;
+  overflow: hidden;
+}
+
+.brand-value-card:nth-child(odd) {
+  margin-top: 92px;
+}
+
+.brand-value-copy {
+  padding: 36px 40px 38px;
+  min-height: 270px;
+}
+
+.brand-value-copy>span {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: var(--main-color);
+}
+
+.brand-value-copy h3 {
+  font-size: 2.4rem;
+  margin: 14px 0 36px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.brand-value-copy p {
+  font-size: 1.6rem;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.brand-value-card img {
+  width: 100%;
+  height: auto;
+}
+
+.brand-belief {
+  height: 672px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.brand-belief .section-title {
+  line-height: 1.6;
+  margin: 0;
+}
+
+.brand-results {
+  display: grid;
+  gap: 24px;
+  overflow: hidden;
+}
+
+.brand-results-row {
+  overflow: hidden;
+}
+
+.brand-results .carousel-wrapper {
+  animation-duration: 50s;
+}
+
+.brand-results .carousel-group {
+  gap: 24px;
+  padding-right: 24px;
+}
+
+.brand-results img {
+  flex: none;
+  width: 301.33px;
+  height: 216px;
+  object-fit: cover;
+}
+
+.brand-results .is-reverse .carousel-wrapper {
+  animation-direction: reverse;
+}
+
+.brand-special {
+  padding: 170px 0 150px;
+  background: radial-gradient(ellipse 400px 340px at 12% 48%, #eef4ff, transparent), radial-gradient(ellipse 400px 340px at 92% 33%, #f3f6fc, transparent);
+}
+
+.brand-special .section-title {
+  margin-bottom: 34px;
+}
+
+.brand-special .section-title-box {
+  margin-bottom: 60px;
+}
+
+.brand-special-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 464px);
+  gap: 156px;
+  width: 1084px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.brand-special-grid::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 260px;
+  bottom: 260px;
+  width: 1px;
+  background: linear-gradient(transparent, #729acb 15%, #729acb 85%, transparent);
+}
+
+.brand-special-column {
+  display: grid;
+  gap: 54px;
+  align-content: start;
+}
+
+.brand-special-column:nth-child(2) {
+  padding-top: 166px;
+}
+
+.brand-special-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 40px;
+  aspect-ratio: 696 / 791;
+  color: #fff;
+}
+
+.brand-special-card>img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.brand-special-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent 40%, rgba(0, 0, 0, .65));
+}
+
+.brand-special-copy {
+  position: absolute;
+  z-index: 1;
+  bottom: 40px;
+  left: 40px;
+  right: 40px;
+}
+
+.brand-special-copy h3 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.brand-special-copy p {
+  font-size: 1.6rem;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.brand-statement {
+  height: 347px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-statement .carousel-item {
+  padding: 0;
+  font-size: 12rem;
+}
+
+.brand-history {
+  padding: 100px 0 100px;
+  background: radial-gradient(ellipse 450px 450px at 94% 44%, #eff5ff, transparent);
+}
+
+.brand-history .section-title {
+  line-height: 1.6;
+  margin: 16px 0 32px;
+}
+
+.brand-history .section-title-box {
+  margin-bottom: 60px;
+}
+
+.brand-history-layout {
+    display: grid;
+    grid-template-columns: 612px 1fr;
+    gap: 128px;
+    align-items: start;
+}
+
+.brand-history-layout > img {
+    position: sticky;
+    top: 140px;
+    align-self: start;
+
+    width: 612px;
+    height: auto;
+    border-radius: 40px;
+}
+
+.brand-history-years article {
+  padding: 0 20px 76px;
+}
+
+.brand-history-years article+article {
+  border-top: 1px solid #e5e9ee;
+  padding-top: 76px;
+}
+
+.brand-history-years article:last-child {
+  padding-bottom: 0;
+}
+
+.brand-history-years h3 {
+  font-size: 3.8rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 30px;
+}
+
+.brand-history-years ul {
+  padding-left: 28px;
+  font-size: 1.8rem;
+  line-height: 1.6;
+}
+
+.brand-history-years li {
+  list-style: disc;
+}
+
+.brand-history-years li+li {
+  margin-top: 12px;
+}
+
+.brand-history-years strong {
+  color: var(--main-color);
+  font-weight: 700;
+}
+
+.brand-inquiry {
+  min-height: 458px;
+  padding: 100px 0;
+  text-align: center;
+  color: #fff;
+  background: url('../images/brand-story/section09-bg.jpg') center / cover no-repeat;
+}
+
+.brand-inquiry h2 {
+  font-size: 3.2rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.brand-inquiry p {
+  font-size: 2rem;
+  margin-top: 26px;
+}
+
+.brand-inquiry-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 56px;
+}
+
+.brand-inquiry-buttons .cta-button {
+  border-radius: 100px;
+  padding: 10px 30px;
+  gap: 10px;
+  background: #fff;
+  color: var(--main-color);
+  font-size: 2.2rem;
+  line-height: 1.5;
+}
+
+.brand-inquiry-arrow {
+  display: flex;
+  border-radius: 50%;
+  background: var(--main-color);
+  color: #fff;
+}
+
+.brand-inquiry-arrow svg {
+  width: 24px;
+  height: 24px;
+  padding: 3px;
+  transform: rotate(-45deg);
+}
+
+.brand-inquiry-buttons .brand-inquiry-phone {
+  background: #151e34;
+  color: #fff;
+}
+
+.brand-inquiry-phone img {
+  width: 24px;
+  height: 24px;
+}
