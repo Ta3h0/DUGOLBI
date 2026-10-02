@@ -236,12 +236,41 @@
         });
     }
 
+    function initStatementMarquees() {
+        if (document.body.classList.contains("home")) {
+            return;
+        }
+
+        document.querySelectorAll(".section-carousel").forEach(function (section) {
+            const item = section.querySelector(":scope > .carousel-item");
+            if (!item || item.textContent.trim() !== "STRUCTURE DETERMINES FUNCTION") {
+                return;
+            }
+
+            // Reuse the main page's two equal groups for a seamless CSS loop.
+            const wrapper = document.createElement("div");
+            wrapper.className = "carousel-wrapper";
+            const group = document.createElement("div");
+            group.className = "carousel-group";
+            group.appendChild(item);
+            wrapper.appendChild(group);
+
+            const duplicate = group.cloneNode(true);
+            duplicate.setAttribute("aria-hidden", "true");
+            wrapper.appendChild(duplicate);
+
+            section.classList.add("statement-marquee");
+            section.appendChild(wrapper);
+        });
+    }
+
     function initCommon() {
         if (!document.body) {
             return;
         }
 
         initHeader();
+        initStatementMarquees();
     }
 
     if (document.readyState === "loading") {

@@ -18,6 +18,56 @@
 
             let targetProgress = 0;
             let currentProgress = 0;
+            let measuredLines = [];
+            let renderedLineCount = 0;
+            let resizeFrame = 0;
+
+            function measureLines() {
+                renderedLineCount = 0;
+                measuredLines = Array.from(lines).map(function (line) {
+                    const box = line.getBoundingClientRect();
+                    const range = document.createRange();
+                    range.selectNodeContents(line);
+
+                    // Inline emphasis and responsive breaks can produce several
+                    // rectangles for one visible row. Merge by vertical position.
+                    const rows = [];
+                    Array.from(range.getClientRects()).forEach(function (rect) {
+                        if (rect.width <= 0 || rect.height <= 0) return;
+                        const center = rect.top + rect.height / 2;
+                        let row = rows.find(function (item) {
+                            return Math.abs(item.center - center) < 2;
+                        });
+                        if (!row) {
+                            row = { center: center, left: rect.left, right: rect.right };
+                            rows.push(row);
+                        } else {
+                            row.left = Math.min(row.left, rect.left);
+                            row.right = Math.max(row.right, rect.right);
+                        }
+                    });
+                    rows.sort(function (a, b) { return a.center - b.center; });
+
+                    const lineHeight = parseFloat(getComputedStyle(line).lineHeight);
+                    const firstRow = renderedLineCount;
+                    renderedLineCount += rows.length;
+
+                    return {
+                        element: line,
+                        firstRow: firstRow,
+                        width: box.width,
+                        rows: rows.map(function (row, index) {
+                            return {
+                                left: row.left - box.left,
+                                right: row.right - box.left,
+                                top: Math.max(0, index * lineHeight),
+                                bottom: Math.min(box.height, (index + 1) * lineHeight)
+                            };
+                        })
+                    };
+                });
+            }
+
 
             function updateTargetProgress() {
 
@@ -25,7 +75,7 @@
                     section02.getBoundingClientRect();
 
                 const scrollable =
-                    section02.offsetHeight - window.innerHeight;
+                    Math.max(1, section02.offsetHeight - section02.querySelector(".inner").offsetHeight);
 
                 const passed =
                     -rect.top;
@@ -46,20 +96,29 @@
                 currentProgress +=
                     (targetProgress - currentProgress) * 0.05;
 
-                lines.forEach(function (line, index) {
+                const progress = currentProgress * renderedLineCount;
+                measuredLines.forEach(function (line) {
+                    const localProgress = progress - line.firstRow;
 
-                    const lineProgress =
-                        Math.min(
-                            Math.max(
-                                currentProgress * lines.length - index,
-                                0
-                            ),
-                            1
-                        );
+                    if (localProgress <= 0 || !line.rows.length) {
+                        line.element.style.clipPath = "inset(0 100% 0 0)";
+                        return;
+                    }
+                    if (localProgress >= line.rows.length) {
+                        line.element.style.clipPath = "inset(0)";
+                        return;
+                    }
 
-                    line.style.clipPath =
-                        `inset(0 ${(1 - lineProgress) * 100}% 0 0)`;
+                    const rowIndex = Math.floor(localProgress);
+                    const row = line.rows[rowIndex];
+                    const fraction = localProgress - rowIndex;
+                    const edge = row.left + (row.right - row.left) * fraction;
 
+                    // Completed rows stay fully colored; only the current row
+                    // reveals horizontally. Lower rows remain entirely gray.
+                    line.element.style.clipPath =
+                        `polygon(0 0, ${line.width}px 0, ${line.width}px ${row.top}px, ` +
+                        `${edge}px ${row.top}px, ${edge}px ${row.bottom}px, 0 ${row.bottom}px)`;
                 });
 
                 requestAnimationFrame(
@@ -76,7 +135,25 @@
                 }
             );
 
-            updateTargetProgress();
+            function refreshLines() {
+                measureLines();
+                updateTargetProgress();
+            }
+
+            function scheduleRefresh() {
+                cancelAnimationFrame(resizeFrame);
+                resizeFrame = requestAnimationFrame(refreshLines);
+            }
+
+            window.addEventListener("resize", scheduleRefresh);
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener("resize", scheduleRefresh);
+            }
+            if (document.fonts) {
+                document.fonts.ready.then(refreshLines);
+            }
+
+            refreshLines();
             renderSection02();
 
         }
