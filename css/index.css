@@ -1,4 +1,7 @@
 /* HOME — existing PC styles and pre-existing media rules. */
+@media (max-width: 1024px) {
+  .hero-text-box { width: calc(100% - 40px); }
+}
 .hero-section {
   position: relative;
   width: 100%;
@@ -203,8 +206,8 @@
 
   .hero-prev,
   .hero-next {
-    width: 34px;
-    height: 34px;
+    width: 44px;
+    height: 44px;
   }
 
 }
@@ -272,11 +275,17 @@
 @media screen and (max-width: 768px) {
   .section02 .inner {
     font-size: 2rem;
+    min-height: 0;
+    padding: 90px 20px 40px;
   }
 
   .section02 .mob {
     display: block;
   }
+}
+
+@media (width > 768px) and (max-width: 1439px) {
+  .section02 .inner { min-height: 0; padding-inline: 20px; font-size: clamp(2.8rem, 3.4vw, 4.8rem); }
 }
 
 .section02 .scroll-text {
@@ -590,6 +599,8 @@
   .section03-subtitle {
     font-size: 1.8rem;
   }
+  .section03-desc { word-break: keep-all; overflow-wrap: anywhere; }
+  .section03-desc br { display: none; }
 }
 
 @media (max-width: 500px) {
@@ -781,7 +792,7 @@
   }
 
   .growth-swiper .swiper-slide {
-    width: calc(100vw - 6rem);
+    width: min(420px, calc(100vw - 6rem));
   }
 
   .growth-pagination.swiper-pagination-progressbar {
@@ -918,6 +929,20 @@
     url("../images/main/section06-bg.jpg") center center / cover no-repeat;
 }
 
+@media (max-width: 1024px) {
+  .section05 .container { gap: 40px; }
+  .section05 .container .profile-box { min-width: 0; margin-left: 0; flex: 1; }
+  .section05 .container .img-box { flex: 0 0 40%; }
+  .section05 .container .profile-name { font-size: 3rem; }
+}
+@media (max-width: 768px) {
+  .section05 { padding-top: 48px; }
+  .section05 .container { flex-direction: column; gap: 32px; padding-bottom: 48px; }
+  .section05 .container .img-box { width: min(100%, 320px); flex-basis: auto; }
+  .section05 .container .profile-box { width: 100%; max-width: 480px; }
+  .section05 .container .career-panel { line-height: 1.6; }
+}
+
 .section06 .container .inner {
   display: flex;
   flex-wrap: wrap;
@@ -984,6 +1009,19 @@
 /* =========================================================
    SECTION 07 - REVIEW
 ========================================================= */
+@media (max-width: 1024px) {
+  .section06 { padding: 80px 0; }
+  .section06 .container .inner .item { padding: 28px; height: auto; min-height: 355px; }
+  .section06 .container .inner .item .item-title { font-size: 2.4rem; line-height: 1.5; word-break: keep-all; }
+}
+@media (max-width: 768px) {
+  .section06 { padding: 64px 0; }
+  .section06 .container .inner .item { width: 100%; min-height: 320px; padding: 24px; margin-bottom: 16px; }
+  .section06 .container .inner .item:last-child { margin-bottom: 0; }
+  .section06 .container .inner .item .item-desc { word-break: keep-all; overflow-wrap: anywhere; }
+  .section06 .container .inner .item .chip { display: inline-block; margin: 0 8px 8px 0; }
+}
+
 .section07 {
   overflow: hidden;
 }
@@ -1063,9 +1101,10 @@
 
   .review-marquee-item {
     width: 18rem;
-    height: 17rem;
+    height: auto;
     border-radius: 1.6rem;
   }
+  .review-marquee-item img { height: auto; }
 
   .review-marquee-track {
     animation-duration: 28s;
@@ -1134,6 +1173,19 @@
   margin: 0 auto;
   width: 100%;
   max-width: 1000px;
+}
+
+@media (max-width: 1024px) {
+  .section08 .container .inner { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; }
+  .section08 .container .img-box, .section08 .container .list-panel { grid-column: auto; min-width: 0; }
+  .section08 .container .list-panel .item { padding: 24px 12px; }
+  .section08 .container .list-panel .item > div { min-width: 0; }
+}
+@media (max-width: 768px) {
+  .section08 .container .inner { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .section08 .container .img-box img { height: auto; aspect-ratio: 1.6; }
+  .section08 .container .list-panel .item { padding: 24px 0; }
+  .section08 .container .list-panel .item .title { font-size: 1.8rem; -webkit-line-clamp: 2; word-break: keep-all; }
 }
 
 .section09 .container .inner .faq-list .item {
@@ -1209,6 +1261,16 @@
   margin-left: 20px;
 }
 
+@media (max-width: 768px) {
+  .section09 .container .inner .faq-list .item { padding: 24px; border-radius: 30px; }
+  .section09 .container .inner .faq-list .item .quest h3 { font-size: 1.8rem; word-break: keep-all; }
+  .section09 .container .inner .faq-list .item .quest strong { flex: 0 0 28px; width: 28px; }
+  .section09 .container .inner .faq-list .item .quest h3 { flex: 1; min-width: 0; }
+  .section09 .container .inner .faq-list .item .quest img { flex: 0 0 20px; }
+  .section09 .container .inner .faq-list .item .answe { padding: 0; line-height: 1.7; overflow-wrap: anywhere; }
+  .section09 .container .inner .faq-list .item.active .quest { padding-bottom: 24px; }
+}
+
 .section10 .section-title-box {
   text-align: left;
 }
@@ -1268,6 +1330,18 @@
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+@media (max-width: 1024px) {
+  .section10 .other-list { align-items: stretch; gap: 16px; }
+  .section10 .other-list .item { padding: 28px; }
+  .section10 .other-list .item .title { font-size: 2.2rem; gap: 16px; word-break: keep-all; }
+  .section10 .other-list .item .title img { flex-shrink: 0; }
+  .section10 .other-list .desc { word-break: keep-all; overflow-wrap: anywhere; }
+}
+@media (max-width: 768px) {
+  .section10 .other-list { flex-direction: column; }
+  .section10 .other-list .item { width: 100%; }
 }
 
 .inquiry .img-box {
@@ -1608,7 +1682,7 @@
     height: 58px;
     padding: 0 18px;
     border-radius: 18px;
-    font-size: 15px;
+    font-size: 16px;
   }
 
   .select-box select {
@@ -1646,7 +1720,7 @@
     min-height: 150px;
     padding: 18px;
     border-radius: 18px;
-    font-size: 15px;
+    font-size: 16px;
   }
 
   .privacy-text {
@@ -1668,6 +1742,26 @@
 
 
 .section-bg { margin-bottom: 0; }
+
+@media (max-width: 1439px) {
+  .inquiry .form-panel { padding: 48px 32px; }
+  .checkbox-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+}
+@media (max-width: 1024px) {
+  .section-bg { height: 300px; background-attachment: scroll; }
+  .inquiry { flex-direction: column; }
+  .inquiry .img-box { width: 100%; height: 360px; }
+  .inquiry .form-panel { width: 100%; padding: 64px var(--page-gap); }
+  .inquiry .form-box { margin-inline: auto; }
+  .inquiry-form .checkbox-item, .inquiry-form .privacy-check { min-height: 44px; }
+}
+@media (max-width: 768px) {
+  .inquiry .img-box { height: 260px; }
+  .inquiry .form-panel { padding-block: 48px; }
+  .inquiry-form .privacy-check { align-items: flex-start; }
+  .inquiry-form .privacy-check .checkmark { margin-top: 3px; }
+  .privacy-text { min-width: 0; line-height: 1.6; }
+}
 
 /* ==================================================
    HOME HEADER

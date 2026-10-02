@@ -43,3 +43,42 @@
 
 .signature-course-copy h3 { color: var(--font-black); }
 .signature-table td { word-break: keep-all; }
+
+@media (max-width: 1439px) {
+  .signature-course { padding: 96px 0 64px; }
+  .signature-difference { padding: 80px 0; }
+  .signature-difference-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  .signature-difference-card { min-width: 0; }
+  .signature-difference-card > img { width: 100%; height: 100%; object-fit: cover; }
+  .signature-difference-card > div { min-width: 0; word-break: keep-all; overflow-wrap: anywhere; padding: 24px; }
+  .signature-curriculum { padding: 80px 0; }
+  .signature-table-wrap { width: min(1240px, 100%); }
+  .signature-part-col { width: 150px; }
+  .signature-table td { padding: 24px; overflow-wrap: anywhere; }
+  .signature-table h3 { max-width: 100%; padding-inline: 20px; }
+}
+@media (max-width: 1024px) {
+  .signature-difference-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-top: 0; }
+  .signature-difference-card:nth-child(2) { margin-top: 0; }
+}
+@media (max-width: 768px) {
+  .signature-course { padding: 64px 0; }
+  .signature-course-copy { font-size: 1.6rem; line-height: 1.7; }
+  .signature-course-copy h3 { font-size: 2.4rem; }
+  .signature-difference { padding: 64px 0; }
+  .signature-difference .section-title-box { margin-bottom: 32px; }
+  .signature-difference-grid { grid-template-columns: minmax(0, 1fr); max-width: 460px; margin-inline: auto; }
+  .signature-difference-card h3 { font-size: 2.2rem; }
+  .signature-difference-card p { font-size: 1.6rem; }
+  .signature-curriculum { padding: 64px 0; }
+  .signature-curriculum .section-title-box { margin-bottom: 32px; }
+  .signature-table, .signature-table caption, .signature-table tbody, .signature-table tfoot { display: block; }
+  .signature-table colgroup { display: none; }
+  .signature-table tbody tr { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .signature-table th { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; padding: 20px; font-size: 1.8rem; }
+  .signature-table th > span { margin: 0; }
+  .signature-table td { display: block; padding: 24px 20px; font-size: 1.6rem; }
+  .signature-table th + td, .signature-table td + td { border-left: 0; }
+  .signature-table tfoot tr { display: block; }
+  .signature-table tfoot td { padding: 24px 20px; font-size: 1.8rem; }
+}

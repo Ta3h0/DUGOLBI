@@ -23,3 +23,11 @@
 
 .growth-course-heading { cursor: pointer; }
 .growth-curriculum-item:not(.is-open) .growth-week { display: none; }
+
+@media (max-width: 1439px) {
+  .growth-course { padding: 96px 0; }
+}
+@media (max-width: 768px) {
+  .growth-course { padding: 64px 0; }
+  .growth-course .section-title-box { margin-bottom: 32px; }
+}

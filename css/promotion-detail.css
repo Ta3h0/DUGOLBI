@@ -14,3 +14,27 @@ body.promotion-detail main { color: var(--font-black); }
 .promotion-article-content h3 { margin-bottom: 60px; color: var(--font-black); font-size: 3.8rem; font-weight: 700; line-height: 1.4; }
 .promotion-article-content p + p { margin-top: 40px; }
 .promotion-back { margin-top: 140px; }
+
+@media (max-width: 768px) {
+  .promotion-detail-hero p { font-size: 2rem; }
+  .promotion-detail-hero h1 { font-size: 3.2rem; }
+}
+
+@media (max-width: 1439px) {
+  .promotion-article { padding: 96px 0; }
+  .promotion-detail-poster { width: min(952px, 100%); }
+  .promotion-article-content { word-break: keep-all; overflow-wrap: anywhere; }
+}
+@media (max-width: 1024px) {
+  .promotion-article-content { margin-top: 64px; }
+  .promotion-article-content h3 { font-size: 3rem; margin-bottom: 40px; }
+  .promotion-back { margin-top: 80px; }
+}
+@media (max-width: 768px) {
+  .promotion-article { padding: 64px 0 80px; }
+  .promotion-article .section-title-box { margin-bottom: 32px; }
+  .promotion-article-content { margin-top: 48px; font-size: 1.6rem; line-height: 1.8; }
+  .promotion-article-content h3 { font-size: 2.4rem; margin-bottom: 32px; }
+  .promotion-article-content p + p { margin-top: 28px; }
+  .promotion-back { margin-top: 48px; }
+}

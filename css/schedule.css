@@ -77,3 +77,63 @@ body.schedule.reduce-motion .schedule-section * { transition: none; }
 
 .schedule-course-date::before { content: ''; flex: 0 0 7px; height: 7px; border-radius: 50%; background: var(--course-color); }
 .schedule-course-example { margin-left: 10px; color: #89929f; font-size: 1.3rem; font-weight: 400; white-space: nowrap; vertical-align: middle; }
+
+/* Keep the existing month/year controls and list/calendar colors. */
+@media (max-width: 1439px) {
+  .schedule-section { padding-top: 160px; }
+  .schedule-layout { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 32px; }
+  .schedule-course-title { word-break: keep-all; overflow-wrap: anywhere; }
+  .schedule-course-date { flex-wrap: wrap; line-height: 1.6; }
+}
+@media (max-width: 1024px) {
+  .schedule-section { padding-top: 144px; }
+  .schedule-title-box { margin-bottom: 48px; }
+  .schedule-title-box .section-title { font-size: 3.8rem; }
+  .schedule-calendar td { height: 76px; }
+  .schedule-calendar td::before { inset-block: 12px; }
+  .schedule-calendar-panel, .schedule-calendar-panel:has(tbody tr:nth-child(6)), .schedule-calendar-panel:has(tbody tr:nth-child(4):last-child) { top: 120px; }
+}
+@media (max-width: 768px) {
+  .schedule-section { padding-top: 120px; }
+  .schedule-title-box { margin-bottom: 40px; }
+  .schedule-title-box .section-title { font-size: 3.2rem; }
+  .schedule-toolbar { gap: 18px; padding-bottom: 24px; }
+  .schedule-month-control { gap: 16px; }
+  .schedule-month-control h2 { min-width: 154px; font-size: 2.6rem; }
+  .schedule-month-button, .schedule-year-control button { width: 44px; height: 44px; }
+  #schedule-picker-toggle { min-height: 44px; }
+  .schedule-picker { width: min(320px, calc(100vw - 48px)); padding: 20px; }
+  .schedule-picker-months button { min-height: 44px; }
+  .schedule-guide { max-width: 100%; text-align: center; line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere; }
+}
+
+.schedule-calendar-backdrop, .schedule-sheet-heading, .schedule-sheet-actions { display: none; }
+@media (max-width: 1024px) {
+  .schedule-course-title { font-size: 1.9rem; }
+  .schedule-course-date { font-size: 1.5rem; }
+  .schedule-day { font-size: 1.6rem; }
+}
+@media (max-width: 768px) {
+  .schedule-layout { grid-template-columns: minmax(0, 1fr); padding-top: 28px; }
+  .schedule-list-panel { padding-bottom: 48px; }
+  .schedule-course { padding: 24px 0; }
+  .schedule-calendar-backdrop { display: block; position: fixed; inset: 0; z-index: 10000; background: rgb(0 0 0 / .4); opacity: 0; visibility: hidden; transition: opacity 260ms, visibility 260ms; }
+  body.schedule .schedule-calendar-panel { position: fixed; inset: auto 0 0; z-index: 10001; width: 100%; max-height: calc(100dvh - 72px); overflow-y: auto; overscroll-behavior: contain; padding: 24px var(--page-gap) max(24px, env(safe-area-inset-bottom)); background: #fff; border-radius: 20px 20px 0 0; transform: translateY(100%); visibility: hidden; transition: transform 260ms ease, visibility 260ms; }
+  .schedule-sheet-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+  .schedule-sheet-heading p { color: var(--main-color); font-size: 1.5rem; margin-bottom: 8px; }
+  .schedule-sheet-heading h3 { font-size: 2rem; font-weight: 700; line-height: 1.45; word-break: keep-all; overflow-wrap: anywhere; }
+  .schedule-sheet-close { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; color: var(--font-black); background: transparent; border: 0; cursor: pointer; }
+  .schedule-calendar th { padding-bottom: 12px; }
+  .schedule-calendar td { height: 60px; }
+  .schedule-calendar td::before { inset-block: 10px; }
+  .schedule-calendar td.range-start::before { left: 3px; }
+  .schedule-calendar td.range-end::before { right: 3px; }
+  .schedule-event-dots { bottom: 3px; gap: 3px; flex-wrap: wrap; }
+  .schedule-calendar-foot { padding-top: 16px; }
+  .schedule-sheet-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
+  .schedule-sheet-actions .cta-button { justify-content: center; padding: 12px 8px; min-width: 0; }
+  .schedule-booking-naver img { width: 24px; height: 24px; }
+  body.schedule-calendar-open { overflow: hidden; }
+  .schedule-calendar-open .schedule-calendar-backdrop { opacity: 1; visibility: visible; }
+  body.schedule-calendar-open .schedule-calendar-panel { transform: translateY(0); visibility: visible; }
+}

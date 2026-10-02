@@ -26,3 +26,28 @@
 .advanced-table th .advanced-sequence { margin-top: 12px; color: var(--main-color); font-weight: 700; }
 .advanced-duration { text-align: center; vertical-align: middle; border-left: 1px solid #d7dfed; background: #f9f9fb; font-size: 2rem; color: #5c6571; }
 .advanced-statement { height: 197px; display: flex; align-items: center; justify-content: center; }
+
+@media (max-width: 1439px) {
+  .advanced-course { padding: 96px 0; }
+  .advanced-curriculum { padding: 96px 0 64px; }
+  .advanced-table-wrap { width: min(1240px, 100%); }
+  .advanced-image-col { width: 180px; }
+  .advanced-duration-col { width: 140px; }
+  .advanced-table-image img { width: 100%; }
+  .advanced-table th { padding: 24px; overflow-wrap: anywhere; }
+  .advanced-course-heading { flex-wrap: wrap; }
+}
+@media (max-width: 768px) {
+  .advanced-course { padding: 64px 0; }
+  .advanced-curriculum { padding: 64px 0; }
+  .advanced-curriculum .section-title-box { margin-bottom: 32px; }
+  .advanced-table, .advanced-table caption, .advanced-table tbody { display: block; }
+  .advanced-table colgroup { display: none; }
+  .advanced-table tr { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .advanced-table th { display: block; padding: 24px 20px; }
+  .advanced-table-image { display: block; padding-top: 20px; }
+  .advanced-table-image img { width: min(258px, 100%); margin-inline: auto; }
+  .advanced-duration { display: block; padding: 16px 20px; border-left: 0; border-top: 1px solid #d7dfed; font-size: 1.8rem; }
+  .advanced-table tr + tr > th, .advanced-table tr + tr > .advanced-duration { border-top: 0; }
+  .advanced-table tr + tr { border-top: 1px solid #d7dfed; }
+}

@@ -29,6 +29,90 @@ document.addEventListener("DOMContentLoaded", function () {
     let pinned = null;
     let hovered = null;
     let focused = null;
+    const mobile = window.matchMedia("(max-width: 768px)");
+    const panel = document.getElementById("schedule-calendar-panel");
+    const sheetTitle = document.getElementById("schedule-sheet-title");
+    const sheetMonth = document.getElementById("schedule-sheet-month");
+    const sheetClose = document.querySelector(".schedule-sheet-close");
+    const backdrop = document.querySelector(".schedule-calendar-backdrop");
+    const booking = document.querySelector(".schedule-booking-naver");
+    const guide = document.querySelector(".schedule-guide");
+    const background = [
+        document.querySelector(".header"), document.querySelector("footer"),
+        document.querySelector(".schedule-title-box"), document.querySelector(".schedule-toolbar"),
+        document.querySelector(".schedule-list-panel")
+    ].filter(Boolean);
+    const backgroundState = new Map();
+    let sheetTrigger = null;
+    let sheetOpen = false;
+    // Reuse the booking URL already used by the monthly education page.
+    if (booking && typeof educationData !== "undefined") booking.href = educationData[0]?.naverBookingUrl || "#";
+
+    function closeSheet(restoreFocus = true) {
+        if (!sheetOpen) return;
+        sheetOpen = false;
+        document.body.classList.remove("schedule-calendar-open");
+        backgroundState.forEach((value, element) => { element.inert = value; });
+        backgroundState.clear();
+        if (restoreFocus && sheetTrigger?.isConnected) sheetTrigger.focus({ preventScroll: true });
+        if (panel) {
+            panel.inert = mobile.matches;
+            if (mobile.matches) panel.setAttribute("aria-hidden", "true");
+        }
+    }
+    function syncSheetMode() {
+        closeSheet();
+        if (panel) {
+            panel.inert = mobile.matches;
+            if (mobile.matches) {
+                panel.setAttribute("role", "dialog");
+                panel.setAttribute("aria-modal", "true");
+                panel.setAttribute("aria-labelledby", "schedule-sheet-title");
+                panel.setAttribute("aria-hidden", "true");
+            } else {
+                ["role", "aria-modal", "aria-labelledby", "aria-hidden"].forEach(name => panel.removeAttribute(name));
+            }
+        }
+        list.querySelectorAll("button").forEach(button => {
+            if (mobile.matches) {
+                button.setAttribute("aria-haspopup", "dialog");
+                button.setAttribute("aria-controls", "schedule-calendar-panel");
+            } else {
+                button.removeAttribute("aria-haspopup");
+                button.removeAttribute("aria-controls");
+            }
+        });
+        if (guide) guide.textContent = mobile.matches
+            ? "교육 일정을 터치하면 달력에서 교육 기간을 확인할 수 있습니다."
+            : "교육 일정을 선택하면 달력에서 교육 기간을 확인할 수 있습니다.";
+    }
+    function openSheet(course, button) {
+        if (!panel || !mobile.matches) return;
+        closePicker();
+        sheetTrigger = button;
+        sheetTitle.textContent = course.title;
+        sheetMonth.textContent = monthLabel.textContent;
+        background.forEach(element => { backgroundState.set(element, element.inert); element.inert = true; });
+        panel.inert = false;
+        panel.setAttribute("aria-hidden", "false");
+        sheetOpen = true;
+        document.body.classList.add("schedule-calendar-open");
+        panel.scrollTop = 0;
+        sheetClose.focus({ preventScroll: true });
+    }
+    sheetClose?.addEventListener("click", () => closeSheet());
+    backdrop?.addEventListener("click", () => closeSheet());
+    mobile.addEventListener("change", syncSheetMode);
+    document.addEventListener("keydown", event => {
+        if (!sheetOpen) return;
+        if (event.key === "Escape") { event.preventDefault(); closeSheet(); return; }
+        if (event.key !== "Tab") return;
+        const controls = Array.from(panel.querySelectorAll("button, a[href]")).filter(element => element.getClientRects().length);
+        const first = controls[0], last = controls[controls.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    });
+
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const updateMotion = () => document.body.classList.toggle("reduce-motion", reducedMotion.matches);
     updateMotion();
@@ -81,11 +165,20 @@ document.addEventListener("DOMContentLoaded", function () {
             period.className = "schedule-course-date";
             period.textContent = `${displayDate(course.start)} ~ ${displayDate(course.end)}`;
             button.append(title, period);
-            button.addEventListener("mouseenter", () => { hovered = course.id; highlight(); });
+            button.addEventListener("mouseenter", () => { if (mobile.matches) return; hovered = course.id; highlight(); });
             button.addEventListener("mouseleave", () => { hovered = null; highlight(); });
             button.addEventListener("focus", () => { focused = course.id; highlight(); });
             button.addEventListener("blur", () => { focused = null; highlight(); });
-            button.addEventListener("click", () => { pinned = pinned === course.id ? null : course.id; highlight(); });
+            if (mobile.matches) {
+                button.setAttribute("aria-haspopup", "dialog");
+                button.setAttribute("aria-controls", "schedule-calendar-panel");
+            }
+            button.addEventListener("click", () => {
+                pinned = mobile.matches ? course.id : (pinned === course.id ? null : course.id);
+                hovered = null;
+                highlight();
+                if (mobile.matches) openSheet(course, button);
+            });
             li.append(button);
             list.append(li);
         });
@@ -176,4 +269,5 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("schedule-prev")?.addEventListener("click", () => { month.setMonth(month.getMonth() - 1); render(); });
     document.getElementById("schedule-next")?.addEventListener("click", () => { month.setMonth(month.getMonth() + 1); render(); });
     render();
+    syncSheetMode();
 });

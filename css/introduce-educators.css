@@ -28,10 +28,36 @@
 .educator-career li + li { margin-top: 14px; }
 .educator-career strong { color: var(--font-black); }
 .educator-row-2 { background: #f5f8fc; }
-.educator-row-2 .container { min-height: 888px; grid-template-columns: 624px 655px; column-gap: 101px; padding-left: 60px; }
+.educator-row-2 .container { min-height: 888px; grid-template-columns: minmax(0, 624px) minmax(0, 655px); column-gap: 101px; padding-left: 60px; }
 .educator-row-2 .educator-profile { grid-column: 1; grid-row: 1; padding-top: 100px; }
 .educator-row-2 .educator-visual { grid-column: 2; grid-row: 1; }
 .educator-row-2 .educator-visual::before { left: -25px; background: #edf2fa; }
 .educator-row-3 .container { min-height: 1092px; }
 .educator-row-3 .educator-profile { padding-top: 100px; }
 .educator-row-3 .educator-visual::before { width: 659px; height: 659px; }
+
+@media (max-width: 1439px) {
+  .educators-section > .section-title-box { height: auto; padding: 96px 20px 48px; }
+  .educator-row .container { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; min-height: 0; padding: 64px 0; }
+  .educator-visual { min-width: 0; }
+  .educator-visual::before { width: 100%; height: auto; aspect-ratio: 1; }
+  .educator-profile { padding-top: 0; padding-bottom: 0; }
+  .educator-name-en { font-size: 3.8rem; overflow-wrap: anywhere; }
+  .educator-name-box { flex-wrap: wrap; gap: 8px 16px; }
+  .educator-name-box h3 { font-size: 3.8rem; }
+  .educator-name-box > span { font-size: 2rem; }
+  .educator-career .career-panel { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .educator-career li { font-size: 1.6rem; overflow-wrap: anywhere; }
+  .educator-row-2 .educator-profile { padding-top: 0; }
+  .educator-row-2 .educator-visual::before { left: 0; }
+  .educator-row-3 .educator-profile { padding-top: 0; }
+  .educator-row-3 .educator-visual::before { width: 100%; height: auto; aspect-ratio: 1; }
+}
+@media (max-width: 768px) {
+  .educators-section > .section-title-box { padding-top: 64px; padding-bottom: 32px; }
+  .educator-row .container { grid-template-columns: minmax(0, 1fr); gap: 32px; padding: 40px 0 64px; }
+  .educator-visual { width: min(100%, 420px); margin-inline: auto; }
+  .educator-name-en, .educator-name-box h3 { font-size: 3.2rem; }
+  .educator-career { margin-top: 24px; padding-top: 24px; }
+  .educator-row-2 .educator-visual, .educator-row-2 .educator-profile { grid-column: auto; grid-row: auto; }
+}

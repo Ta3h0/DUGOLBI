@@ -19,3 +19,21 @@
 
 .network-section .section-title-box { text-align: left; }
 .network-filters { justify-content: flex-start; }
+
+@media (max-width: 1439px) {
+  .network-section { min-height: 0; padding: 96px 0; }
+  .network-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 64px 24px; }
+  .network-card { min-width: 0; }
+  .network-card dd { min-width: 0; overflow-wrap: anywhere; word-break: keep-all; }
+}
+@media (max-width: 1024px) {
+  .network-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px 24px; }
+}
+@media (max-width: 768px) {
+  .network-section { padding: 64px 0 80px; }
+  .network-section .section-title-box { margin-bottom: 32px; }
+  .network-card h3 { font-size: 2.2rem; }
+}
+@media (max-width: 480px) {
+  .network-grid { grid-template-columns: minmax(0, 1fr); }
+}

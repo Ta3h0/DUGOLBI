@@ -8,10 +8,14 @@
 .startup-course .section-title-box { text-align: left; margin-bottom: 44px; }
 
 .startup-curriculum { padding: 190px 0 56px; }
-.startup-curriculum > .container { display: grid; grid-template-columns: 624px 640px; gap: 96px; padding-left: 50px; align-items: start; }
+.startup-curriculum > .container { display: grid; grid-template-columns: 624px minmax(0, 640px); gap: 96px; padding-left: 50px; align-items: start; }
 .startup-curriculum-copy { padding-top: 80px; }
 
 .startup-curriculum-image { width: 640px; height: auto; }
+
+@media (min-width: 1440px) {
+  .startup-curriculum-image { height: 846px; object-fit: contain; object-position: right top; }
+}
 
 .startup-curriculum-item button { width: 100%; padding: 0; border: 0; background: transparent; text-align: left; color: inherit; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 2.2rem; font-weight: 700; line-height: 32px; }
 
@@ -19,3 +23,10 @@
 
 .startup-course-tags { display: flex; gap: 8px; margin-top: 28px; }
 .startup-course-tags span { padding: 4px 14px; border-radius: 100px; background: var(--main-color); color: #fff; font-size: 1.4rem; font-weight: 700; line-height: 22px; }
+
+@media (max-width: 1439px) {
+  .startup-course { padding: 96px 0; }
+}
+@media (max-width: 768px) {
+  .startup-course { padding: 64px 0; }
+}

@@ -63,6 +63,7 @@ body.brand-story main>section {
 }
 
 .brand-principles {
+  overflow-x: clip;
   padding: 140px 0 130px;
   background: radial-gradient(ellipse 360px 360px at 9% 34%, #eef4ff, transparent);
   scroll-margin-top: 100px;
@@ -760,6 +761,7 @@ body.brand-story main>section {
   .brand-history .section-title-box { margin-bottom: 44px; }
   .brand-value-grid { gap: 24px; }
   .brand-value-copy { padding: 28px; }
+  .brand-value-copy p { word-break: keep-all; overflow-wrap: anywhere; }
   .brand-belief { padding: 96px 0; }
 
   .brand-special-grid { gap: 40px; }
@@ -834,6 +836,7 @@ body.brand-story main>section {
   .brand-special-copy h3 br { display: none; }
 
   .brand-statement .carousel-item { font-size: 4rem; }
+  .brand-statement { height: 120px; }
   .brand-history { padding: 64px 0; }
   .brand-history-layout { gap: 32px; }
   .brand-history-layout > img { border-radius: 24px; }
