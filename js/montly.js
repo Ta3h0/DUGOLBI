@@ -8,15 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!grid && !(overview && detailBody)) return;
 
-    function escapeHtml(value) {
-        return String(value ?? "").replace(/[&<>"']/g, function (character) {
-            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character];
-        });
-    }
-
-    function lines(value) {
-        return escapeHtml(value).replace(/\n/g, "<br>");
-    }
+    const { escapeHtml, lines } = window.DugolbiContent;
 
     function displayDate(value) {
         return String(value ?? "").replaceAll("-", ".");

@@ -1,52 +1,88 @@
 /* MONTLY PC — existing common header / footer and container retained. */
-body.qna {
-  color: var(--font-black);
-  background: #fff;
-}
-.qna-hero { letter-spacing: -0.025em; }
 
-body.qna .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) {
-  background: transparent;
-  border-bottom-color: transparent;
-}
-body.qna .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .logo-white { opacity: 1; }
-body.qna .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .logo-black { opacity: 0; }
-body.qna .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link { color: #fff; }
-body.qna .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link::after,
-body.qna .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-menu-toggle span { background: #fff; }
-body.qna .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-cta { background: #fff; color: var(--main-color); }
-body.qna .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-cta .arrow { filter: none; }
-
-.qna-hero {
-  height: 728px;
-  margin: 0;
-  padding-top: 230px;
-  background: url('../images/montly/top-section-bg.png') center / cover no-repeat;
-  color: #fff;
-  text-align: center;
-}
-.qna-hero h1 img { width: 359px; height: auto; margin: 0 auto; }
-.qna-hero-message { margin-top: 24px; font-size: 2.2rem; font-weight: 700; line-height: 1.6; }
-.qna-hero-line { width: 1px; height: 80px; margin: 28px auto 40px; background: #fff; }
-.qna-hero-desc { font-size: 1.8rem; line-height: 1.6; font-weight: 400; }
-
-
+.qna-hero { background: url('../images/montly/top-section-bg.png') center / cover no-repeat; }
 
 body.qna main { color: var(--font-black); }
-body.qna .community-nav { background: #f8f8fa; }
-body.qna .community-nav .container { display: flex; align-items: center; gap: 20px; height: 100px; }
-body.qna .community-nav a { padding: 8px 10px; color: #c6c6c9; font-size: 1.8rem; font-weight: 400; border-bottom: 2px solid transparent; }
-body.qna .community-nav a[aria-current="page"] { color: #171717; font-weight: 700; border-bottom-color: #171717; }
-body.qna .page-statement { margin: 0; height: 347px; display: flex; align-items: center; justify-content: center; }
-body.qna .page-statement .carousel-item { padding: 0; font-size: 12rem; letter-spacing: -0.025em; }
-body.qna .page-button { display: flex; align-items: center; justify-content: space-between; width: 170px; min-height: 64px; padding: 16px 28px; margin-inline: auto; border: 1px solid #7e899f; border-radius: 100px; color: #7e899f; font-size: 1.8rem; font-weight: 700; background: transparent; }
 
-.qna-board { margin: 0; min-height: 976px; padding: 120px 0; background: radial-gradient(ellipse 480px 300px at 88% 0%, #f7f8fa 0%, transparent 100%); }
-.qna-board .section-title-box { margin-bottom: 60px; }
-.qna-board .board-panel { max-width: 1200px; margin: 0 auto; background: #fff; padding-bottom: 46px; }
-.qna-board .board-total { margin-bottom: 20px; color: #7e899f; font-size: 1.2rem; }
-.qna-board table { width: 100%; border-collapse: collapse; table-layout: fixed; text-align: center; font-size: 1.4rem; }
-.qna-board th { height: 58px; border-top: 1px solid #eceef1; border-bottom: 1px solid #eceef1; font-weight: 400; }
-.qna-board th { width: 18.2%; }
-.qna-board th:nth-child(3) { width: 27.2%; }
-.qna-board td { height: 120px; border-bottom: 1px solid #eceef1; color: #858b95; font-weight: 400; }
+
+/* Long tokens must stay inside their existing cell; empty/PC geometry is unchanged. */
+.qna-board td:not([colspan]) { overflow-wrap: anywhere; }
+
+/* COMMUNITY RESPONSIVE — retain the five-column board and shared navigation. */
+@media (max-width: 1439px) {
+  .qna-board {
+    min-height: 720px;
+    padding: 96px 0;
+  }
+
+  .qna-board .board-table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+
+  .qna-board .board-table-scroll:focus-visible {
+    outline: 2px solid var(--main-color);
+    outline-offset: 4px;
+  }
+
+  .qna-board table { min-width: 640px; line-height: 1.6; }
+  .qna-board th { width: auto; }
+  .qna-board th:nth-child(1) { width: 64px; }
+  .qna-board th:nth-child(3) { width: 112px; }
+  .qna-board th:nth-child(4) { width: 64px; }
+  .qna-board th:nth-child(5) { width: 120px; }
+
+  .qna-board th,
+  .qna-board td { padding: 16px 10px; vertical-align: middle; }
+
+  .qna-board td:not([colspan]) { height: auto; }
+  .qna-board th:nth-child(2),
+  .qna-board td:nth-child(2):not([colspan]) { text-align: left; }
+
+  .qna-board td:nth-child(2):not([colspan]) a {
+    display: block;
+    min-height: 44px;
+    padding-block: 8px;
+    font-size: 1.6rem;
+    color: var(--font-black);
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .qna-board td a:focus-visible {
+    outline: 2px solid var(--main-color);
+    outline-offset: 2px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .qna-board { min-height: 0; padding: 80px 0; }
+  .qna-board .section-title-box { margin-bottom: 44px; }
+  .qna-board .board-panel { padding-bottom: 0; }
+}
+
+@media (max-width: 768px) {
+  .qna-board { padding: 64px 0 80px; }
+  .qna-board .section-title-box { margin-bottom: 32px; }
+  .qna-board .board-total { margin-bottom: 16px; font-size: 1.4rem; }
+  .qna-board table { min-width: 620px; }
+  .qna-board th:nth-child(1) { width: 48px; }
+  .qna-board th:nth-child(3) { width: 88px; }
+  .qna-board th:nth-child(4) { width: 56px; }
+  .qna-board th:nth-child(5) { width: 112px; }
+  .qna-board th { height: 52px; }
+  .qna-board th,
+  .qna-board td { padding: 14px 6px; }
+
+  /* An empty board has no long subject or metadata; keep its message in view.
+     Populated boards keep their minimum width and all five columns. */
+  .qna-board table:has(> tbody > tr:only-child > td[colspan="5"]:only-child) {
+    min-width: 0;
+  }
+  .qna-board table:has(> tbody > tr:only-child > td[colspan="5"]:only-child) th { width: auto; }
+  .qna-board table:has(> tbody > tr:only-child > td[colspan="5"]:only-child) th:nth-child(1),
+  .qna-board table:has(> tbody > tr:only-child > td[colspan="5"]:only-child) th:nth-child(4) { width: 13%; }
+  .qna-board table:has(> tbody > tr:only-child > td[colspan="5"]:only-child) th:nth-child(3),
+  .qna-board table:has(> tbody > tr:only-child > td[colspan="5"]:only-child) th:nth-child(5) { width: 18%; }
+}
