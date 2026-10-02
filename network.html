@@ -28,7 +28,7 @@
                     <span class="section-eyebrow">
                         DUGOLBI Certified Network
                     </span>
-                    <h2 class="section-title">
+                    <h2 class="section-title" id="network-list-title" tabindex="-1">
                         배운 기술이 전문성이 되는 곳,
                         <br>
                         전국 두골비 수료 지점
@@ -260,47 +260,7 @@
                 <p class="network-empty" role="status" hidden>
                     등록된 수료 지점이 없습니다.
                 </p>
-                <nav class="network-pagination" aria-label="목록 페이지">
-                    <button type="button" aria-current="page">
-                        1
-                    </button>
-                    <button type="button" disabled>
-                        2
-                    </button>
-                    <button type="button" disabled>
-                        3
-                    </button>
-                    <button type="button" disabled>
-                        4
-                    </button>
-                    <button type="button" disabled>
-                        5
-                    </button>
-                    <button type="button" disabled>
-                        6
-                    </button>
-                    <button type="button" disabled>
-                        7
-                    </button>
-                    <button type="button" disabled>
-                        8
-                    </button>
-                    <button type="button" disabled>
-                        9
-                    </button>
-                    <button type="button" disabled>
-                        10
-                    </button>
-                    <button type="button" disabled>
-                        11
-                    </button>
-                    <button type="button" aria-label="다음 페이지" disabled>
-                        ›
-                    </button>
-                    <button type="button" aria-label="마지막 페이지" disabled>
-                        »
-                    </button>
-                </nav>
+                <nav class="network-pagination" aria-label="수료지점 페이지" hidden></nav>
             </div>
         </section>
         <section class="network-information" aria-labelledby="information-title">
@@ -314,9 +274,9 @@
                                 <p><strong>부산교육 본점:</strong> 부산 부산진구 서면로10, 207호<br><strong>서울청담교육장:</strong> 서울 강남구 삼성로
                                     723, 3층</p>
                                 <div class="network-map-links">
-                                    <a href="https://naver.me/FgHhGggM" class="cta-button">네이버 지도<img
+                                    <a href="https://naver.me/FgHhGggM" target="_blank" rel="noopener noreferrer" class="cta-button">네이버 지도<img
                                             src="images/network/naver-map.png" alt="" width="22" height="22"></a>
-                                    <a href="https://place.map.kakao.com/1689881626" class="cta-button">카카오 지도<img
+                                    <a href="https://place.map.kakao.com/1689881626" target="_blank" rel="noopener noreferrer" class="cta-button">카카오 지도<img
                                             src="images/network/kakao-map.png" alt="" width="23" height="22"></a>
                                 </div>
                             </dd>
@@ -327,7 +287,7 @@
                         </div>
                         <div class="network-information-row">
                             <dt><img src="images/network/phone.png" alt="" width="23" height="23">상담문의</dt>
-                            <dd>031-717-5207<a href="tel:01034501662" class="cta-button w-fit network-contact">상담문의<img
+                            <dd>031-717-5207<a href="index.html#inquiry" class="cta-button w-fit network-contact">상담문의<img
                                         src="images/network/right-up.svg" alt="" class="arrow" width="14"
                                         height="14"></a></dd>
                         </div>
@@ -336,13 +296,14 @@
             </div>
             <!-- 서울청담교육장 위치 -->
             <div class="network-map-panel"><img src="images/network/information-map.png"
-                    alt="서울청담교육장 위치: 서울 강남구 삼성로 723, 3층" width="948" height="672"></div>
+                    alt="서울청담교육장 위치: 서울 강남구 삼성로 723, 3층" width="948" height="672"><div id="daumRoughmapContainer1790929303745" class="information-map root_daum_roughmap root_daum_roughmap_landing" role="img" aria-label="두골비 오브제랩 부산 본점 카카오맵"></div></div>
         </section>
         <?php include $_SERVER['DOCUMENT_ROOT'].'/footer.html'; ?>
     </main>
     
 
     
+    <script charset="UTF-8" class="daum_roughmap_loader_script" src="https://t1.kakaocdn.net/kakaomapweb/roughmap/loader/prod/roughmapLoader.js"></script>
     <script src="js/common.js"></script>
     <script src="js/category-filter.js"></script>
 </body>

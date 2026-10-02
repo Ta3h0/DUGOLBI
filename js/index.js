@@ -328,9 +328,38 @@
     }
 
 
+    function initHomeFaq() {
+        if (!document.body.classList.contains("home")) {
+            return;
+        }
+
+        const items = Array.from(document.querySelectorAll(".section09 .faq-list .item"));
+
+        function setExpanded(item, expanded) {
+            const button = item.querySelector(".quest");
+            const answer = item.querySelector(".answe");
+            item.classList.toggle("active", expanded);
+            button.setAttribute("aria-expanded", String(expanded));
+            answer.setAttribute("aria-hidden", String(!expanded));
+            answer.inert = !expanded;
+        }
+
+        items.forEach(function (item) {
+            const button = item.querySelector(".quest");
+            setExpanded(item, false);
+            button.addEventListener("click", function () {
+                const shouldOpen = button.getAttribute("aria-expanded") !== "true";
+                items.forEach(function (other) {
+                    setExpanded(other, other === item && shouldOpen);
+                });
+            });
+        });
+    }
+
     function initPage() {
         initHomeScrollText();
         initHomeSwipers();
+        initHomeFaq();
     }
 
     if (document.readyState === "loading") {

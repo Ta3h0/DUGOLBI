@@ -201,6 +201,11 @@
             link.addEventListener("click", function () { closeResponsiveMenu(); });
         });
 
+        const headerInquiry = header && header.querySelector(".header-cta");
+        if (headerInquiry) {
+            headerInquiry.addEventListener("click", function () { closeResponsiveMenu(false); });
+        }
+
         document.addEventListener("keydown", function (event) {
             if (!responsiveMenu || !responsiveMenu.classList.contains("is-open")) return;
             if (event.key === "Escape") {
@@ -264,13 +269,91 @@
         });
     }
 
+    function initInformationMap() {
+        const host = document.querySelector(".information-map");
+        if (!host) return;
+        let attempts = 0;
+
+        function renderMap() {
+            if (!window.daum?.roughmap?.Lander) {
+                if (++attempts < 100) window.setTimeout(renderMap, 150);
+                return;
+            }
+            const lander = new daum.roughmap.Lander({
+                timestamp: "1790929303745",
+                key: "2kbq4uve66p",
+                mapWidth: String(host.clientWidth),
+                mapHeight: String(host.clientHeight)
+            });
+            lander.render();
+            attempts = 0;
+
+            function fitMap() {
+                const map = lander.jsMap;
+                if (!map?.getCenter) {
+                    if (++attempts < 100) window.setTimeout(fitMap, 150);
+                    return;
+                }
+                const center = map.getCenter();
+                map.relayout();
+                map.setCenter(center);
+                host.parentElement.classList.add("is-map-ready");
+                const fallback = host.parentElement.querySelector("img");
+                if (fallback) fallback.setAttribute("aria-hidden", "true");
+                if ("ResizeObserver" in window) {
+                    new ResizeObserver(function () {
+                        map.relayout();
+                        map.setCenter(center);
+                    }).observe(host);
+                }
+            }
+            fitMap();
+        }
+        renderMap();
+    }
+
+    function initExternalLinks() {
+        function updateLink(link) {
+            let url;
+            try {
+                url = new URL(link.getAttribute("href"), window.location.href);
+            } catch (_) {
+                return;
+            }
+            if (!/^https?:$/.test(url.protocol) || url.origin === window.location.origin) return;
+            link.target = "_blank";
+            link.relList.add("noopener", "noreferrer");
+        }
+
+        function updateLinks(root) {
+            if (root.matches && root.matches("a[href]")) updateLink(root);
+            root.querySelectorAll("a[href]").forEach(updateLink);
+        }
+
+        updateLinks(document.body);
+        // Cover content renderers, load-more cards and booking URLs set after page load.
+        new MutationObserver(function (records) {
+            records.forEach(function (record) {
+                if (record.type === "attributes") {
+                    if (record.target.matches("a[href]")) updateLink(record.target);
+                    return;
+                }
+                record.addedNodes.forEach(function (node) {
+                    if (node.nodeType === 1) updateLinks(node);
+                });
+            });
+        }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["href"] });
+    }
+
     function initCommon() {
         if (!document.body) {
             return;
         }
 
         initHeader();
+        initExternalLinks();
         initStatementMarquees();
+        initInformationMap();
     }
 
     if (document.readyState === "loading") {

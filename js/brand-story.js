@@ -1,5 +1,51 @@
 document.addEventListener('DOMContentLoaded', function () {
 
+    function initSpecialCardReveals() {
+        const cards = Array.from(document.querySelectorAll('.brand-special-card'));
+        if (!cards.length || !('IntersectionObserver' in window)) {
+            return;
+        }
+
+        const mobile = window.matchMedia('(max-width: 768px)');
+        let observer;
+
+        cards.forEach(function (card, index) {
+            card.classList.add('is-reveal-ready');
+            card.classList.toggle('is-reveal-even', index % 2 === 1);
+            card.addEventListener('animationend', function (event) {
+                if (event.target === card) {
+                    card.classList.remove('is-reveal-ready');
+                }
+            });
+        });
+
+        function observeCards() {
+            if (observer) {
+                observer.disconnect();
+            }
+            const threshold = mobile.matches ? 0.3 : 0.4;
+            observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting && entry.intersectionRatio >= threshold) {
+                        entry.target.classList.add('is-revealed');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: threshold });
+
+            cards.forEach(function (card) {
+                if (!card.classList.contains('is-revealed')) {
+                    observer.observe(card);
+                }
+            });
+        }
+
+        observeCards();
+        mobile.addEventListener('change', observeCards);
+    }
+
+    initSpecialCardReveals();
+
     const slides = Array.from(
         document.querySelectorAll('.brand-points-stage .brand-point')
     );

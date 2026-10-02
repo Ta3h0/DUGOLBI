@@ -75,7 +75,7 @@
 - [x] results-information (DOM 3)
 - [x] 페이지 전체 연결·간격·Header/Footer·console 최종 확인
 
-## signature.html
+## signature01.html
 - [x] signature-hero (DOM 1)
 - [x] signature-course (DOM 2)
 - [x] section-carousel signature-statement (DOM 3)
@@ -245,3 +245,122 @@
 - 수정 CSS: css/common.css, css/index.css, css/brand-story.css, css/introduce.css, css/introduce-educators.css, css/network.css, css/results.css, css/signature.css, css/advanced.css, css/startup.css, css/growth.css, css/montly.css, css/promotion-preview.css, css/promotion-detail.css, css/schedule.css
 - 수정 HTML / JS: schedule.html, js/schedule.js (모바일 달력 팝업에 필요한 최소 마크업·동작)
 - 신규 dependency / 복사 asset / 데이터 수정 / commit / push: 없음.
+
+
+## 최근 2시간 요청 점검 및 지도 링크 후속 작업 — 2026-10-02
+
+- 점검 범위: 점검 요청 접수 시각 기준 15:29:38~17:29:38 (Asia/Seoul), 해당 기간 요청 21건.
+- 대화에서 중단된 기록 3건: 임상 결과 페이지네이션 / 수료지점 페이지네이션 / 전문가 클래스 모바일 POINT 슬라이드.
+- 위 3건은 후속 작업에서 완료되었으며, 이번 점검에서 실제 파일 및 브라우저 동작을 다시 확인함.
+- 현재 미완료 요청: 없음. 먼저 요청했던 설명 숨김은 이후 설명 복원 요청으로 대체됨.
+
+### 요청별 현재 상태
+- [x] 메인 Our Experts 제목과 대표자 사진 간격 확대.
+- [x] 메인 교육 카드 6개 제목·설명 교체.
+- [x] 메인 교육 카드 chip 6개 과정 기간·분류 교체.
+- [x] 1440px 미만 설명 숨김 요청: 이후 복원 요청으로 대체.
+- [x] 모바일 교육 카드 chip 14px.
+- [x] 교육 카드 설명 복원 및 작은 화면 강제 줄바꿈 해제.
+- [x] 모바일 Media & News: 날짜 / 제목·오른쪽 화살표 배치.
+- [x] Others 3개 문구 및 일정·수료지점·이달의 교육 연결.
+- [x] FAQ 질문·답변 5개 교체, 초기 닫힘·슬라이드 펼침·화살표 회전 유지.
+- [x] 모바일 Our Experts 문구만 원장님에게로 변경, 글자 크기 유지.
+- [x] 모바일 브랜드 가치 짝수 카드 왼쪽 모서리·오른쪽 정렬.
+- [x] 모바일 브랜드 신념 문구 3줄 및 위·아래 캐러셀 반대 방향 이동.
+- [x] 브랜드 특별함 카드 PC 40% 플립 / 모바일 30% 좌우 교차 진입.
+- [x] 모바일 브랜드 상담 CTA 제목 2rem, 제목·설명 keep-all, 두 버튼 같은 너비.
+- [x] 모바일 임상 결과 제목 요청한 2줄.
+- [x] 임상 결과 6개씩 페이지 분할, 실제 페이지 수·10개 번호 묶음 이동.
+- [x] 모바일 지역·과정 pill 필터 14px / min-height 0 / padding 4px 18px.
+- [x] 모바일 수료지점 카드 간격 80px.
+- [x] 수료지점 6개씩 페이지 분할, 실제 페이지 수·10개 번호 묶음 이동.
+- [x] advanced / startup / growth 모바일 POINT 카드 유한 좌우 스크롤·스냅.
+- [x] 이달의 교육·프로모션 초기 6개 / 더보기 6개 추가 / 남은 항목 유무에 따른 활성·비활성.
+
+### 검수 근거와 후속 변경
+- 이번 재확인: 375px에서 메인 문구·chip·설명·FAQ 펼침/접힘·소식 배치·Others 링크, 브랜드 가치·신념 줄바꿈·양방향 캐러셀의 실제 이동·카드 진입·상담 CTA 검수.
+- 수료지점 실제 7개: 1페이지 6개 / 2페이지 1개. 임상 결과 실제 9개: 6개 / 3개. 필터 버튼 값과 문서 가로 넘침 확인.
+- 전문가 3페이지 모바일 POINT 카드 4개만 존재, 마지막 카드 scrollLeft가 최대값 928px에서 종료됨. 앞선 검수에서 추가 스크롤 시 반복 없음·첫 카드 복귀 및 PC 4열·Tablet 2열도 확인함.
+- 더보기 실제 운영 데이터: 이달의 교육 1개 / 프로모션 5개로 현재 비활성. 직전 완료 작업에서 두 페이지 모두 13개 임시 데이터로 6→12→13 검수, 0개·6개 경계 및 키보드 검수 완료. 테스트 파일은 삭제됨.
+- 페이지네이션 30개→5페이지 / 300개→50페이지 및 10페이지 묶음·필터 후 재계산은 앞선 완료 작업의 브라우저 검수 기록 확인. 이번 점검에서는 실제 데이터 페이지 전환 재확인.
+- 새 요청: INFORMATION이 존재하는 introduce / introduce-educators / network / results의 네이버·카카오 지도 링크 총 8개에 target="_blank", rel="noopener noreferrer" 적용. 기존 URL 유지. 4페이지 모두 브라우저에서 설정 확인.
+- 재확인한 페이지에서 console error / 의도하지 않은 문서 가로 넘침 발견 없음. JavaScript 문법 및 git diff --check 통과.
+- 이번 후속 변경 파일: introduce.html / introduce-educators.html / network.html / results.html / RESPONSIVE_PROGRESS.md.
+- 이번 점검에서 추가 구현 누락이 발견되지 않아 정상 작동하는 코드의 재작성은 하지 않음. modify.js 데이터 / reset.css / commit / push 변경 없음.
+- Current: 최근 요청 점검 및 INFORMATION 지도 새창 적용 완료.
+- Next: 없음. 기존 실제 기기·운영 환경 확인 항목은 위 기록 참고.
+
+
+## INFORMATION 카카오맵 교체 — 2026-10-02
+- [x] introduce / introduce-educators / network / results: 동일한 제공 roughmap timestamp 1790929303745, key 2kbq4uve66p 적용.
+- [x] 실행 코드는 js/common.js에 작성. 각 대상 페이지에 공식 loader 1개만 삽입, inline 실행 스크립트 없음.
+- [x] 확대·축소·초기화, 로드뷰·길찾기·지도 크게보기, 장소 설명 UI 숨김. 지도 내부 Kakao 출처와 축척은 유지.
+- [x] 기존 지도 프레임 유지: 큰 화면 672px / Tablet 380px / Mobile 300px. ResizeObserver와 SDK relayout/setCenter로 화면 크기 변경 후 영역 채움 및 중심 유지.
+- [x] 4페이지 각각 1920 / 1440 / 1024 / 768 / 375px 검수: 지도 tile 생성, 프레임과 canvas 크기 일치, loader 1개, 도구 비노출, 문서 가로 넘침 없음.
+- [x] 같은 페이지에서 375→1920px 크기 변경 후 지도 자동 맞춤, 실제 tile 이미지 로딩, 출처 표시 확인. Console error 없음. node --check js/common.js 및 git diff --check 통과.
+- 제공 코드의 지도 위치는 부산 두골비 오브제랩 본점. 기존 INFORMATION의 부산/서울 주소 문구는 수정하지 않음. 지도 aria-label은 제공 지도 위치에 맞춤.
+- 지도 로딩 중/실패 시 기존 이미지 유지, 지도 준비 시 이미지 시각·접근성 노출 해제.
+- 수정: introduce.html / introduce-educators.html / network.html / results.html / css/common.css / js/common.js / RESPONSIVE_PROGRESS.md.
+- 신규 파일·asset·dependency 및 commit/push 없음.
+
+
+## 시그니처 과정 분리 및 교육 카드 연결 — 2026-10-02
+- [x] signature.html → signature01.html 이름 변경. 기존 두골비 템플릿 / 공통 CSS / JS / Header / Footer 유지.
+- [x] signature02.html: 두골체 소개 원고 및 7개 PART, 총 20주 커리큘럼 반영. 표 스타일을 재사용한 2열 구성.
+- [x] signature03.html: 신결비 제목 및 메인 카드 이미지 반영. 소개 본문 / 차별점 / 표는 두골비 템플릿 임시 내용 (신결비 확정 원고 미제공).
+- [x] index 교육 카드: 두골비 / 두골체 / 신결비 / 심화 / 창업 / 성장의 개별 페이지 링크 연결.
+- [x] 공통 Header: PC / 모바일 두골체·신결비 메뉴 및 기존 signature 링크 변경.
+- [x] 세 페이지 전체 브라우저 / 이미지 / 표 / 링크 / 가로 overflow / console 확인: 1920 / 1440 / 1024 / 768 / 480 / 375px. 이미지 누락, 가로 넘침, console error 없음.
+- Current: 시그니처 과정 분리 / 카드·Header 연결 / 브라우저 검수 완료.
+- Next: 신결비 확정 원고 수령 시 임시 본문 및 커리큘럼 교체 (현재 요청의 템플릿 제작은 완료).
+
+- [x] 소개 이미지 3개: 메인의 각 교육 카드 images/main/section06-item-bg01~03.jpg 재사용. 원본 비율 유지.
+- [x] 공통 CSS의 signature-course-copy에 word-break: keep-all 추가 (PC 한국어 단어 중간 줄바꿈 방지). JS 변경 없음.
+- [x] production HTML / JS / PHP에 signature.html 참조 없음. 로컬 HTML 링크 대상 누락 없음.
+
+## signature02.html
+- [x] signature-hero (DOM 1) — 기존 signature 템플릿 및 반응형 재사용, 6개 검수 폭 확인
+- [x] signature-course (DOM 2) — 기존 signature 템플릿 및 반응형 재사용, 6개 검수 폭 확인
+- [x] section-carousel signature-statement (DOM 3) — 기존 signature 템플릿 및 반응형 재사용, 6개 검수 폭 확인
+- [x] signature-difference (DOM 4) — 기존 signature 템플릿 및 반응형 재사용, 6개 검수 폭 확인
+- [x] signature-curriculum (DOM 5) — 기존 signature 템플릿 및 반응형 재사용, 6개 검수 폭 확인
+- [x] 페이지 전체 연결·간격·Header/Footer·console 최종 확인
+
+## signature03.html
+- [x] signature-hero (DOM 1) — 기존 signature 템플릿 및 반응형 재사용, 6개 검수 폭 확인
+- [x] signature-course (DOM 2) — 기존 signature 템플릿 및 반응형 재사용, 6개 검수 폭 확인
+- [x] section-carousel signature-statement (DOM 3) — 기존 signature 템플릿 및 반응형 재사용, 6개 검수 폭 확인
+- [x] signature-difference (DOM 4) — 기존 signature 템플릿 및 반응형 재사용, 6개 검수 폭 확인
+- [x] signature-curriculum (DOM 5) — 기존 signature 템플릿 및 반응형 재사용, 6개 검수 폭 확인
+- [x] 페이지 전체 연결·간격·Header/Footer·console 최종 확인
+
+
+## 상담신청 섹션 링크 통일 — 2026-10-02
+- [x] 메인 상담신청 section에 id="inquiry" 추가.
+- [x] Header / 메인 Hero / Brand Story / Schedule 모바일 팝업 / INFORMATION 4개 페이지: 상담신청·상담문의 진입 버튼 8개를 index.html#inquiry로 연결.
+- [x] 전화번호 / 전화예약 / 네이버 예약 / 상담 form submit 기능 유지.
+- [x] 공통 Header CTA 클릭 시 모바일 메뉴 닫음. 동일 페이지 내 이동 시 메뉴가 남지 않도록 처리.
+- [x] 상담 section scroll-margin-top: PC·Tablet Header 100px / Mobile Header 73px 반영.
+- [x] 모든 상담 anchor 정적 검사 통과. PC Header, Mobile Header(메뉴 열린 상태), Hero, Schedule 팝업 실제 클릭 이동 확인. Console error 없음.
+- Current: 상담신청 진입 링크 통일 및 PC·모바일 확인 완료.
+- Next: 신결비 확정 원고 수령 시 임시 본문 / 표 교체.
+
+
+## 시그니처 좌측 이미지 패널 통일 — 2026-10-02
+- [x] signature01 / signature02 / signature03 좌측 이미지: advanced 기준 700×500 (7:5) 비율 적용. object-fit: cover로 원본 왜곡 없이 크롭.
+- [x] advanced course-panel.png에 포함된 약 30px 라운드와 동일한 상대 radius 적용: 4.285714% / 6%.
+- [x] 기존 공통 course-panel 너비·Grid·breakpoint 그대로 재사용. 이미지와 라운드가 화면 폭에 맞춰 함께 축소.
+- [x] advanced와 3개 signature 모두 1920 / 1440 / 1024 / 768 / 480 / 375px에서 좌측 이미지 실측 크기 동일. 누락 이미지 / 가로 넘침 / console error 없음. PC 3개 이미지 및 Mobile 크롭·라운드 시각 확인.
+- 수정 파일: css/common.css / RESPONSIVE_PROGRESS.md. HTML / JS / 원본 asset 변경 없음.
+- Current: 시그니처 좌측 이미지 패널 통일 완료.
+- Next: 신결비 확정 원고 수령 시 임시 본문 / 표 교체.
+
+
+## 외부 링크 새 창 규칙 통일 — 2026-10-02
+- [x] js/common.js: 다른 origin의 HTTP(S) 링크를 target="_blank" / rel="noopener noreferrer"로 처리.
+- [x] 초기 링크 / 동적 추가 / href 변경을 반영. 기존 rel 값 유지. 운영 데이터(modify.js) 변경 없음.
+- [x] production HTML의 외부 링크 9개는 기존 _blank 유지. 모든 실제 페이지에서 common.js 로드 확인.
+- [x] 브라우저 QA: 일반 외부 URL / protocol-relative / 동적 추가 / 예약 href 변경은 _blank. 내부 HTML / 같은 origin URL / anchor / 전화 / 이메일 링크는 기존 동작 유지. Console error 없음.
+- [x] 실제 monthly detail 푸터 외부 블로그 링크 및 전화·상담·# 예약 링크 구분 확인. 임시 QA 파일 제거 완료.
+- Current: 외부 링크 새 창 공통 처리 완료.
+- Next: 신결비 확정 원고 수령 시 임시 본문 / 표 교체.

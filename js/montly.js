@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!grid && !(overview && detailBody)) return;
 
-    const { escapeHtml, lines } = window.DugolbiContent;
+    const { escapeHtml, lines, initLoadMore } = window.DugolbiContent;
 
     function displayDate(value) {
         return String(value ?? "").replaceAll("-", ".");
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (grid) {
-        grid.innerHTML = items.map(function (item, index) {
+        initLoadMore(grid, document.querySelector(".montly-more"), items, function (item, index) {
             const url = `montly-detail.html?id=${encodeURIComponent(item.id)}`;
             const titleId = index === 0 ? "preview-title" : `preview-title-${index + 1}`;
             return `<article class="montly-preview" aria-labelledby="${titleId}">
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     ${priceMarkup(item)}
                 </div>
             </article>`;
-        }).join("");
+        });
     }
 
     if (!(overview && detailBody) || !items.length) return;

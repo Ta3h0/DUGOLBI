@@ -7,20 +7,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!grid && !article) return;
 
-    const { escapeHtml, lines } = window.DugolbiContent;
+    const { escapeHtml, lines, initLoadMore } = window.DugolbiContent;
 
     function period(item) {
         return `${String(item.startDate ?? "").replaceAll("-", ".")} ~ ${String(item.endDate ?? "").replaceAll("-", ".")}`;
     }
 
     if (grid) {
-        grid.innerHTML = items.map(function (item) {
+        initLoadMore(grid, document.querySelector(".promotion-more"), items, function (item) {
             const image = item.image || {};
             const url = `promotion-detail.html?id=${encodeURIComponent(item.id)}`;
             return `<article class="promotion-card"><a href="${escapeHtml(url)}" class="promotion-poster" aria-label="${escapeHtml(item.title)} 상세보기"><img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt)}" width="${escapeHtml(image.width)}" height="${escapeHtml(image.height)}" loading="lazy"></a>
                 <div class="promotion-card-content"><p class="promotion-category">${escapeHtml(item.category)}</p><h3><a href="${escapeHtml(url)}">${escapeHtml(item.title)}</a></h3><p class="promotion-excerpt">${lines(item.description)}</p><dl><dt>기간</dt><dd>${escapeHtml(period(item))}</dd></dl></div>
             </article>`;
-        }).join("");
+        });
     }
 
     if (!article || !items.length) return;

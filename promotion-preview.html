@@ -22,9 +22,8 @@
 <nav class="community-nav" aria-label="커뮤니티"><div class="container"><a href="notice.html">NOTICE</a><a href="qna.html">Q&amp;A</a><a href="promotion-preview.html" aria-current="page">SPECIAL OFFER</a><a href="review.html">REVIEW</a><a href="news.html">NEWS</a></div></nav>
         <section class="promotion-list" aria-labelledby="promotion-title"><div class="container">
             <div class="section-title-box"><span class="section-eyebrow">Special Offer</span><h2 class="section-title" id="promotion-title">프로모션</h2></div>
-            <div class="promotion-grid"></div>
-            <!-- 추가 게시글 데이터 연결 시 활성화합니다. 현재 시안의 5개 게시글을 모두 표시합니다. -->
-            <button class="page-button promotion-more" type="button" disabled aria-label="더보기: 추가 게시글 없음">더보기<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.5"/></svg></button>
+            <div class="promotion-grid" id="promotion-grid"></div>
+            <button class="page-button promotion-more" type="button" aria-controls="promotion-grid" disabled>더보기<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.5"/></svg></button>
         </div></section>
         <section class="section-carousel page-statement" aria-label="Structure determines function"><div class="carousel-item">STRUCTURE DETERMINES FUNCTION</div></section>
        <?php include $_SERVER['DOCUMENT_ROOT'].'/footer.html'; ?>
