@@ -1,11 +1,14 @@
 # Responsive Progress
 
+> 현재 구조 안내 (2026-10-06): 아래 내용은 당시 작업 기록입니다. 현재 사이트는 21개 페이지이며, 스타일은 `css/reset.css`와 `css/common.css`를 사용합니다. 예전 페이지별 CSS는 삭제되었고 `signature.html`은 `signature01.html`로 변경되었습니다. 두골체/신결비는 `signature02.html`/`signature03.html`입니다. 최신 운영 확인 사항과 수정 결과는 [DELIVERY_CHECK.md](DELIVERY_CHECK.md)를 먼저 확인하세요.
+
+
 기준: 최신 커밋 ed7405e / 2026-10-02. 기존 PC와 데이터·PHP include·JS 구조 보존.
 검수 폭: 1920 / 1440 / 1024 / 768 / 480 / 375px.
 체크 의미: 해당 section의 PC 보존, Tablet/Mobile 배치·overflow·비율·터치/interaction·콘솔 검수 완료.
 
 ## Current / Next
-- Current: 전체 19개 페이지 / section 및 최종 전수 검수 완료
+- Current: 전체 21개 페이지 반응형 적용. 최신 검증·운영 보류 사항은 DELIVERY_CHECK.md 참고 (아래 19개 페이지 기록은 이전 검수 이력).
 - Next: 없음. 실제 기기·운영 환경 확인 항목은 아래 기록 참고.
 - 진행 규칙: section별 저장 → 브라우저 확인 → 즉시 체크. 미완료는 체크하지 않음.
 

@@ -1,43 +1,40 @@
 <?php
 declare(strict_types=1);
 
-header('Content-Type: text/html; charset=UTF-8');
 header('Cache-Control: no-store');
 date_default_timezone_set('Asia/Seoul');
 
-function alertAndBack(string $message): void
+$wantsJson = stripos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false;
+header('Content-Type: ' . ($wantsJson ? 'application/json' : 'text/html') . '; charset=UTF-8');
+
+function respond(string $message, int $status, bool $success = false, string $path = ''): void
 {
-    $message = json_encode(
-        $message,
-        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-    );
-
-    echo "<script>
-        alert({$message});
-        history.back();
-    </script>";
-
+    global $wantsJson;
+    http_response_code($status);
+    $flags = JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
+    if ($wantsJson) {
+        echo json_encode(['success' => $success, 'message' => $message, 'redirect' => $path], $flags);
+    } else {
+        $encodedMessage = json_encode($message, $flags);
+        $destination = $path !== ''
+            ? 'location.href = ' . json_encode($path, $flags) . ';'
+            : 'if (history.length > 1) history.back(); else location.href = "index.html#inquiry";';
+        echo "<!DOCTYPE html><html lang=\"ko\"><meta charset=\"UTF-8\"><title>상담 신청</title>";
+        echo '<p>' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . '</p>';
+        echo '<a href="index.html#inquiry">상담 신청으로 돌아가기</a>';
+        echo "<script>alert({$encodedMessage}); {$destination}</script></html>";
+    }
     exit;
+}
+
+function alertAndBack(string $message, int $status = 422): void
+{
+    respond($message, $status);
 }
 
 function alertAndRedirect(string $message, string $path): void
 {
-    $message = json_encode(
-        $message,
-        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-    );
-
-    $path = json_encode(
-        $path,
-        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-    );
-
-    echo "<script>
-        alert({$message});
-        location.href = {$path};
-    </script>";
-
-    exit;
+    respond($message, 200, true, $path);
 }
 
 function posted(string $name): string
@@ -47,14 +44,27 @@ function posted(string $name): string
 }
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-    alertAndRedirect(
-        '신청폼에서 접수해 주세요.',
-        '/index.html'
-    );
+    header('Allow: POST');
+    respond('신청폼에서 접수해 주세요.', 405, false, 'index.html#inquiry');
 }
 
-if ((int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 8192) {
-    alertAndBack('입력 내용이 너무 깁니다.');
+if ((int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 65536) {
+    alertAndBack('입력 내용이 너무 깁니다.', 413);
+}
+
+require_once __DIR__ . '/inquiry-session.php';
+if (!startInquirySession()) {
+    alertAndBack('접수 세션을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.', 503);
+}
+$token = posted('inquiry_token');
+if (!isset($_SESSION['inquiry_token']) || $token === '' || !hash_equals($_SESSION['inquiry_token'], $token)) {
+    alertAndBack('신청 화면이 만료되었습니다. 페이지를 새로고침한 뒤 다시 신청해 주세요.', 403);
+}
+
+foreach (['user_name', 'user_region', 'user_phone', 'shop_status', 'education', 'message', 'privacy_agree', 'inquiry_token'] as $field) {
+    if (isset($_POST[$field]) && !is_string($_POST[$field])) {
+        alertAndBack('입력 형식을 다시 확인해 주세요.', 400);
+    }
 }
 
 $name = posted('user_name');
@@ -75,15 +85,17 @@ $routeRaw = $_POST['route'] ?? [];
 
 $route = [];
 
-if (is_array($routeRaw)) {
-    foreach ($routeRaw as $value) {
-        if (is_string($value)) {
-            $value = trim($value);
+if (!is_array($routeRaw) || count($routeRaw) > 4) {
+    alertAndBack('알게 된 경로를 다시 확인해 주세요.', 400);
+}
 
-            if ($value !== '') {
-                $route[] = $value;
-            }
-        }
+foreach ($routeRaw as $value) {
+    if (!is_string($value)) {
+        alertAndBack('알게 된 경로를 다시 확인해 주세요.', 400);
+    }
+    $value = trim($value);
+    if ($value !== '') {
+        $route[] = $value;
     }
 }
 
@@ -131,7 +143,13 @@ foreach ($route as $value) {
     }
 }
 
-if (mb_strlen($message, 'UTF-8') > 2000) {
+if (!preg_match('//u', $message) || preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', $message)) {
+    alertAndBack('문의 내용의 입력 문자를 다시 확인해 주세요.');
+}
+$messageLength = function_exists('mb_strlen')
+    ? mb_strlen($message, 'UTF-8')
+    : preg_match_all('/./us', $message);
+if ($messageLength > 2000) {
     alertAndBack('문의 내용은 2,000자 이내로 입력해 주세요.');
 }
 
@@ -140,7 +158,7 @@ if ($consent !== 'Y') {
 }
 
 $routeText = $route
-    ? implode(', ', $route)
+    ? implode(', ', array_unique($route))
     : '선택 안 함';
 
 
@@ -178,10 +196,20 @@ if (
     || preg_match('/[\r\n]/', $fromEmail)
 ) {
     alertAndBack(
-        '현재 메일 접수 설정을 확인 중입니다. 잠시 후 다시 시도해 주세요.'
+        '현재 메일 접수 설정을 확인 중입니다. 잠시 후 다시 시도해 주세요.',
+        503
     );
 }
 
+
+// The session lock serializes simultaneous requests from the same browser.
+$now = time();
+$lastAttempt = (int)($_SESSION['inquiry_last_attempt'] ?? 0);
+if ($lastAttempt > $now - 10) {
+    header('Retry-After: ' . (string)max(1, 10 - ($now - $lastAttempt)));
+    alertAndBack('신청을 처리 중이거나 방금 전송했습니다. 10초 후 다시 시도해 주세요.', 429);
+}
+$_SESSION['inquiry_last_attempt'] = $now;
 
 $subject =
     '=?UTF-8?B?' .
@@ -266,7 +294,8 @@ try {
 if (!$sent) {
 
     alertAndBack(
-        '상담 신청 메일 전송에 실패했습니다. 잠시 후 다시 시도해 주세요.'
+        '상담 신청 메일 전송에 실패했습니다. 잠시 후 다시 시도해 주세요.',
+        503
     );
 
 }
@@ -274,5 +303,5 @@ if (!$sent) {
 
 alertAndRedirect(
     '상담 신청이 완료되었습니다.',
-    '/index.html'
+    'index.html'
 );

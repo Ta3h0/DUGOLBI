@@ -1,4 +1,5 @@
 // 운영 콘텐츠는 이 파일에서 수정합니다. 날짜는 YYYY-MM-DD, 줄바꿈은 \n으로 작성합니다.
+// scheduleData의 naverBookingUrl에는 해당 일정의 실제 예약 주소를 입력합니다. 없으면 빈 문자열을 유지합니다.
 // 각 항목의 id는 중복 없이 유지합니다. 이미지는 실제 images/ 경로를 사용합니다.
 
 const educationData = [
@@ -51,7 +52,7 @@ const educationData = [
             }
         ],
         "phone": "010-3450-1662",
-        "naverBookingUrl": "#"
+        "naverBookingUrl": ""
     }
 ];
 
@@ -196,6 +197,7 @@ const promotionList = [
 const scheduleData = [
     {
         "id": "dugolbi-10",
+        "naverBookingUrl": "",
         "color": "schedule-color-1",
         "title": "두골비 과정 10기 교육일정",
         "start": "2026-10-11",
@@ -203,6 +205,7 @@ const scheduleData = [
     },
     {
         "id": "sample-signature",
+        "naverBookingUrl": "",
         "color": "schedule-color-2",
         "title": "시그니처 교육과정",
         "start": "2026-10-03",
@@ -211,6 +214,7 @@ const scheduleData = [
     },
     {
         "id": "sample-decollete",
+        "naverBookingUrl": "",
         "color": "schedule-color-3",
         "title": "데콜테 실전 테크닉",
         "start": "2026-10-08",
@@ -219,6 +223,7 @@ const scheduleData = [
     },
     {
         "id": "sample-startup",
+        "naverBookingUrl": "",
         "color": "schedule-color-4",
         "title": "창업반 실전 교육",
         "start": "2026-10-19",
@@ -227,6 +232,7 @@ const scheduleData = [
     },
     {
         "id": "sample-growth",
+        "naverBookingUrl": "",
         "color": "schedule-color-5",
         "title": "어린이 성장 매니지먼트",
         "start": "2026-10-29",

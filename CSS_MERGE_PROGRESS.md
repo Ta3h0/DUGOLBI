@@ -1,5 +1,8 @@
 # CSS Merge Progress
 
+> 현재 구조 안내 (2026-10-06): 아래 내용은 당시 작업 기록입니다. 현재 사이트는 21개 페이지이며, 스타일은 `css/reset.css`와 `css/common.css`를 사용합니다. 예전 페이지별 CSS는 삭제되었고 `signature.html`은 `signature01.html`로 변경되었습니다. 두골체/신결비는 `signature02.html`/`signature03.html`입니다. 최신 운영 확인 사항과 수정 결과는 [DELIVERY_CHECK.md](DELIVERY_CHECK.md)를 먼저 확인하세요.
+
+
 기준: 2026-10-02 현재 파일. CSS 통합은 완료되어 있으며 다시 수행하지 않음.
 기존 페이지별 CSS 19개는 전체 페이지 검수 통과 후 삭제 완료.
 이전 CSS 통합 검수 기록이 불완전하므로 아래 페이지는 이번 세션에서 확실하게 검증한 뒤 체크.

@@ -45,8 +45,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const backgroundState = new Map();
     let sheetTrigger = null;
     let sheetOpen = false;
-    // Reuse the booking URL already used by the monthly education page.
-    if (booking && typeof educationData !== "undefined") booking.href = educationData[0]?.naverBookingUrl || "#";
+    function updateBooking(course) {
+        window.DugolbiLinks.setOptionalLink(booking, course && course.naverBookingUrl);
+    }
+    updateBooking(null);
 
     function closeSheet(restoreFocus = true) {
         if (!sheetOpen) return;
@@ -107,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!sheetOpen) return;
         if (event.key === "Escape") { event.preventDefault(); closeSheet(); return; }
         if (event.key !== "Tab") return;
-        const controls = Array.from(panel.querySelectorAll("button, a[href]")).filter(element => element.getClientRects().length);
+        const controls = Array.from(panel.querySelectorAll("button, a[href]")).filter(element => element.getClientRects().length && element.getAttribute("aria-disabled") !== "true");
         const first = controls[0], last = controls[controls.length - 1];
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
@@ -121,6 +123,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function highlight() {
         const id = hovered || focused || pinned;
         const course = courses.find(item => item.id === id);
+        updateBooking(course);
         list.querySelectorAll("button").forEach(button => {
             button.classList.toggle("is-active", button.dataset.id === id);
             button.setAttribute("aria-pressed", String(button.dataset.id === pinned));

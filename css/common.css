@@ -4417,6 +4417,12 @@ body.home .header:not(.is-scrolled):has(.gnb-item:hover) .header-cta .arrow {
 
 
 
+/* Inquiry feedback appears only after submission. */
+:where(body.home) .inquiry-status { margin: 0; overflow-wrap: anywhere; }
+:where(body.home) .inquiry-status[hidden] { display: none; }
+:where(body.home) .submit:disabled { cursor: wait; opacity: .65; }
+a[aria-disabled="true"] { cursor: not-allowed; }
+
 /* ==================== BRAND-STORY ==================== */
 /* INTRODUCE PC — existing common header / footer and container retained. */
 body.brand-story {
@@ -5744,6 +5750,7 @@ body.brand-story main>section {
 
 :where(body.montly) .montly-education { margin: 0; padding: 120px 0 130px; letter-spacing: -0.025em; }
 :where(body.montly) .montly-education .section-title-box { margin-bottom: 60px; }
+:where(body.montly) .montly-grid .content-empty { grid-column: 1 / -1; text-align: center; overflow-wrap: anywhere; }
 :where(body.montly) .montly-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 60px 24px; }
 :where(body.montly) .montly-preview { min-width: 0; }
 :where(body.montly) .montly-poster { display: block; position: relative; }
@@ -5888,6 +5895,7 @@ body.promotion-preview main { color: var(--font-black); }
 
 :where(body.promotion-preview) .promotion-list { margin: 0; padding: 120px 0; background: radial-gradient(ellipse 480px 300px at 88% 0%, #f7f8fa, transparent); }
 :where(body.promotion-preview) .promotion-list .section-title-box { margin-bottom: 70px; }
+:where(body.promotion-preview) .promotion-grid .content-empty { grid-column: 1 / -1; text-align: center; overflow-wrap: anywhere; }
 :where(body.promotion-preview) .promotion-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 120px 24px; }
 :where(body.promotion-preview) .promotion-poster { display: block; }
 :where(body.promotion-preview) .promotion-poster img { width: 100%; height: auto; aspect-ratio: 1; }
@@ -6100,7 +6108,7 @@ body.schedule.reduce-motion .schedule-section * { transition: none; }
   :where(body.schedule) .schedule-sheet-actions .cta-button { justify-content: center; padding: 12px 8px; min-width: 0; }
   :where(body.schedule) .schedule-booking-naver img { width: 24px; height: 24px; }
   body.schedule-calendar-open { overflow: hidden; }
-  :where(body.schedule) .schedule-calendar-open .schedule-calendar-backdrop { opacity: 1; visibility: visible; }
+  body.schedule-calendar-open .schedule-calendar-backdrop { opacity: 1; visibility: visible; }
   body.schedule-calendar-open .schedule-calendar-panel { transform: translateY(0); visibility: visible; }
 }
 

@@ -1,15 +1,20 @@
 <?php
 
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri = rawurldecode((string)parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
+if (strpos($uri, "\0") !== false) {
+    http_response_code(400);
+    exit('400 Bad Request');
+}
 
 if ($uri === '/') {
     $uri = '/index.html';
 }
 
-$file = __DIR__ . $uri;
+$file = realpath(__DIR__ . $uri);
+$root = __DIR__ . DIRECTORY_SEPARATOR;
 
 // 실제 파일이 없으면 404
-if (!file_exists($file)) {
+if ($file === false || !is_file($file) || strncmp($file, $root, strlen($root)) !== 0) {
     http_response_code(404);
     echo '404 Not Found';
     exit;

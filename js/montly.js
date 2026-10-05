@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function posterMarkup(item, preview) {
         const image = item.image || {};
+        if (!image.src) return "";
         const alt = preview ? image.previewAlt : image.alt;
         const badge = item.badge ? `<span class="montly-earlybird-chip">${escapeHtml(item.badge)}</span>` : "";
         return `<img src="${escapeHtml(image.src)}" alt="${escapeHtml(alt)}" width="${escapeHtml(image.width)}" height="${escapeHtml(image.height)}">${badge}`;
@@ -61,14 +62,22 @@ document.addEventListener("DOMContentLoaded", function () {
                     ${priceMarkup(item)}
                 </div>
             </article>`;
-        });
+        }, '등록된 교육이 없습니다.');
     }
 
-    if (!(overview && detailBody) || !items.length) return;
+    if (!(overview && detailBody)) return;
 
-    // A direct visit without an id, or an outdated id, keeps the existing first-course view.
+    // A direct visit keeps the first course; unknown ids must not show another course.
     const id = new URLSearchParams(window.location.search).get("id");
-    const item = items.find(function (course) { return String(course.id) === id; }) || items[0];
+    const item = id === null ? items[0] : items.find(function (course) { return String(course.id) === id; });
+    if (!item) {
+        const message = document.createElement('h2');
+        message.id = 'course-title';
+        message.textContent = items.length ? '해당 교육을 찾을 수 없습니다.' : '등록된 교육이 없습니다.';
+        overview.replaceChildren(message);
+        detailBody.replaceChildren();
+        return;
+    }
     const pageTitle = String(item.title ?? "").split("\n").pop().trim();
     document.title = `${pageTitle || "이달의 교육"} | 두골비·체 트레이닝 센터`;
     const phone = String(item.phone ?? "");

@@ -11,7 +11,7 @@
     }
 
 
-    function initLoadMore(grid, button, items, renderCard) {
+    function initLoadMore(grid, button, items, renderCard, emptyMessage) {
         let visibleCount = 0;
         const batchSize = 6;
 
@@ -30,6 +30,13 @@
         grid.replaceChildren();
         if (button) button.addEventListener("click", appendBatch);
         appendBatch();
+        if (!items.length) {
+            const message = document.createElement('p');
+            message.className = 'content-empty';
+            message.setAttribute('role', 'status');
+            message.textContent = emptyMessage || '등록된 항목이 없습니다.';
+            grid.append(message);
+        }
     }
 
     window.DugolbiContent = { escapeHtml: escapeHtml, lines: lines, initLoadMore: initLoadMore };

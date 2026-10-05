@@ -1,3 +1,21 @@
+/* Optional external links stay visible until their real destination is supplied. */
+window.DugolbiLinks = {
+    setOptionalLink: function (link, value) {
+        if (!link) return;
+        let url;
+        try { url = new URL(String(value || '')); } catch (_) {}
+        const enabled = Boolean(url && /^https?:$/.test(url.protocol));
+        link.setAttribute('href', enabled ? url.href : '#');
+        if (enabled) {
+            link.removeAttribute('aria-disabled');
+            link.removeAttribute('title');
+        } else {
+            link.setAttribute('aria-disabled', 'true');
+            link.setAttribute('title', '연결 주소 준비 중');
+        }
+    }
+};
+
 /* Shared interactions moved from the existing DUGOLBI HTML pages. */
 (function () {
 
@@ -314,6 +332,10 @@
 
     function initExternalLinks() {
         function updateLink(link) {
+            if (link.getAttribute('href') === '#') {
+                if (link.getAttribute('aria-disabled') !== 'true') window.DugolbiLinks.setOptionalLink(link, '');
+                return;
+            }
             let url;
             try {
                 url = new URL(link.getAttribute("href"), window.location.href);
@@ -350,6 +372,13 @@
             return;
         }
 
+        document.querySelectorAll('a[href="#"]').forEach(function (link) {
+            window.DugolbiLinks.setOptionalLink(link, '');
+        });
+        document.addEventListener('click', function (event) {
+            const link = event.target.closest('a[aria-disabled="true"]');
+            if (link) event.preventDefault();
+        });
         initHeader();
         initExternalLinks();
         initStatementMarquees();

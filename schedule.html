@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="images/logo-black.svg">
     <title>교육일정 | 두골비·체 트레이닝 센터</title>
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/common.css">
 </head>
 <body class="schedule">
-<?php include $_SERVER['DOCUMENT_ROOT'].'/header.html'; ?>
+<?php include __DIR__ . '/header.html'; ?>
     <main id="wrap">
         <section class="schedule-section" aria-labelledby="schedule-title">
             <div class="container">
@@ -62,7 +63,7 @@
                 <noscript><p class="schedule-no-script">달력을 이용하려면 JavaScript를 활성화해 주세요.</p></noscript>
             </div>
         </section>
- <?php include $_SERVER['DOCUMENT_ROOT'].'/footer.html'; ?>
+ <?php include __DIR__ . '/footer.html'; ?>
     </main>
     
     <script src="js/modify.js"></script>

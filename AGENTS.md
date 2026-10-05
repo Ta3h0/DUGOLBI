@@ -103,7 +103,10 @@ Do not rename existing classes unless absolutely necessary.
 
 Do not modify unrelated completed pages.
 
-Page-specific CSS should only contain styles required for that page.
+All production page styles are currently merged into `css/common.css`.
+Keep the existing page sections and their media-query order together.
+Scope page-specific selectors using the existing `:where(body.page)` pattern.
+Do not recreate the deleted page CSS files or undo the CSS merge.
 
 ---
 
@@ -128,8 +131,9 @@ styles and JavaScript patterns for new pages.
 
 Do not redesign or independently reimplement these common components.
 
-When creating a standalone static HTML page,
-copy the existing common markup as required by the current project structure.
+Production `.html` pages execute PHP and include `header.html`/`footer.html` using `__DIR__`.
+Use the same includes for new pages; do not duplicate the common markup.
+`router.php` is for the local PHP built-in server. Production hosting must execute PHP in `.html` files.
 
 Do not unnecessarily modify working common components.
 
@@ -167,7 +171,7 @@ Production HTML:
 `{page}.html`
 
 Page CSS:
-`css/{page}.css`
+The corresponding page section inside `css/common.css` (no separate page CSS file).
 
 Production assets:
 `images/{page}/`
@@ -185,9 +189,9 @@ Before implementing a new subpage, inspect:
 - index.html
 - css/common.css
 - introduce.html
-- css/introduce.css
+- the INTRODUCE page section inside css/common.css
 
-`introduce.html` and `css/introduce.css` are the primary examples
+`introduce.html` and the INTRODUCE section in `css/common.css` are the primary examples
 for how DUGOLBI subpages should be implemented.
 
 Reuse the existing:

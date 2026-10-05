@@ -356,10 +356,72 @@
         });
     }
 
+    function initInquiryForm() {
+        const form = document.querySelector('.inquiry-form');
+        if (!form || !window.fetch) return;
+        const button = form.querySelector('button[type="submit"]');
+        const label = button.querySelector('span');
+        const status = document.getElementById('inquiry-status');
+        const originalLabel = label.textContent;
+        let pending = false;
+
+        function setPending(value) {
+            pending = value;
+            button.disabled = value;
+            form.setAttribute('aria-busy', String(value));
+            label.textContent = value ? '전송 중…' : originalLabel;
+        }
+        ['user_name', 'user_region', 'user_phone'].forEach(function (name) {
+            form.elements[name].addEventListener('input', function () { this.setCustomValidity(''); });
+        });
+        window.addEventListener('pageshow', function () { setPending(false); });
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            if (pending) return;
+            const name = form.elements.user_name;
+            const region = form.elements.user_region;
+            const phone = form.elements.user_phone;
+            name.value = name.value.trim();
+            region.value = region.value.trim();
+            name.setCustomValidity(name.value ? '' : '이름을 입력해 주세요.');
+            region.setCustomValidity(region.value ? '' : '지역을 입력해 주세요.');
+            const normalizedPhone = phone.value.replace(/[\s()\-]/g, '');
+            phone.setCustomValidity(/^(?:0\d{8,10}|\+82\d{8,10})$/.test(normalizedPhone)
+                ? '' : '연락 가능한 전화번호를 정확히 입력해 주세요.');
+            if (!form.reportValidity()) return;
+            const data = new FormData(form);
+            data.set('user_phone', normalizedPhone);
+            setPending(true);
+            status.hidden = false;
+            status.textContent = '상담 신청을 전송하고 있습니다.';
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST', body: data, credentials: 'same-origin',
+                    headers: { 'Accept': 'application/json' }
+                });
+                const result = await response.json();
+                if (!response.ok || result.success !== true) {
+                    throw new Error(result.message || '접수하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+                }
+                status.textContent = result.message;
+                window.alert(result.message);
+                window.location.assign('index.html');
+            } catch (error) {
+                status.textContent = error instanceof SyntaxError || error instanceof TypeError
+                    ? '서버에 연결하거나 응답을 확인하지 못했습니다. 입력 내용은 유지됩니다. 잠시 후 다시 시도해 주세요.'
+                    : error.message;
+                status.focus({ preventScroll: true });
+            } finally {
+                setPending(false);
+            }
+        });
+    }
+
     function initPage() {
         initHomeScrollText();
         initHomeSwipers();
         initHomeFaq();
+        initInquiryForm();
     }
 
     if (document.readyState === "loading") {
