@@ -5799,6 +5799,7 @@ body.brand-story main>section {
   line-height: 1.55;
   font-weight: 400;
   margin-top: 40px;
+  word-break: keep-all;
 }
 
 :where(body.brand-story) .brand-story-hero strong {
@@ -6839,6 +6840,7 @@ body.brand-story main>section {
     font-size: 1.6rem;
     line-height: 1.7;
     margin-top: 28px;
+    
   }
 
   :where(body.brand-story) .brand-story-hero p:first-of-type br {
