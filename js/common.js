@@ -5,7 +5,8 @@ window.DugolbiLinks = {
         let url;
         try { url = new URL(String(value || '')); } catch (_) {}
         const enabled = Boolean(url && /^https?:$/.test(url.protocol));
-        link.setAttribute('href', enabled ? url.href : '#');
+        if (enabled) link.setAttribute('href', url.href);
+        else link.removeAttribute('href');
         if (enabled) {
             link.removeAttribute('aria-disabled');
             link.removeAttribute('title');

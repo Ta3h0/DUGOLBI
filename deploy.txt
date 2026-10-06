@@ -1,0 +1,11 @@
+option batch abort
+option confirm off
+
+open "DUGOLBI-cafe24"
+
+lcd "E:\김태호\업체별 작업\두골비\www"
+cd /www
+
+synchronize remote -filemask="| .git/; .codex/; .agents/; ai/; font/; .gitignore; AGENTS.md; DELIVERY_CHECK.md; PC-REFACTOR.md; CSS_MERGE_PROGRESS.md; RESPONSIVE_PROGRESS.md; deploy.bat; deploy.txt; deploy.log; router.php; www.zip"
+
+exit

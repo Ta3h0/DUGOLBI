@@ -81,7 +81,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const pageTitle = String(item.title ?? "").split("\n").pop().trim();
     document.title = `${pageTitle || "이달의 교육"} | 두골비·체 트레이닝 센터`;
     const phone = String(item.phone ?? "");
-    const phoneHref = `tel:${phone.replace(/[^\d+]/g, "")}`;
+    const phoneNumber = phone.replace(/[^\d+]/g, "");
+    const phoneHref = phoneNumber ? `tel:${phoneNumber}` : "#";
 
     overview.innerHTML = `<div class="montly-poster">${posterMarkup(item, false)}</div>
         <div class="montly-detail-info">
@@ -130,4 +131,8 @@ document.addEventListener("DOMContentLoaded", function () {
             <p class="montly-phone-status" id="montly-phone-status" role="status" aria-live="polite"></p>
             <input class="montly-phone-copy" id="montly-phone-copy" type="text" value="${escapeHtml(phone)}" readonly tabindex="-1" aria-label="복사할 전화번호" hidden>
         </section>`;
+    window.DugolbiLinks.setOptionalLink(detailBody.querySelector(".montly-booking-naver"), item.naverBookingUrl);
+    if (!phoneNumber) {
+        window.DugolbiLinks.setOptionalLink(document.getElementById("montly-phone"), "");
+    }
 });
