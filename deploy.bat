@@ -48,10 +48,6 @@ echo [4/5] Cafe24 FTP 동기화
 if errorlevel 1 goto ERROR
 
 echo.
-echo [5/5] 실서버 열기
-start "" "https://woc288.mycafe24.com/"
-
-echo.
 echo ========================================
 echo       DEPLOY COMPLETE
 echo ========================================
