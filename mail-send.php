@@ -100,8 +100,9 @@ foreach ($routeRaw as $value) {
 }
 
 $shopStatuses = [
+    '미운영',
     '운영중',
-    '계획중'
+    '계획중',
 ];
 
 $educations = [
