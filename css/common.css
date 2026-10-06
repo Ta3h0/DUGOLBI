@@ -1134,6 +1134,38 @@ body.startup .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)
   filter: none;
 }
 
+/* Schedule header state */
+body.schedule .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) {
+  background: transparent;
+  border-bottom-color: transparent;
+}
+
+body.schedule .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .logo-white {
+  opacity: 1;
+}
+
+body.schedule .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .logo-black {
+  opacity: 0;
+}
+
+body.schedule .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link {
+  color: #fff;
+}
+
+body.schedule .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link::after,
+body.schedule .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-menu-toggle span {
+  background: #fff;
+}
+
+body.schedule .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-cta {
+  background: #fff;
+  color: var(--main-color);
+}
+
+body.schedule .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-cta .arrow {
+  filter: none;
+}
+
 /* Course introduction */
 .advanced-course-panel,
 .growth-course-panel,

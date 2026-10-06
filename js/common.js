@@ -3,7 +3,7 @@ window.DugolbiLinks = {
     setOptionalLink: function (link, value) {
         if (!link) return;
         let url;
-        try { url = new URL(String(value || '')); } catch (_) {}
+        try { url = new URL(String(value || '')); } catch (_) { }
         const enabled = Boolean(url && /^https?:$/.test(url.protocol));
         if (enabled) link.setAttribute('href', url.href);
         else link.removeAttribute('href');
@@ -36,7 +36,7 @@ window.DugolbiLinks = {
                 ".hero-section, .introduce-hero, .advanced-hero, .brand-story-hero, " +
                 ".growth-hero, .montly-hero, .network-hero, .news-hero, .notice-hero, " +
                 ".promotion-detail-hero, .promotion-preview-hero, .qna-hero, " +
-                ".results-hero, .review-hero, .signature-hero, .startup-hero"
+                ".results-hero, .review-hero, .schedule-hero, .signature-hero, .startup-hero"
             );
 
         const menuToggle =
