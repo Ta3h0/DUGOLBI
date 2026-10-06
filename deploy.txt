@@ -1,7 +1,7 @@
 option batch abort
 option confirm off
 
-open "DUGOLBI-cafe24"
+open "DUCOLBI-cafe24"
 
 lcd "E:\김태호\업체별 작업\두골비\www"
 cd /www

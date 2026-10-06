@@ -1,0 +1,51 @@
+. 2026-10-06 11:15:29.919 --------------------------------------------------------------------------
+. 2026-10-06 11:15:29.920 WinSCP 버전 6.5.7 (빌드 16562 2026-09-09) (OS 10.0.19045 – Windows 10 Pro)
+. 2026-10-06 11:15:29.920 Configuration: HKCU\Software\Martin Prikryl\WinSCP 2\
+. 2026-10-06 11:15:29.920 Log level: Normal
+. 2026-10-06 11:15:29.920 Local account: DESKTOP-LIUMSPA\82104
+. 2026-10-06 11:15:29.920 Working directory: E:\김태호\업체별 작업\두골비\www
+. 2026-10-06 11:15:29.920 Process ID: 10884
+. 2026-10-06 11:15:29.940 Ancestor processes: WinSCP, cmd, powershell, Code, Code, explorer, ...
+. 2026-10-06 11:15:29.941 Command-line: "C:\Program Files (x86)\WinSCP\WinSCP.exe" /console=6.5.7 /consoleinstance=_26136_607 "/script=E:\김태호\업체별 작업\두골비\www\deploy.txt" "/log=E:\김태호\업체별 작업\두골비\www\deploy.log" 
+. 2026-10-06 11:15:29.941 Time zone: Current: GMT+9 (대한민국 표준시), No DST
+. 2026-10-06 11:15:29.941 Login time: 2026년 10월 6일 화요일 오전 11:15:29
+. 2026-10-06 11:15:29.941 --------------------------------------------------------------------------
+. 2026-10-06 11:15:29.941 Script: Retrospectively logging previous script records:
+> 2026-10-06 11:15:29.941 Script: option batch abort
+< 2026-10-06 11:15:29.942 Script: batch           abort     
+> 2026-10-06 11:15:29.942 Script: option confirm off
+< 2026-10-06 11:15:29.942 Script: confirm         off       
+> 2026-10-06 11:15:29.942 Script: open "DUGOLBI-cafe24"
+. 2026-10-06 11:15:29.942 --------------------------------------------------------------------------
+. 2026-10-06 11:15:29.942 Session name: DUGOLBI-cafe24 (Ad-Hoc site)
+. 2026-10-06 11:15:29.942 Host name: DUGOLBI-cafe24 (Port: 22)
+. 2026-10-06 11:15:29.942 User name:  (Password: No, Key file: No, Passphrase: No)
+. 2026-10-06 11:15:29.942 Tunnel: No
+. 2026-10-06 11:15:29.942 Transfer Protocol: SFTP (SCP)
+. 2026-10-06 11:15:29.942 Ping type: Off, Ping interval: 30 sec; Timeout: 15 sec
+. 2026-10-06 11:15:29.942 Disable Nagle: No
+. 2026-10-06 11:15:29.942 Proxy: None
+. 2026-10-06 11:15:29.942 Send buffer: 262144
+. 2026-10-06 11:15:29.942 Compression: No
+. 2026-10-06 11:15:29.942 Bypass authentication: No
+. 2026-10-06 11:15:29.942 Try agent: Yes; Agent forwarding: No; KI: Yes; GSSAPI: Yes
+. 2026-10-06 11:15:29.942 GSSAPI: KEX: No; Forwarding: No; Libs: gssapi32,sspi,custom; Custom: 
+. 2026-10-06 11:15:29.942 Ciphers: aes,chacha20,aesgcm,3des,WARN,des,blowfish,arcfour; Ssh2DES: No
+. 2026-10-06 11:15:29.942 KEX: ntru-curve25519,mlkem-curve25519,mlkem-nist,ecdh,dh-gex-sha1,dh-group18-sha512,dh-group17-sha512,dh-group16-sha512,dh-group15-sha512,dh-group14-sha1,rsa,WARN,dh-group1-sha1
+. 2026-10-06 11:15:29.942 SSH Bugs: Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto
+. 2026-10-06 11:15:29.942 Simple channel: Yes
+. 2026-10-06 11:15:29.942 Return code variable: Autodetect; Lookup user groups: Auto
+. 2026-10-06 11:15:29.942 Shell: default
+. 2026-10-06 11:15:29.942 EOL: LF, UTF: Auto
+. 2026-10-06 11:15:29.942 Clear aliases: Yes, Unset nat.vars: Yes, Resolve symlinks: Yes; Follow directory symlinks: No
+. 2026-10-06 11:15:29.942 LS: ls -la, Ign LS warn: Yes, Scp1 Comp: No; Exit code 1 is error: No
+. 2026-10-06 11:15:29.943 SFTP Bugs: Auto,Auto
+. 2026-10-06 11:15:29.943 SFTP Server: default
+. 2026-10-06 11:15:29.943 Local directory: default, Remote directory: home, Update: Yes, Cache: Yes
+. 2026-10-06 11:15:29.943 Cache directory changes: Yes, Permanent: Yes
+. 2026-10-06 11:15:29.943 Recycle bin: Delete to: No, Overwritten to: No, Bin path: 
+. 2026-10-06 11:15:29.943 DST mode: Unix
+. 2026-10-06 11:15:29.943 --------------------------------------------------------------------------
+< 2026-10-06 11:15:29.943 Script: 호스트를 찾는 중...
+. 2026-10-06 11:15:29.944 Looking up host "DUGOLBI-cafe24" for SSH connection
+< 2026-10-06 11:15:32.238 Script: "DUGOLBI-cafe24" 호스트가 존재하지 않습니다.
