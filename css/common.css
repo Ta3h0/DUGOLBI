@@ -11574,6 +11574,56 @@ body.news main {
   font-weight: 700;
 }
 
+/* ==================================================
+   SIMPLE SUBPAGE HEADER STATE
+   brand-story / introduce 제외
+================================================== */
+
+body:has(.subpage-simple-hero)
+.header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) {
+  background: transparent;
+  border-bottom-color: transparent;
+}
+
+body:has(.subpage-simple-hero)
+.header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover))
+.logo-white {
+  opacity: 1;
+}
+
+body:has(.subpage-simple-hero)
+.header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover))
+.logo-black {
+  opacity: 0;
+}
+
+body:has(.subpage-simple-hero)
+.header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover))
+.gnb-link {
+  color: #fff;
+}
+
+body:has(.subpage-simple-hero)
+.header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover))
+.gnb-link::after,
+body:has(.subpage-simple-hero)
+.header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover))
+.header-menu-toggle span {
+  background: #fff;
+}
+
+body:has(.subpage-simple-hero)
+.header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover))
+.header-cta {
+  background: #fff;
+  color: var(--main-color);
+}
+
+body:has(.subpage-simple-hero)
+.header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover))
+.header-cta .arrow {
+  filter: none;
+}
 
 @media (max-width: 768px) {
 
