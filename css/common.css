@@ -10217,17 +10217,18 @@ body.schedule.reduce-motion .schedule-section * {
   }
 
   :where(body.schedule) .schedule-calendar td::before {
+    z-index: 1;
     transform: none;
     pointer-events: none;
     transition: opacity 280ms ease, background-color 280ms ease;
   }
 
-  /* Preview fills the entire date cell without reshaping the selected range. */
+  /* Preview fills the entire date cell behind the selected range. */
   :where(body.schedule) .schedule-calendar td::after {
     content: '';
     position: absolute;
     inset: 0;
-    z-index: 1;
+    z-index: 0;
     background: #e4e9f0;
     opacity: 0;
     pointer-events: none;
@@ -10243,13 +10244,17 @@ body.schedule.reduce-motion .schedule-section * {
     z-index: 2;
   }
 
-  :where(body.schedule) .schedule-calendar td.is-preview .schedule-day {
+  :where(body.schedule) .schedule-calendar td.is-preview:not(.is-highlighted) .schedule-day {
     color: var(--font-black);
   }
 
-  :where(body.schedule.reduce-motion) .schedule-calendar td::before,
-  :where(body.schedule.reduce-motion) .schedule-calendar td::after {
-    transition: none;
+  /* Keep the requested short color fades enabled on desktop. */
+  body.schedule.reduce-motion .schedule-course {
+    transition: background-color 280ms ease, color 280ms ease;
+  }
+
+  body.schedule.reduce-motion .schedule-day {
+    transition: color 280ms ease;
   }
 }
 
