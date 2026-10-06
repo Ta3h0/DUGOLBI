@@ -10972,6 +10972,29 @@ body.news main {
   user-select: none;
 }
 
+:where(body.location) .location-roughmap {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  pointer-events: none;
+  user-select: none;
+}
+
+:where(body.location) .location-roughmap .wrap_map {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+:where(body.location) .location-roughmap .wrap_btn_zoom,
+:where(body.location) .location-roughmap .wrap_controllers,
+:where(body.location) .location-roughmap .roughmap_lebel_text,
+:where(body.location) .location-roughmap > .cont {
+  display: none !important;
+}
+
 :where(body.location) .location-map.is-active {
   opacity: 1;
   visibility: visible;

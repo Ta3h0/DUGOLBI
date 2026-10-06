@@ -83,6 +83,30 @@ document.addEventListener("DOMContentLoaded", function () {
             changeLocation(tab.dataset.location);
         });
     });
+    function renderLocationMaps() {
+        if (
+            !window.daum ||
+            !window.daum.roughmap ||
+            !window.daum.roughmap.Lander
+        ) {
+            return;
+        }
 
+        new daum.roughmap.Lander({
+            timestamp: "1791258098959",
+            key: "2sehwjfj78r",
+            mapWidth: "640",
+            mapHeight: "440"
+        }).render();
+
+        new daum.roughmap.Lander({
+            timestamp: "1791258123716",
+            key: "2sej69o8zpp",
+            mapWidth: "640",
+            mapHeight: "440"
+        }).render();
+    }
+
+    renderLocationMaps();
     changeLocation("busan");
 });
