@@ -1,7 +1,3 @@
-// 운영 콘텐츠는 이 파일에서 수정합니다. 날짜는 YYYY-MM-DD, 줄바꿈은 \n으로 작성합니다.
-// scheduleData의 naverBookingUrl에는 해당 일정의 실제 예약 주소를 입력합니다. 없으면 빈 문자열을 유지합니다.
-// 각 항목의 id는 중복 없이 유지합니다. 이미지는 실제 images/ 경로를 사용합니다.
-
 const educationData = [
     {
         "id": 1,
