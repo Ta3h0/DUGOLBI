@@ -367,63 +367,808 @@
 
     function initInquiryForm() {
         const form = document.querySelector('.inquiry-form');
-        if (!form || !window.fetch) return;
-        const button = form.querySelector('button[type="submit"]');
-        const label = button.querySelector('span');
-        const status = document.getElementById('inquiry-status');
-        const originalLabel = label.textContent;
+
+        if (!form || !window.fetch) {
+            return;
+        }
+
+
+        /* =========================================
+           CUSTOM SELECT
+        ========================================= */
+
+        const customSelectMap = new Map();
+
+        const customSelects =
+            Array.from(
+                form.querySelectorAll('.custom-select')
+            );
+
+
+        function closeCustomSelect(wrapper) {
+            const trigger =
+                wrapper.querySelector('.custom-select-trigger');
+
+            const menu =
+                wrapper.querySelector('.custom-select-menu');
+
+            wrapper.classList.remove('is-open');
+
+            trigger.setAttribute(
+                'aria-expanded',
+                'false'
+            );
+
+            menu.hidden = true;
+        }
+
+
+        function closeAllCustomSelects(except) {
+            customSelects.forEach(function (wrapper) {
+
+                if (wrapper !== except) {
+                    closeCustomSelect(wrapper);
+                }
+
+            });
+        }
+
+
+        customSelects.forEach(function (wrapper) {
+
+            const selectId =
+                wrapper.dataset.select;
+
+            const nativeSelect =
+                document.getElementById(selectId);
+
+            const trigger =
+                wrapper.querySelector('.custom-select-trigger');
+
+            const valueElement =
+                wrapper.querySelector('.custom-select-value');
+
+            const menu =
+                wrapper.querySelector('.custom-select-menu');
+
+            const options =
+                Array.from(
+                    wrapper.querySelectorAll('.custom-select-option')
+                );
+
+
+            customSelectMap.set(
+                selectId,
+                {
+                    wrapper,
+                    nativeSelect,
+                    trigger,
+                    valueElement,
+                    menu,
+                    options
+                }
+            );
+
+
+            function openSelect() {
+
+                closeAllCustomSelects(wrapper);
+
+                wrapper.classList.add('is-open');
+
+                trigger.setAttribute(
+                    'aria-expanded',
+                    'true'
+                );
+
+                menu.hidden = false;
+            }
+
+
+            function selectOption(option) {
+
+                const value =
+                    option.dataset.value;
+
+                nativeSelect.value = value;
+
+                valueElement.textContent =
+                    option.textContent.trim();
+
+                trigger.classList.toggle(
+                    'has-value',
+                    Boolean(value)
+                );
+
+                options.forEach(function (item) {
+
+                    item.setAttribute(
+                        'aria-selected',
+                        String(item === option)
+                    );
+
+                });
+
+
+                nativeSelect.dispatchEvent(
+                    new Event(
+                        'change',
+                        {
+                            bubbles: true
+                        }
+                    )
+                );
+
+
+                closeCustomSelect(wrapper);
+
+                trigger.focus();
+            }
+
+
+            trigger.addEventListener(
+                'click',
+                function () {
+
+                    if (
+                        wrapper.classList.contains(
+                            'is-open'
+                        )
+                    ) {
+                        closeCustomSelect(wrapper);
+                    } else {
+                        openSelect();
+                    }
+
+                }
+            );
+
+
+            trigger.addEventListener(
+                'keydown',
+                function (event) {
+
+                    if (
+                        event.key !== 'ArrowDown' &&
+                        event.key !== 'ArrowUp'
+                    ) {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    openSelect();
+
+                    const target =
+                        event.key === 'ArrowDown'
+                            ? options[0]
+                            : options[options.length - 1];
+
+                    if (target) {
+                        target.focus();
+                    }
+
+                }
+            );
+
+
+            options.forEach(function (
+                option,
+                index
+            ) {
+
+                option.addEventListener(
+                    'click',
+                    function () {
+
+                        selectOption(option);
+
+                    }
+                );
+
+
+                option.addEventListener(
+                    'keydown',
+                    function (event) {
+
+                        if (event.key === 'Escape') {
+
+                            event.preventDefault();
+
+                            closeCustomSelect(wrapper);
+
+                            trigger.focus();
+
+                            return;
+                        }
+
+
+                        if (
+                            event.key !== 'ArrowDown' &&
+                            event.key !== 'ArrowUp'
+                        ) {
+                            return;
+                        }
+
+
+                        event.preventDefault();
+
+
+                        const direction =
+                            event.key === 'ArrowDown'
+                                ? 1
+                                : -1;
+
+
+                        const nextIndex =
+                            (
+                                index +
+                                direction +
+                                options.length
+                            ) % options.length;
+
+
+                        options[nextIndex].focus();
+
+                    }
+                );
+
+            });
+
+        });
+
+
+        document.addEventListener(
+            'click',
+            function (event) {
+
+                customSelects.forEach(function (
+                    wrapper
+                ) {
+
+                    if (
+                        !wrapper.contains(
+                            event.target
+                        )
+                    ) {
+                        closeCustomSelect(wrapper);
+                    }
+
+                });
+
+            }
+        );
+
+
+        /* =========================================
+           VALIDATION
+        ========================================= */
+
+        const requiredFields = [
+            'user_name',
+            'user_region',
+            'user_phone',
+            'shop_status',
+            'education',
+            'privacy_agree'
+        ];
+
+
+        function getErrorElement(name) {
+            return form.querySelector(
+                '[data-error-for="' +
+                name +
+                '"]'
+            );
+        }
+
+
+        function getFormGroup(control) {
+            return control
+                ? control.closest('.form-group')
+                : null;
+        }
+
+
+        function setFieldError(
+            name,
+            message
+        ) {
+
+            const control =
+                form.elements[name];
+
+            const group =
+                getFormGroup(control);
+
+            const error =
+                getErrorElement(name);
+
+
+            if (!group || !error) {
+                return;
+            }
+
+
+            const hasError =
+                Boolean(message);
+
+
+            group.classList.toggle(
+                'is-invalid',
+                hasError
+            );
+
+
+            error.hidden =
+                !hasError;
+
+            error.textContent =
+                message || '';
+
+
+            if (
+                name === 'shop_status' ||
+                name === 'education'
+            ) {
+
+                const custom =
+                    customSelectMap.get(
+                        control.id
+                    );
+
+                if (custom) {
+
+                    if (hasError) {
+                        custom.trigger.setAttribute(
+                            'aria-invalid',
+                            'true'
+                        );
+                    } else {
+                        custom.trigger.removeAttribute(
+                            'aria-invalid'
+                        );
+                    }
+
+                }
+
+            } else {
+
+                if (hasError) {
+                    control.setAttribute(
+                        'aria-invalid',
+                        'true'
+                    );
+                } else {
+                    control.removeAttribute(
+                        'aria-invalid'
+                    );
+                }
+
+            }
+
+        }
+
+
+        function clearFieldError(name) {
+            setFieldError(name, '');
+        }
+
+
+        function focusInvalidField(name) {
+
+            const control =
+                form.elements[name];
+
+            if (!control) {
+                return;
+            }
+
+
+            const group =
+                getFormGroup(control);
+
+
+            if (group) {
+
+                group.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+
+            }
+
+
+            window.setTimeout(
+                function () {
+
+                    if (
+                        name === 'shop_status' ||
+                        name === 'education'
+                    ) {
+
+                        const custom =
+                            customSelectMap.get(
+                                control.id
+                            );
+
+                        if (custom) {
+                            custom.trigger.focus({
+                                preventScroll: true
+                            });
+                        }
+
+                    } else {
+
+                        control.focus({
+                            preventScroll: true
+                        });
+
+                    }
+
+                },
+                250
+            );
+
+        }
+
+
+        function validateForm() {
+
+            requiredFields.forEach(
+                clearFieldError
+            );
+
+
+            const name =
+                form.elements.user_name;
+
+            const region =
+                form.elements.user_region;
+
+            const phone =
+                form.elements.user_phone;
+
+            const shopStatus =
+                form.elements.shop_status;
+
+            const education =
+                form.elements.education;
+
+            const privacy =
+                form.elements.privacy_agree;
+
+
+            name.value =
+                name.value.trim();
+
+            region.value =
+                region.value.trim();
+
+
+            const normalizedPhone =
+                phone.value.replace(
+                    /[\s()\-]/g,
+                    ''
+                );
+
+
+            const errors = [];
+
+
+            if (!name.value) {
+
+                errors.push([
+                    'user_name',
+                    '이름을 입력해주세요.'
+                ]);
+
+            }
+
+
+            if (!region.value) {
+
+                errors.push([
+                    'user_region',
+                    '지역을 입력해주세요.'
+                ]);
+
+            }
+
+
+            if (
+                !/^(?:0\d{8,10}|\+82\d{8,10})$/
+                    .test(normalizedPhone)
+            ) {
+
+                errors.push([
+                    'user_phone',
+                    '연락 가능한 전화번호를 정확히 입력해주세요.'
+                ]);
+
+            }
+
+
+            if (!shopStatus.value) {
+
+                errors.push([
+                    'shop_status',
+                    '샵 운영 여부를 선택해주세요.'
+                ]);
+
+            }
+
+
+            if (!education.value) {
+
+                errors.push([
+                    'education',
+                    '관심 교육과정을 선택해주세요.'
+                ]);
+
+            }
+
+
+            if (!privacy.checked) {
+
+                errors.push([
+                    'privacy_agree',
+                    '개인정보 수집에 동의해주세요.'
+                ]);
+
+            }
+
+
+            errors.forEach(function (
+                error
+            ) {
+
+                setFieldError(
+                    error[0],
+                    error[1]
+                );
+
+            });
+
+
+            return {
+                valid:
+                    errors.length === 0,
+
+                firstInvalid:
+                    errors.length
+                        ? errors[0][0]
+                        : null,
+
+                normalizedPhone
+            };
+
+        }
+
+
+        [
+            'user_name',
+            'user_region',
+            'user_phone'
+        ].forEach(function (name) {
+
+            form.elements[name]
+                .addEventListener(
+                    'input',
+                    function () {
+
+                        clearFieldError(name);
+
+                    }
+                );
+
+        });
+
+
+        [
+            'shop_status',
+            'education'
+        ].forEach(function (name) {
+
+            form.elements[name]
+                .addEventListener(
+                    'change',
+                    function () {
+
+                        clearFieldError(name);
+
+                    }
+                );
+
+        });
+
+
+        form.elements.privacy_agree
+            .addEventListener(
+                'change',
+                function () {
+
+                    clearFieldError(
+                        'privacy_agree'
+                    );
+
+                }
+            );
+
+
+        /* =========================================
+           SUBMIT
+        ========================================= */
+
+        const button =
+            form.querySelector(
+                'button[type="submit"]'
+            );
+
+        const label =
+            button.querySelector('span');
+
+        const status =
+            document.getElementById(
+                'inquiry-status'
+            );
+
+        const originalLabel =
+            label.textContent;
+
         let pending = false;
 
+
         function setPending(value) {
+
             pending = value;
+
             button.disabled = value;
-            form.setAttribute('aria-busy', String(value));
-            label.textContent = value ? '전송 중…' : originalLabel;
+
+            form.setAttribute(
+                'aria-busy',
+                String(value)
+            );
+
+            label.textContent =
+                value
+                    ? '전송 중…'
+                    : originalLabel;
+
         }
-        ['user_name', 'user_region', 'user_phone'].forEach(function (name) {
-            form.elements[name].addEventListener('input', function () { this.setCustomValidity(''); });
-        });
-        window.addEventListener('pageshow', function () { setPending(false); });
-        form.addEventListener('submit', async function (event) {
-            event.preventDefault();
-            if (pending) return;
-            const name = form.elements.user_name;
-            const region = form.elements.user_region;
-            const phone = form.elements.user_phone;
-            name.value = name.value.trim();
-            region.value = region.value.trim();
-            name.setCustomValidity(name.value ? '' : '이름을 입력해 주세요.');
-            region.setCustomValidity(region.value ? '' : '지역을 입력해 주세요.');
-            const normalizedPhone = phone.value.replace(/[\s()\-]/g, '');
-            phone.setCustomValidity(/^(?:0\d{8,10}|\+82\d{8,10})$/.test(normalizedPhone)
-                ? '' : '연락 가능한 전화번호를 정확히 입력해 주세요.');
-            if (!form.reportValidity()) return;
-            const data = new FormData(form);
-            data.set('user_phone', normalizedPhone);
-            setPending(true);
-            status.hidden = false;
-            status.textContent = '상담 신청을 전송하고 있습니다.';
-            try {
-                const response = await fetch(form.action, {
-                    method: 'POST', body: data, credentials: 'same-origin',
-                    headers: { 'Accept': 'application/json' }
-                });
-                const result = await response.json();
-                if (!response.ok || result.success !== true) {
-                    throw new Error(result.message || '접수하지 못했습니다. 잠시 후 다시 시도해 주세요.');
-                }
-                status.textContent = result.message;
-                window.alert(result.message);
-                window.location.assign('index.html');
-            } catch (error) {
-                status.textContent = error instanceof SyntaxError || error instanceof TypeError
-                    ? '서버에 연결하거나 응답을 확인하지 못했습니다. 입력 내용은 유지됩니다. 잠시 후 다시 시도해 주세요.'
-                    : error.message;
-                status.focus({ preventScroll: true });
-            } finally {
+
+
+        window.addEventListener(
+            'pageshow',
+            function () {
+
                 setPending(false);
+
             }
-        });
+        );
+
+
+        form.addEventListener(
+            'submit',
+            async function (event) {
+
+                event.preventDefault();
+
+
+                if (pending) {
+                    return;
+                }
+
+
+                const validation =
+                    validateForm();
+
+
+                if (!validation.valid) {
+
+                    focusInvalidField(
+                        validation.firstInvalid
+                    );
+
+                    return;
+                }
+
+
+                const data =
+                    new FormData(form);
+
+
+                data.set(
+                    'user_phone',
+                    validation.normalizedPhone
+                );
+
+
+                setPending(true);
+
+
+                status.hidden = false;
+
+                status.textContent =
+                    '상담 신청을 전송하고 있습니다.';
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            form.action,
+                            {
+                                method: 'POST',
+
+                                body: data,
+
+                                credentials:
+                                    'same-origin',
+
+                                headers: {
+                                    'Accept':
+                                        'application/json'
+                                }
+                            }
+                        );
+
+
+                    const result =
+                        await response.json();
+
+
+                    if (
+                        !response.ok ||
+                        result.success !== true
+                    ) {
+
+                        throw new Error(
+                            result.message ||
+                            '접수하지 못했습니다. 잠시 후 다시 시도해 주세요.'
+                        );
+
+                    }
+
+
+                    status.textContent =
+                        result.message;
+
+
+                    window.alert(
+                        result.message
+                    );
+
+
+                    window.location.assign(
+                        'index.html'
+                    );
+
+
+                } catch (error) {
+
+                    status.textContent =
+                        error instanceof SyntaxError ||
+                            error instanceof TypeError
+
+                            ? '서버에 연결하거나 응답을 확인하지 못했습니다. 입력 내용은 유지됩니다. 잠시 후 다시 시도해 주세요.'
+
+                            : error.message;
+
+
+                    status.focus({
+                        preventScroll: true
+                    });
+
+
+                } finally {
+
+                    setPending(false);
+
+                }
+
+            }
+        );
     }
 
     function initPage() {
