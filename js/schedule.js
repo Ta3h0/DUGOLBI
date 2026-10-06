@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const sheetMonth = document.getElementById("schedule-sheet-month");
     const sheetClose = document.querySelector(".schedule-sheet-close");
     const backdrop = document.querySelector(".schedule-calendar-backdrop");
-    const booking = document.querySelector(".schedule-booking-naver");
+    const bookingLinks = document.querySelectorAll(".schedule-booking-naver");
     const guide = document.querySelector(".schedule-guide");
     const background = [
         document.querySelector(".header"), document.querySelector("footer"),
@@ -46,7 +46,12 @@ document.addEventListener("DOMContentLoaded", function () {
     let sheetTrigger = null;
     let sheetOpen = false;
     function updateBooking(course) {
-        window.DugolbiLinks.setOptionalLink(booking, course && course.naverBookingUrl);
+        bookingLinks.forEach(link => {
+            window.DugolbiLinks.setOptionalLink(
+                link,
+                course && course.naverBookingUrl
+            );
+        });
     }
     updateBooking(null);
 
