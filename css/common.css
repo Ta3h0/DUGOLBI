@@ -4743,7 +4743,7 @@ body.review .page-button {
   }
 
   :where(body.home) .section09 .container .inner .faq-list .item .quest .faq-question {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     word-break: keep-all;
   }
 
@@ -4860,7 +4860,7 @@ body.review .page-button {
   }
 
   :where(body.home) .section10 .other-list .item .title {
-    font-size: 2.2rem;
+    font-size: 1.8rem;
     gap: 16px;
     word-break: keep-all;
   }
@@ -6327,6 +6327,10 @@ body.brand-story main>section {
 
   :where(body.brand-story) .brand-special-card.is-reveal-ready.is-revealed.is-reveal-even {
     animation-name: brandSpecialSlideRight;
+  }
+
+  .no-mob {
+    display: none;
   }
 }
 
