@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     const list = document.getElementById("schedule-list");
     const days = document.getElementById("schedule-days");
-    const status = document.getElementById("schedule-selection");
     const monthLabel = document.getElementById("schedule-month");
     const countLabel = document.getElementById("schedule-count");
     const emptyMessage = document.getElementById("schedule-empty");
@@ -151,9 +150,6 @@ document.addEventListener("DOMContentLoaded", function () {
             cell.classList.toggle("range-start", selected && (cell.dataset.date === selectedCourse.start || cell.cellIndex === 0));
             cell.classList.toggle("range-end", selected && (cell.dataset.date === selectedCourse.end || cell.cellIndex === 6));
         });
-        if (status) status.textContent = previewCourse && selectedCourse
-            ? `선택: ${displayDate(selectedCourse.start)} ~ ${displayDate(selectedCourse.end)} / 미리보기: ${displayDate(previewCourse.start)} ~ ${displayDate(previewCourse.end)}`
-            : course ? `${displayDate(course.start)} ~ ${displayDate(course.end)}` : "목록에 마우스를 올려 교육 기간을 확인해 보세요.";
     }
 
     function render() {

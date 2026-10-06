@@ -9694,7 +9694,6 @@ body.schedule {
 }
 
 :where(body.schedule) .schedule-title-box .section-title {
-  font-size: 4.8rem;
   margin-bottom: 16px;
 }
 
@@ -9963,11 +9962,6 @@ body.schedule {
   padding-top: 20px;
   font-size: 1.4rem;
   color: #667180;
-}
-
-:where(body.schedule) #schedule-selection {
-  min-height: 24px;
-  color: var(--main-color);
 }
 
 :where(body.schedule) .schedule-calendar-actions {
