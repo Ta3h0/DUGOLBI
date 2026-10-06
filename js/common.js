@@ -368,6 +368,136 @@ window.DugolbiLinks = {
         }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["href"] });
     }
 
+    function initLegalDialogs() {
+
+        const triggers =
+            document.querySelectorAll(
+                "[data-legal-dialog]"
+            );
+
+
+        if (!triggers.length) {
+            return;
+        }
+
+
+        function openDialog(dialog) {
+
+            if (
+                !dialog ||
+                typeof dialog.showModal !== "function"
+            ) {
+                return;
+            }
+
+
+            if (!dialog.open) {
+                dialog.showModal();
+            }
+
+
+            document.body.classList.add(
+                "legal-modal-open"
+            );
+
+
+            const body =
+                dialog.querySelector(
+                    ".legal-dialog-body"
+                );
+
+
+            if (body) {
+                body.scrollTop = 0;
+            }
+
+        }
+
+
+        function closeDialog(dialog) {
+
+            if (
+                dialog &&
+                dialog.open
+            ) {
+                dialog.close();
+            }
+
+        }
+
+
+        triggers.forEach(function (trigger) {
+
+            trigger.addEventListener(
+                "click",
+                function () {
+
+                    const id =
+                        trigger.dataset.legalDialog;
+
+                    const dialog =
+                        document.getElementById(id);
+
+
+                    openDialog(dialog);
+
+                }
+            );
+
+        });
+
+
+        document
+            .querySelectorAll(".legal-dialog")
+            .forEach(function (dialog) {
+
+                const closeButtons =
+                    dialog.querySelectorAll(
+                        ".legal-dialog-close, .legal-dialog-confirm"
+                    );
+
+
+                closeButtons.forEach(
+                    function (button) {
+
+                        button.addEventListener(
+                            "click",
+                            function () {
+                                closeDialog(dialog);
+                            }
+                        );
+
+                    }
+                );
+
+
+                dialog.addEventListener(
+                    "click",
+                    function (event) {
+
+                        if (event.target === dialog) {
+                            closeDialog(dialog);
+                        }
+
+                    }
+                );
+
+
+                dialog.addEventListener(
+                    "close",
+                    function () {
+
+                        document.body.classList.remove(
+                            "legal-modal-open"
+                        );
+
+                    }
+                );
+
+            });
+
+    }
+
     function initCommon() {
         if (!document.body) {
             return;
@@ -376,14 +506,17 @@ window.DugolbiLinks = {
         document.querySelectorAll('a[href="#"]').forEach(function (link) {
             window.DugolbiLinks.setOptionalLink(link, '');
         });
+
         document.addEventListener('click', function (event) {
             const link = event.target.closest('a[aria-disabled="true"]');
             if (link) event.preventDefault();
         });
+
         initHeader();
         initExternalLinks();
         initStatementMarquees();
         initInformationMap();
+        initLegalDialogs();
     }
 
     if (document.readyState === "loading") {

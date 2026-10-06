@@ -13,8 +13,14 @@
 
             <!-- footer menu -->
             <nav class="footer-menu">
-                <a href="#" class="privacy">개인정보처리방침</a>
-                <a href="#">이용약관</a>
+                <button type="button" class="footer-legal-button privacy" data-legal-dialog="privacy-policy">
+                    개인정보처리방침
+                </button>
+
+                <button type="button" class="footer-legal-button" data-legal-dialog="terms-of-use">
+                    이용약관
+                </button>
+
                 <a href="location.html">오시는길</a>
             </nav>
 
@@ -80,3 +86,489 @@
 
     </div>
 </footer>
+
+<dialog class="legal-dialog" id="privacy-policy">
+
+    <div class="legal-dialog-panel">
+
+        <header class="legal-dialog-header">
+            <div>
+                <span class="legal-dialog-eyebrow">PRIVACY POLICY</span>
+                <h2>개인정보처리방침</h2>
+            </div>
+
+            <button
+                type="button"
+                class="legal-dialog-close"
+                aria-label="개인정보처리방침 닫기">
+                <span></span>
+                <span></span>
+            </button>
+        </header>
+
+
+        <div class="legal-dialog-body">
+
+            <div class="legal-intro">
+                <p>
+                    두골비체 트레이닝 센터는 이용자의 개인정보를 중요하게 생각하며,
+                    관련 법령에 따라 개인정보를 안전하게 처리하기 위해 다음과 같이
+                    개인정보처리방침을 안내합니다.
+                </p>
+
+                <span>시행일자 2026.10.06</span>
+            </div>
+
+
+            <section class="legal-section">
+                <h3>1. 개인정보의 처리 목적</h3>
+
+                <p>
+                    두골비체 트레이닝 센터는 다음의 목적을 위해 개인정보를 처리합니다.
+                    수집된 개인정보는 아래 목적 이외의 용도로 이용하지 않으며,
+                    이용 목적이 변경되는 경우 관련 법령에 따라 필요한 절차를 진행합니다.
+                </p>
+
+                <ul>
+                    <li>교육과정 상담 신청 접수 및 본인 확인</li>
+                    <li>교육과정, 일정 및 수강 관련 안내</li>
+                    <li>문의사항 확인 및 상담 연락</li>
+                    <li>상담 이력 관리 및 고객 응대</li>
+                    <li>서비스 이용 과정에서 발생하는 민원 및 분쟁 대응</li>
+                </ul>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>2. 처리하는 개인정보의 항목</h3>
+
+                <div class="legal-table-wrap">
+                    <table class="legal-table">
+                        <thead>
+                            <tr>
+                                <th>구분</th>
+                                <th>수집 항목</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr>
+                                <td>필수</td>
+                                <td>
+                                    이름, 지역, 연락처, 샵 운영 여부,
+                                    관심 교육과정, 개인정보 수집 동의 여부
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>선택</td>
+                                <td>
+                                    두골비를 알게 된 경로, 문의 내용
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>자동 생성 가능 정보</td>
+                                <td>
+                                    웹사이트 이용 과정에서 접속 IP,
+                                    접속 일시 및 브라우저 관련 정보 등이
+                                    서버 기록으로 생성될 수 있습니다.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>3. 개인정보의 처리 및 보유기간</h3>
+
+                <p>
+                    교육 상담을 위해 수집한 개인정보는 상담 목적 달성 후
+                    최대 1년간 보관한 뒤 안전한 방법으로 파기합니다.
+                </p>
+
+                <p>
+                    다만 관계 법령에 따라 보존할 필요가 있거나 분쟁 처리,
+                    법적 의무 이행 등을 위해 필요한 경우에는 해당 법령에서
+                    정한 기간 동안 보관할 수 있습니다.
+                </p>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>4. 개인정보의 제3자 제공</h3>
+
+                <p>
+                    두골비체 트레이닝 센터는 원칙적으로 이용자의 개인정보를
+                    외부에 제공하지 않습니다.
+                </p>
+
+                <p>
+                    다만 이용자가 사전에 동의한 경우 또는 법령에 따라
+                    제공 의무가 발생한 경우에는 필요한 범위 내에서
+                    개인정보를 제공할 수 있습니다.
+                </p>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>5. 개인정보 처리업무의 위탁</h3>
+
+                <p>
+                    원활한 홈페이지 운영 및 상담 접수를 위해
+                    다음과 같이 개인정보 처리업무의 일부를 위탁할 수 있습니다.
+                </p>
+
+                <div class="legal-table-wrap">
+                    <table class="legal-table">
+                        <thead>
+                            <tr>
+                                <th>수탁자</th>
+                                <th>위탁 업무</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr>
+                                <td>리움스페이스</td>
+                                <td>
+                                    홈페이지 유지관리 및 상담 접수 시스템 운영
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>카페24(주)</td>
+                                <td>
+                                    웹호스팅 및 서버 운영
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>6. 개인정보의 파기</h3>
+
+                <p>
+                    개인정보의 보유기간이 경과하거나 처리 목적이 달성되어
+                    개인정보가 불필요하게 된 경우 지체 없이 파기합니다.
+                </p>
+
+                <ul>
+                    <li>
+                        전자적 파일 형태의 정보는 복구 또는 재생되지 않도록
+                        안전한 방법으로 삭제합니다.
+                    </li>
+                    <li>
+                        출력물 등 종이 형태의 개인정보는 분쇄 또는 소각 등의
+                        방법으로 파기합니다.
+                    </li>
+                </ul>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>7. 이용자의 권리와 행사방법</h3>
+
+                <p>
+                    이용자는 자신의 개인정보에 대해 열람, 정정, 삭제,
+                    처리정지 등을 요청할 수 있습니다.
+                </p>
+
+                <p>
+                    관련 요청은 아래 연락처를 통해 접수할 수 있으며,
+                    본인 확인 후 관련 법령에서 정한 절차에 따라 처리합니다.
+                </p>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>8. 개인정보의 안전성 확보조치</h3>
+
+                <p>
+                    두골비체 트레이닝 센터는 개인정보의 분실, 도난, 유출,
+                    위조 또는 훼손을 방지하기 위해 접근 권한 관리,
+                    서버 및 시스템 관리 등 개인정보 보호에 필요한
+                    기술적·관리적 조치를 시행합니다.
+                </p>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>9. 개인정보 보호 관련 문의</h3>
+
+                <div class="legal-contact-box">
+                    <dl>
+                        <div>
+                            <dt>상호</dt>
+                            <dd>두골비체 트레이닝 센터</dd>
+                        </div>
+
+                        <div>
+                            <dt>대표자</dt>
+                            <dd>이희경</dd>
+                        </div>
+
+                        <div>
+                            <dt>전화</dt>
+                            <dd>
+                                <a href="tel:01034501662">
+                                    010-3450-1662
+                                </a>
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>이메일</dt>
+                            <dd>
+                                <a href="mailto:mjk5407-@naver.com">
+                                    mjk5407-@naver.com
+                                </a>
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>10. 개인정보처리방침의 변경</h3>
+
+                <p>
+                    본 개인정보처리방침의 내용이 변경되는 경우
+                    웹사이트를 통해 변경 내용을 확인할 수 있도록 안내합니다.
+                </p>
+
+                <p class="legal-effective-date">
+                    시행일자: 2026년 10월 6일
+                </p>
+            </section>
+
+        </div>
+
+
+        <footer class="legal-dialog-footer">
+            <button
+                type="button"
+                class="legal-dialog-confirm">
+                확인
+            </button>
+        </footer>
+
+    </div>
+
+</dialog>
+
+<dialog class="legal-dialog" id="terms-of-use">
+
+    <div class="legal-dialog-panel">
+
+        <header class="legal-dialog-header">
+            <div>
+                <span class="legal-dialog-eyebrow">TERMS OF USE</span>
+                <h2>이용약관</h2>
+            </div>
+
+            <button
+                type="button"
+                class="legal-dialog-close"
+                aria-label="이용약관 닫기">
+                <span></span>
+                <span></span>
+            </button>
+        </header>
+
+
+        <div class="legal-dialog-body">
+
+            <div class="legal-intro">
+                <p>
+                    본 약관은 두골비체 트레이닝 센터가 운영하는 웹사이트의
+                    이용과 관련하여 필요한 기본 사항을 안내합니다.
+                </p>
+
+                <span>시행일자 2026.10.06</span>
+            </div>
+
+
+            <section class="legal-section">
+                <h3>제1조 목적</h3>
+
+                <p>
+                    본 약관은 두골비체 트레이닝 센터가 제공하는
+                    웹사이트 및 관련 온라인 서비스의 이용조건과
+                    이용자 및 운영자 간의 기본적인 권리·의무를
+                    정하는 것을 목적으로 합니다.
+                </p>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>제2조 서비스의 내용</h3>
+
+                <p>
+                    웹사이트에서는 다음과 같은 정보를 제공할 수 있습니다.
+                </p>
+
+                <ul>
+                    <li>두골비·두골체·신결비 등 교육과정 안내</li>
+                    <li>전문가 클래스 및 교육 일정 안내</li>
+                    <li>프로모션 및 교육 관련 소식</li>
+                    <li>수료생 운영지점 및 교육장 위치 안내</li>
+                    <li>교육 상담 신청 및 문의 접수</li>
+                    <li>그 밖에 센터가 제공하는 교육 관련 정보</li>
+                </ul>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>제3조 약관의 효력 및 변경</h3>
+
+                <p>
+                    본 약관은 웹사이트에 게시함으로써 효력이 발생합니다.
+                </p>
+
+                <p>
+                    센터는 관련 법령을 위반하지 않는 범위에서
+                    필요한 경우 약관의 내용을 변경할 수 있으며,
+                    변경된 약관은 웹사이트를 통해 안내합니다.
+                </p>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>제4조 이용자의 의무</h3>
+
+                <p>
+                    이용자는 웹사이트 이용 시 다음 행위를 하여서는 안 됩니다.
+                </p>
+
+                <ul>
+                    <li>타인의 정보를 도용하거나 허위 정보를 입력하는 행위</li>
+                    <li>웹사이트의 정상적인 운영을 방해하는 행위</li>
+                    <li>악성코드, 자동화 프로그램 등을 이용하여 서비스를 방해하는 행위</li>
+                    <li>센터 또는 제3자의 권리를 침해하는 행위</li>
+                    <li>관련 법령 또는 사회질서에 위반되는 행위</li>
+                </ul>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>제5조 상담 및 교육 신청</h3>
+
+                <p>
+                    웹사이트에서 제출하는 상담 신청은 교육과정에 대한
+                    문의 및 상담 접수를 위한 것이며,
+                    상담 신청만으로 교육 등록 또는 예약이 최종 확정되는 것은 아닙니다.
+                </p>
+
+                <p>
+                    실제 교육 등록, 일정, 수강료, 결제 및 기타 조건은
+                    별도의 안내 또는 예약 과정에서 확정될 수 있습니다.
+                </p>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>제6조 외부 서비스 및 링크</h3>
+
+                <p>
+                    웹사이트에는 네이버 예약, 네이버 지도, 카카오 지도,
+                    SNS 등 외부 서비스로 연결되는 링크가 포함될 수 있습니다.
+                </p>
+
+                <p>
+                    외부 서비스의 이용에는 해당 서비스 제공자의 정책과
+                    이용약관이 적용되며, 센터는 해당 외부 서비스 자체의
+                    운영에 대해서는 책임을 부담하지 않습니다.
+                </p>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>제7조 저작권 및 지식재산권</h3>
+
+                <p>
+                    웹사이트에 게시된 교육과정, 문구, 이미지, 영상,
+                    디자인, 자료 및 기타 콘텐츠에 관한 권리는
+                    두골비체 트레이닝 센터 또는 정당한 권리자에게 있습니다.
+                </p>
+
+                <p>
+                    이용자는 사전 허락 없이 콘텐츠를 복제, 배포,
+                    전송, 가공하거나 영리 목적으로 이용할 수 없습니다.
+                </p>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>제8조 서비스의 변경 및 중단</h3>
+
+                <p>
+                    센터는 사이트 점검, 시스템 장애, 서비스 개편,
+                    운영상 필요한 사유 등이 있는 경우
+                    웹사이트의 일부 또는 전부를 변경하거나
+                    일시적으로 중단할 수 있습니다.
+                </p>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>제9조 책임의 제한</h3>
+
+                <p>
+                    웹사이트에서 제공하는 교육 일정, 수강료, 프로모션 등의 정보는
+                    운영 상황에 따라 변경될 수 있으며,
+                    실제 신청 또는 상담 시 안내되는 내용을 기준으로 합니다.
+                </p>
+
+                <p>
+                    천재지변, 통신 장애, 외부 서비스 장애 등
+                    센터가 합리적으로 통제하기 어려운 사유로 발생한
+                    서비스 중단에 대해서는 관련 법령이 허용하는 범위에서
+                    책임이 제한될 수 있습니다.
+                </p>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>제10조 준거법 및 분쟁 해결</h3>
+
+                <p>
+                    본 약관은 대한민국 법령을 기준으로 해석됩니다.
+                </p>
+
+                <p>
+                    웹사이트 이용과 관련하여 분쟁이 발생하는 경우
+                    당사자 간 원만한 해결을 위해 노력하며,
+                    해결되지 않는 경우 관련 법령에서 정한 절차에 따릅니다.
+                </p>
+            </section>
+
+
+            <section class="legal-section">
+                <h3>부칙</h3>
+
+                <p class="legal-effective-date">
+                    본 약관은 2026년 10월 6일부터 시행합니다.
+                </p>
+            </section>
+
+        </div>
+
+
+        <footer class="legal-dialog-footer">
+            <button
+                type="button"
+                class="legal-dialog-confirm">
+                확인
+            </button>
+        </footer>
+
+    </div>
+
+</dialog>
