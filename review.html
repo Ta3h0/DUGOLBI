@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,33 +9,43 @@
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/common.css">
 </head>
+
 <body class="review">
- <?php include __DIR__ . '/header.html'; ?>
+    <?php include __DIR__ . '/header.html'; ?>
     <main id="wrap">
-                <section class="review-hero subpage-simple-hero" aria-labelledby="review-title">
+        <section class="review-hero subpage-simple-hero" aria-labelledby="review-title">
             <div class="container">
                 <h1 id="review-title">
-                    <img src="images/introduce-educators/dugolbi-che.svg" alt="DUGOLBI&#183;CHE" width="359" height="40">
+                    <img src="images/introduce-educators/dugolbi-che.svg" alt="DUGOLBI&#183;CHE" width="359"
+                        height="40">
                 </h1>
                 <p class="subpage-simple-hero-title">&#49688;&#44053;&#49373; &#54980;&#44592;</p>
             </div>
         </section>
 
-<nav class="community-nav" aria-label="커뮤니티"><div class="container"><a href="notice.html">NOTICE</a><a href="qna.html">Q&amp;A</a><a href="promotion-preview.html">SPECIAL OFFER</a><a href="review.html" aria-current="page">REVIEW</a><a href="news.html">NEWS</a></div></nav>
+        <nav class="community-nav" aria-label="커뮤니티">
+            <div class="container"><a href="notice.html">NOTICE</a><a href="qna.html">Q&amp;A</a><a
+                    href="promotion-preview.html">SPECIAL OFFER</a><a href="review.html"
+                    aria-current="page">REVIEW</a><a href="news.html">NEWS</a></div>
+        </nav>
         <section class="review-board" aria-labelledby="board-title">
-            <div class="container"><div class="section-title-box"><span class="section-eyebrow">Review</span><h2 class="section-title" id="board-title">수강생 후기</h2></div>
-                <div class="board-panel"><p class="board-total">Total 0건 1 페이지</p>
-                    <div class="board-table-scroll" role="region" aria-label="수강생 후기 표 스크롤 영역" tabindex="0">
-                    <table aria-label="수강생 후기 게시글 목록"><thead><tr><th scope="col">번호</th><th scope="col">제목</th><th scope="col">글쓴이</th><th scope="col">조회</th><th scope="col">날짜</th></tr></thead>
-                    <tbody><tr><td colspan="5">게시물이 없습니다.</td></tr></tbody></table>
-                    </div>
+            <div class="container">
+                <div class="section-title-box"><span class="section-eyebrow">Review</span>
+                    <h2 class="section-title" id="board-title">수강생 후기</h2>
+                </div>
+                <div class="board-panel"><iframe id="iframe" src="/board/bbs/board.php?bo_table=review" width="100%"
+                        height="1300px" frameborder="0" style="border:0" scrolling="auto" align="center"></iframe>
                 </div>
             </div>
+            </div>
         </section>
-        <section class="section-carousel page-statement" aria-label="Structure determines function"><div class="carousel-item">STRUCTURE DETERMINES FUNCTION</div></section>
-<?php include __DIR__ . '/footer.html'; ?>
+        <section class="section-carousel page-statement" aria-label="Structure determines function">
+            <div class="carousel-item">STRUCTURE DETERMINES FUNCTION</div>
+        </section>
+        <?php include __DIR__ . '/footer.html'; ?>
     </main>
-    
+
     <script src="js/common.js"></script>
 </body>
+
 </html>

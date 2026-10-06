@@ -8089,6 +8089,16 @@ body.brand-story main>section {
   margin-top: 28px;
 }
 
+/* Column headings for the two-column course tables. */
+:where(body.signature) .signature-course-table thead th {
+  padding: 16px;
+  font-size: 1.6rem;
+}
+
+:where(body.signature) .signature-course-table thead th + th {
+  border-left: 1px solid #dce2ea;
+}
+
 :where(body.signature) .signature-table tfoot td {
   padding: 26px;
   border-bottom: 0;
@@ -8224,6 +8234,10 @@ body.brand-story main>section {
   :where(body.signature) .signature-table tbody,
   :where(body.signature) .signature-table tfoot {
     display: block;
+  }
+
+  :where(body.signature) .signature-course-table thead {
+    display: none;
   }
 
   :where(body.signature) .signature-table colgroup {
