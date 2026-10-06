@@ -1548,7 +1548,7 @@ body.review .page-statement {
 }
 
 .is-map-ready>.information-map {
-  visibility: visible;
+  visibility: visible; 
 }
 
 .is-map-ready>img {
