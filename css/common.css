@@ -978,6 +978,7 @@ body.startup {
 
 /* Subpage header states */
 body.advanced .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)),
+body.schedule .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)),
 body.brand-story .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)),
 body.growth .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)),
 body.introduce-educators .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)),
@@ -11319,4 +11320,27 @@ body.news main {
     line-height: 1.35;
   }
 
+}
+
+:where(body.schedule) .schedule-hero {
+  background:
+    url('../images/montly/top-section-bg.png')
+    center / cover no-repeat;
+}
+
+:where(body.schedule) .schedule-section {
+  margin: 0;
+  padding-top: 120px;
+}
+
+@media (max-width: 1439px) {
+  :where(body.schedule) .schedule-section {
+    padding-top: 100px;
+  }
+}
+
+@media (max-width: 768px) {
+  :where(body.schedule) .schedule-section {
+    padding-top: 72px;
+  }
 }

@@ -13,138 +13,142 @@
 <body class="schedule">
     <?php include __DIR__ . '/header.html'; ?>
     <main id="wrap">
-        <section class="schedule-section" aria-labelledby="schedule-title">
-            <div class="container">
-                <div class="section-title-box schedule-title-box">
-                    <span class="section-eyebrow">EDUCATION SCHEDULE</span>
-                    <h1 class="section-title" id="schedule-title">교육일정</h1>
-                    <p class="section-desc">배움의 다음 단계, 두골비·체와 함께하세요.</p>
+        <main id="wrap">
+
+            <section class="schedule-hero subpage-simple-hero" aria-labelledby="schedule-hero-title">
+                <div class="container">
+                    <h1 id="schedule-hero-title">
+                        <img src="images/introduce-educators/dugolbi-che.svg" alt="DUGOLBI·CHE" width="359" height="40">
+                    </h1>
+
+                    <p class="subpage-simple-hero-title">교육일정</p>
                 </div>
-                <div class="schedule-toolbar">
-                    <div class="schedule-month-control">
-                        <button class="schedule-month-button" id="schedule-prev" type="button" aria-label="이전 달"><svg
-                                viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="m14 6-6 6 6 6" />
-                            </svg></button>
-                        <div class="schedule-date-select">
-                            <h2><button id="schedule-picker-toggle" type="button" aria-expanded="false"
-                                    aria-controls="schedule-picker"><span id="schedule-month"
-                                        aria-live="polite"></span><svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="m6 9 6 6 6-6" />
-                                    </svg></button></h2>
-                            <div class="schedule-picker" id="schedule-picker" role="region" aria-label="연도와 월 선택"
-                                hidden>
-                                <div class="schedule-year-control">
-                                    <button type="button" id="schedule-year-prev" aria-label="이전 연도"><svg
+            </section>
+
+            <section class="schedule-section" aria-labelledby="schedule-title">
+                <section class="schedule-section" aria-labelledby="schedule-title">
+                    <div class="container">
+                        <div class="section-title-box schedule-title-box">
+                            <span class="section-eyebrow">EDUCATION SCHEDULE</span>
+                            <h1 class="section-title" id="schedule-title">교육일정</h1>
+                            <p class="section-desc">배움의 다음 단계, 두골비·체와 함께하세요.</p>
+                        </div>
+                        <div class="schedule-toolbar">
+                            <div class="schedule-month-control">
+                                <button class="schedule-month-button" id="schedule-prev" type="button"
+                                    aria-label="이전 달"><svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="m14 6-6 6 6 6" />
+                                    </svg></button>
+                                <div class="schedule-date-select">
+                                    <h2><button id="schedule-picker-toggle" type="button" aria-expanded="false"
+                                            aria-controls="schedule-picker"><span id="schedule-month"
+                                                aria-live="polite"></span><svg viewBox="0 0 24 24" aria-hidden="true">
+                                                <path d="m6 9 6 6 6-6" />
+                                            </svg></button></h2>
+                                    <div class="schedule-picker" id="schedule-picker" role="region"
+                                        aria-label="연도와 월 선택" hidden>
+                                        <div class="schedule-year-control">
+                                            <button type="button" id="schedule-year-prev" aria-label="이전 연도"><svg
+                                                    viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path d="m14 6-6 6 6 6" />
+                                                </svg></button>
+                                            <strong id="schedule-year" aria-live="polite"></strong>
+                                            <button type="button" id="schedule-year-next" aria-label="다음 연도"><svg
+                                                    viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path d="m10 6 6 6-6 6" />
+                                                </svg></button>
+                                        </div>
+                                        <div class="schedule-picker-months" id="schedule-picker-months"></div>
+                                    </div>
+                                </div>
+                                <button class="schedule-month-button" id="schedule-next" type="button"
+                                    aria-label="다음 달"><svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="m10 6 6 6-6 6" />
+                                    </svg></button>
+                            </div>
+                            <p class="schedule-guide">교육 일정을 선택하면 달력에서 교육 기간을 확인할 수 있습니다.</p>
+                        </div>
+                        <div class="schedule-layout">
+                            <div class="schedule-list-panel">
+                                <div class="schedule-list-heading">
+                                    <h3>교육 일정</h3><span id="schedule-count"></span>
+                                </div>
+                                <ul class="schedule-list" id="schedule-list"></ul>
+                                <p class="schedule-empty" id="schedule-empty" hidden>등록된 교육 일정이 없습니다.<br>다른 달의 일정을 확인해
+                                    주세요.</p>
+                                <div class="schedule-inquiry"><span>교육 상담문의</span><a
+                                        href="tel:01034501662">010-3450-1662<svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M5 19 19 5M5 5h14v14" />
+                                        </svg></a></div>
+                            </div>
+                            <div class="schedule-calendar-backdrop" aria-hidden="true"></div>
+                            <div class="schedule-calendar-panel" id="schedule-calendar-panel">
+                                <div class="schedule-sheet-heading">
+                                    <div>
+                                        <p id="schedule-sheet-month"></p>
+                                        <h3 id="schedule-sheet-title">교육일정</h3>
+                                    </div>
+                                    <button class="schedule-sheet-close" type="button" aria-label="달력 닫기"><svg
                                             viewBox="0 0 24 24" aria-hidden="true">
-                                            <path d="m14 6-6 6 6 6" />
-                                        </svg></button>
-                                    <strong id="schedule-year" aria-live="polite"></strong>
-                                    <button type="button" id="schedule-year-next" aria-label="다음 연도"><svg
-                                            viewBox="0 0 24 24" aria-hidden="true">
-                                            <path d="m10 6 6 6-6 6" />
+                                            <path d="m6 6 12 12M18 6 6 18" />
                                         </svg></button>
                                 </div>
-                                <div class="schedule-picker-months" id="schedule-picker-months"></div>
+                                <table class="schedule-calendar" aria-labelledby="schedule-month">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">일</th>
+                                            <th scope="col">월</th>
+                                            <th scope="col">화</th>
+                                            <th scope="col">수</th>
+                                            <th scope="col">목</th>
+                                            <th scope="col">금</th>
+                                            <th scope="col">토</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="schedule-days"></tbody>
+                                </table>
+                                <div class="schedule-calendar-foot">
+                                    <p id="schedule-selection" role="status">
+                                        목록에 마우스를 올려 교육 기간을 확인해 보세요.
+                                    </p>
+
+                                    <!-- PC 전용 -->
+                                    <div class="schedule-calendar-actions">
+                                        <a class="cta-button schedule-action-inquiry" href="index.html#inquiry">
+                                            상담신청
+                                        </a>
+
+                                        <a class="cta-button schedule-action-naver schedule-booking-naver" href="#">
+                                            <img src="images/network/naver-map.png" alt="" width="33" height="33">
+                                            네이버 예약
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- 모바일 바텀시트 전용 -->
+                                <div class="schedule-sheet-actions">
+                                    <a class="cta-button schedule-action-inquiry" href="index.html#inquiry">
+                                        상담신청
+                                    </a>
+
+                                    <a class="cta-button schedule-action-naver schedule-booking-naver" href="#">
+                                        <img src="images/network/naver-map.png" alt="" width="33" height="33">
+                                        네이버 예약
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                        <button class="schedule-month-button" id="schedule-next" type="button" aria-label="다음 달"><svg
-                                viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="m10 6 6 6-6 6" />
-                            </svg></button>
+                        <noscript>
+                            <p class="schedule-no-script">달력을 이용하려면 JavaScript를 활성화해 주세요.</p>
+                        </noscript>
                     </div>
-                    <p class="schedule-guide">교육 일정을 선택하면 달력에서 교육 기간을 확인할 수 있습니다.</p>
-                </div>
-                <div class="schedule-layout">
-                    <div class="schedule-list-panel">
-                        <div class="schedule-list-heading">
-                            <h3>교육 일정</h3><span id="schedule-count"></span>
-                        </div>
-                        <ul class="schedule-list" id="schedule-list"></ul>
-                        <p class="schedule-empty" id="schedule-empty" hidden>등록된 교육 일정이 없습니다.<br>다른 달의 일정을 확인해 주세요.</p>
-                        <div class="schedule-inquiry"><span>교육 상담문의</span><a href="tel:01034501662">010-3450-1662<svg
-                                    viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M5 19 19 5M5 5h14v14" />
-                                </svg></a></div>
-                    </div>
-                    <div class="schedule-calendar-backdrop" aria-hidden="true"></div>
-                    <div class="schedule-calendar-panel" id="schedule-calendar-panel">
-                        <div class="schedule-sheet-heading">
-                            <div>
-                                <p id="schedule-sheet-month"></p>
-                                <h3 id="schedule-sheet-title">교육일정</h3>
-                            </div>
-                            <button class="schedule-sheet-close" type="button" aria-label="달력 닫기"><svg
-                                    viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="m6 6 12 12M18 6 6 18" />
-                                </svg></button>
-                        </div>
-                        <table class="schedule-calendar" aria-labelledby="schedule-month">
-                            <thead>
-                                <tr>
-                                    <th scope="col">일</th>
-                                    <th scope="col">월</th>
-                                    <th scope="col">화</th>
-                                    <th scope="col">수</th>
-                                    <th scope="col">목</th>
-                                    <th scope="col">금</th>
-                                    <th scope="col">토</th>
-                                </tr>
-                            </thead>
-                            <tbody id="schedule-days"></tbody>
-                        </table>
-                        <div class="schedule-calendar-foot">
-    <p id="schedule-selection" role="status">
-        목록에 마우스를 올려 교육 기간을 확인해 보세요.
-    </p>
+                </section>
+                <?php include __DIR__ . '/footer.html'; ?>
+        </main>
 
-    <!-- PC 전용 -->
-    <div class="schedule-calendar-actions">
-        <a class="cta-button schedule-action-inquiry"
-           href="index.html#inquiry">
-            상담신청
-        </a>
-
-        <a class="cta-button schedule-action-naver schedule-booking-naver"
-           href="#">
-            <img src="images/network/naver-map.png"
-                 alt=""
-                 width="33"
-                 height="33">
-            네이버 예약
-        </a>
-    </div>
-</div>
-
-<!-- 모바일 바텀시트 전용 -->
-<div class="schedule-sheet-actions">
-    <a class="cta-button schedule-action-inquiry"
-       href="index.html#inquiry">
-        상담신청
-    </a>
-
-    <a class="cta-button schedule-action-naver schedule-booking-naver"
-       href="#">
-        <img src="images/network/naver-map.png"
-             alt=""
-             width="33"
-             height="33">
-        네이버 예약
-    </a>
-</div>
-                    </div>
-                </div>
-                <noscript>
-                    <p class="schedule-no-script">달력을 이용하려면 JavaScript를 활성화해 주세요.</p>
-                </noscript>
-            </div>
-        </section>
-        <?php include __DIR__ . '/footer.html'; ?>
-    </main>
-
-    <script src="js/modify.js"></script>
-    <script src="js/common.js"></script>
-    <script src="js/schedule.js"></script>
+        <script src="js/modify.js"></script>
+        <script src="js/common.js"></script>
+        <script src="js/schedule.js"></script>
 </body>
 
 </html>
