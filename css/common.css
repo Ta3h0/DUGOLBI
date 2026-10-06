@@ -1019,6 +1019,7 @@ body.startup .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)
 
 body.advanced .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .logo-black,
 body.brand-story .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .logo-black,
+body.schedule .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .logo-black,
 body.growth .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .logo-black,
 body.introduce-educators .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .logo-black,
 body.introduce .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .logo-black,
@@ -1040,6 +1041,7 @@ body.advanced .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover
 body.brand-story .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link,
 body.growth .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link,
 body.introduce-educators .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link,
+body.schedule .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link,
 body.introduce .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link,
 body.montly .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link,
 body.network .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link,
@@ -1059,6 +1061,8 @@ body.advanced .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover
 body.advanced .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-menu-toggle span,
 body.brand-story .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link::after,
 body.brand-story .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-menu-toggle span,
+body.schedule .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link::after,
+body.schedule .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-menu-toggle span,
 body.growth .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link::after,
 body.growth .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-menu-toggle span,
 body.introduce-educators .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .gnb-link::after,
@@ -1092,6 +1096,7 @@ body.startup .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)
 
 body.advanced .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-cta,
 body.brand-story .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-cta,
+body.schedule .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-cta,
 body.growth .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-cta,
 body.introduce-educators .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-cta,
 body.introduce .header:not(.is-scrolled):not(.menu-open):not(:has(.gnb-item:hover)) .header-cta,
@@ -10120,9 +10125,7 @@ body.schedule.reduce-motion .schedule-section * {
   }
 
   :where(body.schedule) .schedule-event-dots {
-    bottom: 3px;
-    gap: 3px;
-    flex-wrap: wrap;
+  display: none;
   }
 
   :where(body.schedule) .schedule-calendar-foot {
@@ -11224,6 +11227,11 @@ body.news main {
 
 }
 /* SIMPLE SUBPAGE HERO PATCH */
+:where(body.schedule) .schedule-hero {
+  background:
+    url('../images/montly/top-section-bg.png')
+    center / cover no-repeat;
+}
 
 .subpage-simple-hero.subpage-simple-hero {
   position: relative;
