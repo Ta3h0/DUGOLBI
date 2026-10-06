@@ -1171,11 +1171,88 @@
         );
     }
 
+    async function initHomeCommunityFeed() {
+        const target = document.getElementById('home-community-feed');
+        const status = document.getElementById('home-community-status');
+        if (!target || !status) return;
+        const featured = target.querySelector('.img-box');
+        const poster = featured.querySelector('img');
+        const featuredTitle = featured.querySelector('.img-title');
+        const list = target.querySelector('.list-panel');
+        const fallback = 'images/alert.jpg';
+        status.textContent = '게시글을 불러오는 중입니다.';
+
+        // A second failure hides the image rather than retrying the fallback forever.
+        let usingFallback = false;
+        poster.addEventListener('error', function () {
+            if (usingFallback) {
+                poster.remove();
+                return;
+            }
+            usingFallback = true;
+            poster.src = fallback;
+        });
+
+        try {
+            const response = await fetch('community-feed.php', {
+                credentials: 'same-origin',
+                headers: { Accept: 'application/json' }
+            });
+            if (!response.ok) throw new Error('Community feed unavailable');
+            const data = await response.json();
+            if (!Array.isArray(data)) throw new Error('Invalid community feed');
+            const items = data.filter(function (item) {
+                return item && ['notice', 'news'].includes(item.board) &&
+                    Number.isSafeInteger(item.id) && item.id > 0 &&
+                    typeof item.title === 'string' && /^\d{4}\.\d{2}\.\d{2}$/.test(item.date);
+            }).slice(0, 5);
+            if (!items.length) {
+                status.textContent = '등록된 게시물이 없습니다.';
+                return;
+            }
+            const first = items[0];
+            featured.href = `${first.board}.html?wr_id=${first.id}`;
+            featuredTitle.textContent = first.title;
+            poster.alt = first.title;
+            let imageUrl;
+            try { imageUrl = new URL(first.image || '', window.location.href); } catch (_) {}
+            usingFallback = !first.image || !imageUrl || !/^https?:$/.test(imageUrl.protocol);
+            poster.src = usingFallback ? fallback : imageUrl.href;
+            poster.hidden = false;
+            featured.hidden = false;
+            const fragment = document.createDocumentFragment();
+            items.forEach(function (item) {
+                const link = document.createElement('a');
+                link.className = 'item';
+                link.href = `${item.board}.html?wr_id=${item.id}`;
+                const date = document.createElement('span');
+                date.className = 'date';
+                date.textContent = item.date;
+                const title = document.createElement('h4');
+                title.className = 'title';
+                title.textContent = item.title;
+                const arrow = document.createElement('img');
+                arrow.src = 'images/arrow-right.svg';
+                arrow.alt = '바로가기';
+                link.append(date, title, arrow);
+                fragment.append(link);
+            });
+            list.replaceChildren(fragment);
+            status.hidden = true;
+        } catch (_) {
+            target.closest('.section08').hidden = true;
+            console.warn('Media & News: 게시글 목록을 불러오지 못했습니다.');
+        } finally {
+            target.setAttribute('aria-busy', 'false');
+        }
+    }
+
     function initPage() {
         initHomeScrollText();
         initHomeSwipers();
         initHomeFaq();
         initInquiryForm();
+        initHomeCommunityFeed();
     }
 
     if (document.readyState === "loading") {

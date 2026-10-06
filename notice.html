@@ -1,3 +1,6 @@
+<?php
+$noticePostId = filter_var($_GET['wr_id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) ?: 0;
+?>
 <!DOCTYPE html>
 <html lang="ko">
 
@@ -34,7 +37,7 @@
                     <h2 class="section-title" id="board-title">공지사항</h2>
                 </div>
                 <div class="board-panel">
-                    <iframe id="iframe" src="/board/bbs/board.php?bo_table=notice" width="100%" height="1300px"
+                    <iframe id="iframe" src="/board/bbs/board.php?bo_table=notice<?php echo $noticePostId ? '&amp;wr_id=' . $noticePostId : ''; ?>" width="100%" height="1300px"
                         frameborder="0" style="border:0" scrolling="auto" align="center"></iframe>
                 </div>
             </div>
