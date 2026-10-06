@@ -1,5 +1,56 @@
 /* Existing page interactions; loaded only by pages that use them. */
 (function () {
+    function initNetworkListing() {
+        if (!document.body.classList.contains("network")) return;
+        const section = document.querySelector(".network-section");
+        if (!section) return;
+        const grid = section.querySelector(".network-grid");
+        if (!grid) return;
+
+        const collator = new Intl.Collator("ko", { numeric: true, sensitivity: "base" });
+        const branches = typeof networkData !== "undefined" && Array.isArray(networkData)
+            ? networkData.filter(function (branch) {
+                return branch && typeof branch === "object" && typeof branch.name === "string";
+            }).slice().sort(function (first, second) {
+                return collator.compare(first.name.trim(), second.name.trim());
+            })
+            : [];
+        const fragment = document.createDocumentFragment();
+        branches.forEach(function (branch) {
+            const card = document.createElement("article");
+            card.className = "network-card";
+            card.dataset.category = String(branch.region || "");
+            const image = branch.image || {};
+            if (image.src) {
+                const poster = document.createElement("img");
+                poster.src = image.src;
+                poster.alt = image.alt || branch.name + " 내부";
+                if (Number(image.width) > 0) poster.width = Number(image.width);
+                if (Number(image.height) > 0) poster.height = Number(image.height);
+                card.append(poster);
+            }
+            const region = document.createElement("span");
+            region.className = "network-region";
+            region.textContent = branch.region || "";
+            const name = document.createElement("h3");
+            name.textContent = branch.name;
+            const facts = document.createElement("dl");
+            [["주소", branch.address], ["연락처", branch.phone]].forEach(function (fact) {
+                const row = document.createElement("div");
+                const label = document.createElement("dt");
+                label.textContent = fact[0];
+                const value = document.createElement("dd");
+                value.textContent = fact[1] || "";
+                row.append(label, value);
+                facts.append(row);
+            });
+            card.append(region, name, facts);
+            fragment.append(card);
+        });
+        grid.replaceChildren(fragment);
+
+    }
+
     function initListingPagination(pageClass) {
         if (!document.body.classList.contains(pageClass)) {
             return;
@@ -43,7 +94,7 @@
             const visible = new Set(matching.slice(start, start + pageSize));
             items.forEach(function (item) { item.hidden = !visible.has(item); });
             if (empty) empty.hidden = matching.length > 0;
-            pagination.hidden = pageCount === 0;
+            pagination.hidden = pageCount === 0 || (pageClass === "network" && pageCount === 1);
             pagination.replaceChildren();
             if (!pageCount) return;
 
@@ -103,6 +154,7 @@
 
 
     function initPage() {
+        initNetworkListing();
         initListingPagination("network");
         initListingPagination("results");
     }

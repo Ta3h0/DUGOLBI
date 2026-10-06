@@ -10192,6 +10192,67 @@ body.schedule.reduce-motion .schedule-section * {
   vertical-align: middle;
 }
 
+/* Desktop selection stays colored; other courses use a gray range preview. */
+@media (min-width: 769px) {
+  :where(body.schedule) .schedule-course {
+    padding-inline: 20px;
+    transition: background-color 220ms ease, color 220ms ease;
+  }
+
+  :where(body.schedule) .schedule-course.is-preview:not(.is-active) {
+    background: #e4e9f0;
+  }
+
+  :where(body.schedule) .schedule-course.is-active {
+    background: var(--course-color);
+    color: #fff;
+  }
+
+  :where(body.schedule) .schedule-course.is-active :is(.schedule-course-title, .schedule-course-date, .schedule-course-example) {
+    color: inherit;
+  }
+
+  :where(body.schedule) .schedule-course.is-active .schedule-course-date::before {
+    background: currentColor;
+  }
+
+  :where(body.schedule) .schedule-calendar td::before {
+    transform: none;
+    pointer-events: none;
+    transition: opacity 280ms ease, background-color 280ms ease;
+  }
+
+  /* Preview fills the entire date cell without reshaping the selected range. */
+  :where(body.schedule) .schedule-calendar td::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: #e4e9f0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 280ms ease;
+  }
+
+  :where(body.schedule) .schedule-calendar td.is-preview::after {
+    opacity: 1;
+  }
+
+  :where(body.schedule) .schedule-day,
+  :where(body.schedule) .schedule-event-dots {
+    z-index: 2;
+  }
+
+  :where(body.schedule) .schedule-calendar td.is-preview .schedule-day {
+    color: var(--font-black);
+  }
+
+  :where(body.schedule.reduce-motion) .schedule-calendar td::before,
+  :where(body.schedule.reduce-motion) .schedule-calendar td::after {
+    transition: none;
+  }
+}
+
 /* Keep the existing month/year controls and list/calendar colors. */
 @media (max-width: 1439px) {
   :where(body.schedule) .schedule-section {

@@ -237,3 +237,92 @@ const scheduleData = [
     }
 ];
 
+
+// 수료지점: ID 없이 업체명 가나다순으로 정렬하고 페이지당 6개씩 표시합니다.
+// 지점 추가/수정은 name, region, address, phone, image 항목을 편집하세요.
+const networkData = [
+    {
+        "name": "OOO 에스테틱",
+        "region": "서울",
+        "address": "서울특별시 OO구 OO로 18-1",
+        "phone": "02-0000-0000",
+        "image": {
+            "src": "images/network/branch-interior.png",
+            "alt": "OOO 에스테틱 내부",
+            "width": 684,
+            "height": 464
+        }
+    },
+    {
+        "name": "OOO 에스테틱",
+        "region": "서울",
+        "address": "서울특별시 OO구 OO로 18-1",
+        "phone": "02-0000-0000",
+        "image": {
+            "src": "images/network/branch-interior.png",
+            "alt": "OOO 에스테틱 내부",
+            "width": 684,
+            "height": 464
+        }
+    },
+    {
+        "name": "OOO 에스테틱",
+        "region": "서울",
+        "address": "서울특별시 OO구 OO로 18-1",
+        "phone": "02-0000-0000",
+        "image": {
+            "src": "images/network/branch-interior.png",
+            "alt": "OOO 에스테틱 내부",
+            "width": 684,
+            "height": 464
+        }
+    },
+    {
+        "name": "OOO 에스테틱",
+        "region": "서울",
+        "address": "서울특별시 OO구 OO로 18-1",
+        "phone": "02-0000-0000",
+        "image": {
+            "src": "images/network/branch-interior.png",
+            "alt": "OOO 에스테틱 내부",
+            "width": 684,
+            "height": 464
+        }
+    },
+    {
+        "name": "OOO 에스테틱",
+        "region": "서울",
+        "address": "서울특별시 OO구 OO로 18-1",
+        "phone": "02-0000-0000",
+        "image": {
+            "src": "images/network/branch-interior.png",
+            "alt": "OOO 에스테틱 내부",
+            "width": 684,
+            "height": 464
+        }
+    },
+    {
+        "name": "OOO 에스테틱",
+        "region": "서울",
+        "address": "서울특별시 OO구 OO로 18-1",
+        "phone": "02-0000-0000",
+        "image": {
+            "src": "images/network/branch-interior.png",
+            "alt": "OOO 에스테틱 내부",
+            "width": 684,
+            "height": 464
+        }
+    },
+    {
+        "name": "OOO 에스테틱",
+        "region": "서울",
+        "address": "서울특별시 OO구 OO로 18-1",
+        "phone": "02-0000-0000",
+        "image": {
+            "src": "images/network/branch-interior.png",
+            "alt": "OOO 에스테틱 내부",
+            "width": 684,
+            "height": 464
+        }
+    }
+];

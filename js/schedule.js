@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let pinned = null;
     let hovered = null;
     let focused = null;
+    let previewed = null;
     const mobile = window.matchMedia("(max-width: 768px)");
     const panel = document.getElementById("schedule-calendar-panel");
     const sheetTitle = document.getElementById("schedule-sheet-title");
@@ -92,6 +93,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (guide) guide.textContent = mobile.matches
             ? "교육 일정을 터치하면 달력에서 교육 기간을 확인할 수 있습니다."
             : "교육 일정을 선택하면 달력에서 교육 기간을 확인할 수 있습니다.";
+        hovered = focused = previewed = null;
+        highlight();
     }
     function openSheet(course, button) {
         if (!panel || !mobile.matches) return;
@@ -126,29 +129,38 @@ document.addEventListener("DOMContentLoaded", function () {
     reducedMotion.addEventListener("change", updateMotion);
 
     function highlight() {
-        const id = hovered || focused || pinned;
-        const course = courses.find(item => item.id === id);
+        const selectedCourse = courses.find(item => item.id === pinned);
+        const previewId = mobile.matches ? null : (hovered || focused || (!pinned ? previewed : null));
+        const previewCourse = previewId !== pinned ? courses.find(item => item.id === previewId) : null;
+        const course = selectedCourse || previewCourse;
+        // Reservation actions always belong to the clicked selection, even during preview.
         updateBooking(course);
         list.querySelectorAll("button").forEach(button => {
-            button.classList.toggle("is-active", button.dataset.id === id);
-            button.setAttribute("aria-pressed", String(button.dataset.id === pinned));
+            const selected = button.dataset.id === pinned;
+            button.classList.toggle("is-active", selected);
+            button.classList.toggle("is-preview", Boolean(previewCourse && button.dataset.id === previewCourse.id));
+            button.setAttribute("aria-pressed", String(selected));
         });
         days.querySelectorAll("td").forEach(cell => {
-            const active = Boolean(course && cell.dataset.date >= course.start && cell.dataset.date <= course.end);
+            const selected = Boolean(selectedCourse && cell.dataset.date >= selectedCourse.start && cell.dataset.date <= selectedCourse.end);
+            const preview = Boolean(previewCourse && cell.dataset.date >= previewCourse.start && cell.dataset.date <= previewCourse.end);
             courses.forEach(item => cell.classList.remove(item.color));
-            if (active) cell.classList.add(course.color);
-            cell.classList.toggle("is-highlighted", active);
-            cell.classList.toggle("range-start", active && (cell.dataset.date === course.start || cell.cellIndex === 0));
-            cell.classList.toggle("range-end", active && (cell.dataset.date === course.end || cell.cellIndex === 6));
+            if (selected) cell.classList.add(selectedCourse.color);
+            cell.classList.toggle("is-highlighted", selected);
+            cell.classList.toggle("is-preview", preview);
+            cell.classList.toggle("range-start", selected && (cell.dataset.date === selectedCourse.start || cell.cellIndex === 0));
+            cell.classList.toggle("range-end", selected && (cell.dataset.date === selectedCourse.end || cell.cellIndex === 6));
         });
-        if (status) status.textContent = course ? `${displayDate(course.start)} ~ ${displayDate(course.end)}` : "목록에 마우스를 올려 교육 기간을 확인해 보세요.";
+        if (status) status.textContent = previewCourse && selectedCourse
+            ? `선택: ${displayDate(selectedCourse.start)} ~ ${displayDate(selectedCourse.end)} / 미리보기: ${displayDate(previewCourse.start)} ~ ${displayDate(previewCourse.end)}`
+            : course ? `${displayDate(course.start)} ~ ${displayDate(course.end)}` : "목록에 마우스를 올려 교육 기간을 확인해 보세요.";
     }
 
     function render() {
         const start = dateKey(month);
         const end = dateKey(new Date(month.getFullYear(), month.getMonth() + 1, 0));
         const visible = courses.filter(course => course.start <= end && course.end >= start);
-        pinned = hovered = focused = null;
+        pinned = hovered = focused = previewed = null;
         if (monthLabel) monthLabel.textContent = `${month.getFullYear()}. ${String(month.getMonth() + 1).padStart(2, "0")}`;
         if (countLabel) countLabel.textContent = `${visible.length}개 과정`;
         if (emptyMessage) emptyMessage.hidden = visible.length > 0;
@@ -173,17 +185,17 @@ document.addEventListener("DOMContentLoaded", function () {
             period.className = "schedule-course-date";
             period.textContent = `${displayDate(course.start)} ~ ${displayDate(course.end)}`;
             button.append(title, period);
-            button.addEventListener("mouseenter", () => { if (mobile.matches) return; hovered = course.id; highlight(); });
+            button.addEventListener("mouseenter", () => { if (mobile.matches) return; hovered = previewed = course.id; highlight(); });
             button.addEventListener("mouseleave", () => { hovered = null; highlight(); });
-            button.addEventListener("focus", () => { focused = course.id; highlight(); });
+            button.addEventListener("focus", () => { if (mobile.matches) return; hovered = null; focused = previewed = course.id; highlight(); });
             button.addEventListener("blur", () => { focused = null; highlight(); });
             if (mobile.matches) {
                 button.setAttribute("aria-haspopup", "dialog");
                 button.setAttribute("aria-controls", "schedule-calendar-panel");
             }
             button.addEventListener("click", () => {
-                pinned = mobile.matches ? course.id : (pinned === course.id ? null : course.id);
-                hovered = null;
+                pinned = course.id;
+                hovered = focused = previewed = null;
                 highlight();
                 if (mobile.matches) openSheet(course, button);
             });
