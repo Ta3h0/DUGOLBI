@@ -1533,7 +1533,6 @@ body.review .page-statement {
   object-fit: cover;
 }
 
-/* Keep the existing map frame and fallback image while Kakao loads. */
 .information-map.root_daum_roughmap {
   position: absolute;
   inset: 0;
@@ -1543,6 +1542,9 @@ body.review .page-statement {
   padding: 0;
   border: 0;
   visibility: hidden;
+
+  pointer-events: none;
+  user-select: none;
 }
 
 .is-map-ready>.information-map {
