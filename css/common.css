@@ -10842,89 +10842,355 @@ body.news main {
   }
 }
 
-:where(body.location) .location-content {
-    display: grid;
-    grid-template-columns: 624px minmax(0, 1fr);
-    gap: 60px;
-    align-items: stretch;
+
+
+/* ==================== LOCATION ==================== */
+
+:where(body.location) {
+  color: var(--font-black);
+  background: #fff;
+}
+
+
+/* HERO */
+
+:where(body.location) .location-hero {
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.38), rgba(0, 0, 0, 0.38)),
+    url('../images/introduce-educators/top-section-bg.png')
+    center / cover no-repeat;
+}
+
+:where(body.location) .location-hero .container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+:where(body.location) .location-hero-message {
+  margin-top: 20px;
+  color: #fff;
+  font-size: 3.2rem;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+
+/* SECTION */
+
+:where(body.location) .location-section {
+  margin: 0;
+  padding: 120px 0 140px;
 }
 
 :where(body.location) .location-tabs {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 64px;
 }
 
 :where(body.location) .location-tab {
-    min-width: 160px;
-    height: 52px;
-    border-radius: 100px;
-    border: 1px solid #e4e9ef;
-    background: #fff;
-    color: #aab2bd;
-    font-weight: 700;
+  min-width: 196px;
+  height: 56px;
+
+  padding: 0 28px;
+
+  border: 1px solid #dfe5ee;
+  border-radius: 100px;
+
+  background: #fff;
+  color: #b0b8c4;
+
+  font-size: 1.8rem;
+  font-weight: 700;
+
+  cursor: pointer;
 }
 
 :where(body.location) .location-tab.is-active {
-    background: var(--main-color);
-    border-color: var(--main-color);
-    color: #fff;
+  border-color: var(--main-color);
+  background: var(--main-color);
+  color: #fff;
 }
 
-:where(body.location) .location-map-wrap {
-    position: relative;
-    min-height: 420px;
-    overflow: hidden;
-    border-radius: 40px;
+
+/* TITLE */
+
+:where(body.location) .location-title {
+  margin: 0 0 56px;
+
+  color: #121a32;
+
+  font-size: 3.2rem;
+  line-height: 1.4;
+  font-weight: 700;
+
+  text-align: center;
+}
+
+
+/* CONTENT */
+
+:where(body.location) .location-content {
+  display: grid;
+  grid-template-columns: minmax(0, 624px) minmax(0, 1fr);
+
+  gap: 64px;
+
+  align-items: stretch;
+}
+
+
+/* MAP */
+
+:where(body.location) .location-map-panel {
+  position: relative;
+
+  min-height: 440px;
+
+  overflow: hidden;
+
+  border-radius: 40px;
+
+  background: #f4f6f8;
 }
 
 :where(body.location) .location-map {
-    position: absolute;
-    inset: 0;
+  position: absolute;
 
-    width: 100%;
-    height: 100%;
+  inset: 0;
 
-    opacity: 0;
-    visibility: hidden;
+  width: 100%;
+  height: 100%;
 
-    pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+
+  pointer-events: none;
+  user-select: none;
 }
 
 :where(body.location) .location-map.is-active {
-    opacity: 1;
-    visibility: visible;
+  opacity: 1;
+  visibility: visible;
 }
+
+
+/* INFORMATION */
+
+:where(body.location) .location-information {
+  min-width: 0;
+}
+
+:where(body.location) .location-information-list {
+  margin: 0;
+}
+
+:where(body.location) .location-information-row {
+  display: grid;
+
+  grid-template-columns: 160px minmax(0, 1fr);
+
+  gap: 28px;
+
+  padding: 36px 0;
+
+  border-bottom: 1px solid #e4e9ef;
+}
+
+:where(body.location) .location-information-row:first-child {
+  padding-top: 0;
+}
+
+:where(body.location) .location-information-row:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+:where(body.location) .location-information-row dt {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 16px;
+
+  color: #121a32;
+
+  font-size: 1.8rem;
+  line-height: 1.6;
+  font-weight: 700;
+}
+
+:where(body.location) .location-information-row dt img {
+  width: 24px;
+  height: 24px;
+
+  margin-top: 2px;
+
+  object-fit: contain;
+}
+
+:where(body.location) .location-information-row dd {
+  min-width: 0;
+
+  color: #121a32;
+
+  font-size: 1.7rem;
+  line-height: 1.7;
+}
+
+
+/* MAP BUTTONS */
+
+:where(body.location) .location-map-links {
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+
+  margin-top: 22px;
+}
+
+:where(body.location) .location-map-links .cta-button {
+  gap: 10px;
+
+  padding: 8px 20px;
+
+  border: 1px solid #dfe5ee;
+  border-radius: 100px;
+
+  background: #fff;
+
+  color: var(--main-color);
+
+  font-size: 1.6rem;
+  line-height: 1.4;
+}
+
+:where(body.location) .location-map-links img {
+  width: auto;
+  height: 22px;
+}
+
+
+/* CONTACT */
+
+:where(body.location) .location-contact {
+  margin-top: 20px;
+
+  padding: 9px 28px;
+
+  border-radius: 100px;
+
+  background: var(--main-color);
+
+  color: #fff;
+
+  font-size: 1.6rem;
+}
+
+
+/* TABLET */
+
+@media (max-width: 1024px) {
+
+  :where(body.location) .location-section {
+    padding: 88px 0 110px;
+  }
+
+  :where(body.location) .location-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  :where(body.location) .location-map-panel {
+    min-height: 420px;
+  }
+
+}
+
+
+/* MOBILE */
 
 @media (max-width: 768px) {
-    :where(body.location) .location-content {
-        grid-template-columns: 1fr;
-        gap: 32px;
-    }
 
-    :where(body.location) .location-map-wrap {
-        min-height: 320px;
-        border-radius: 24px;
-    }
+  :where(body.location) .location-hero-message {
+    font-size: 2.6rem;
+  }
 
-    :where(body.location) .location-tabs {
-        width: 100%;
-    }
+  :where(body.location) .location-section {
+    padding: 64px 0 80px;
+  }
 
-    :where(body.location) .location-tab {
-        flex: 1;
-        min-width: 0;
-    }
-}
+  :where(body.location) .location-tabs {
+    width: 100%;
 
-:where(body.introduce-educators) .introduce-hero {
-    background:
-        url('../images/introduce-educators/top-section-bg.png')
-        center / cover no-repeat;
-}
+    gap: 8px;
 
-:where(body.location) .location-hero {
-    background:
-        url('../images/introduce-educators/top-section-bg.png')
-        center / cover no-repeat;
+    margin-bottom: 40px;
+  }
+
+  :where(body.location) .location-tab {
+    flex: 1;
+
+    min-width: 0;
+
+    height: 48px;
+
+    padding: 0 12px;
+
+    font-size: 1.4rem;
+  }
+
+  :where(body.location) .location-title {
+    margin-bottom: 32px;
+
+    font-size: 2.4rem;
+  }
+
+  :where(body.location) .location-content {
+    gap: 28px;
+  }
+
+  :where(body.location) .location-map-panel {
+    min-height: 300px;
+
+    border-radius: 24px;
+  }
+
+  :where(body.location) .location-information-row {
+    grid-template-columns: 1fr;
+
+    gap: 14px;
+
+    padding: 24px 0;
+  }
+
+  :where(body.location) .location-information-row dt {
+    gap: 10px;
+
+    font-size: 1.6rem;
+  }
+
+  :where(body.location) .location-information-row dd {
+    font-size: 1.6rem;
+  }
+
+  :where(body.location) .location-map-links {
+    flex-wrap: wrap;
+
+    gap: 10px;
+  }
+
+  :where(body.location) .location-map-links .cta-button {
+    min-height: 44px;
+
+    padding: 8px 16px;
+
+    font-size: 1.5rem;
+  }
+
 }

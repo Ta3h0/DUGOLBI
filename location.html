@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="icon" type="image/svg+xml" href="images/logo-black.svg">
+
     <title>오시는 길 | 두골비·체 트레이닝 센터</title>
 
     <link rel="stylesheet" href="css/reset.css">
@@ -11,21 +13,38 @@
 </head>
 
 <body class="location">
+
 <?php include __DIR__ . '/header.html'; ?>
 
 <main id="wrap">
 
-    <section class="introduce-hero location-hero">
+    <!-- HERO -->
+    <section class="introduce-hero location-hero" aria-labelledby="location-hero-title">
         <div class="container">
-            <p class="location-hero-logo">DUGOLBI·CHE</p>
-            <h1>오시는 길</h1>
+
+            <h1 id="location-hero-title">
+                <img
+                    src="images/introduce-educators/dugolbi-che.svg"
+                    alt="DUGOLBI·CHE"
+                    width="359"
+                    height="40"
+                >
+            </h1>
+
+            <p class="introduce-hero-message">오시는 길</p>
+
         </div>
     </section>
 
+
+    <!-- LOCATION -->
     <section class="location-section">
+
         <div class="container">
 
+            <!-- 지점 선택 -->
             <div class="location-tabs" role="tablist">
+
                 <button
                     type="button"
                     class="location-tab is-active"
@@ -39,15 +58,20 @@
                     data-location="seoul">
                     서울 청담 교육장
                 </button>
+
             </div>
+
 
             <h2 class="location-title">
                 부산 교육 본점 오시는 길
             </h2>
 
+
             <div class="location-content">
 
-                <div class="location-map-wrap">
+                <!-- MAP -->
+                <div class="location-map-panel">
+
                     <div
                         id="location-map-busan"
                         class="location-map is-active">
@@ -57,84 +81,157 @@
                         id="location-map-seoul"
                         class="location-map">
                     </div>
+
                 </div>
 
-                <div class="location-info">
 
-                    <div class="location-info-row">
-                        <div class="location-info-label">
-                            <span class="icon">...</span>
-                            주소
+                <!-- INFORMATION -->
+                <div class="location-information">
+
+                    <dl class="location-information-list">
+
+                        <!-- 주소 -->
+                        <div class="location-information-row">
+
+                            <dt>
+                                <img
+                                    src="images/introduce-educators/location.png"
+                                    alt=""
+                                    width="24"
+                                    height="24">
+                                주소
+                            </dt>
+
+                            <dd>
+
+                                <p id="location-address">
+                                    부산 부산진구 서면로10, 207호
+                                </p>
+
+                                <div class="location-map-links">
+
+                                    <a
+                                        id="location-naver"
+                                        href="https://naver.me/FgHhGggM"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="cta-button">
+
+                                        네이버 지도
+
+                                        <img
+                                            src="images/introduce-educators/naver-map.png"
+                                            alt=""
+                                            width="22"
+                                            height="22">
+
+                                    </a>
+
+                                    <a
+                                        id="location-kakao"
+                                        href="https://place.map.kakao.com/1689881626"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="cta-button">
+
+                                        카카오 지도
+
+                                        <img
+                                            src="images/introduce-educators/kakao-map.png"
+                                            alt=""
+                                            width="23"
+                                            height="22">
+
+                                    </a>
+
+                                </div>
+
+                            </dd>
+
                         </div>
 
-                        <div class="location-info-value">
-                            <p id="location-address">
-                                부산 부산진구 서면로10, 207호
-                            </p>
 
-                            <div class="location-map-links">
-                                <a
-                                    id="location-naver"
-                                    class="cta-button"
-                                    target="_blank">
-                                    네이버 지도
-                                </a>
+                        <!-- 운영시간 -->
+                        <div class="location-information-row">
 
-                                <a
-                                    id="location-kakao"
-                                    class="cta-button"
-                                    target="_blank">
-                                    카카오 지도
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                            <dt>
+                                <img
+                                    src="images/introduce-educators/calendar.png"
+                                    alt=""
+                                    width="24"
+                                    height="24">
+                                운영시간
+                            </dt>
 
-                    <div class="location-info-row">
-                        <div class="location-info-label">
-                            운영시간
+                            <dd id="location-hours">
+                                두골비 10:00 ~ 14:00<br>
+                                두골체 15:30 ~ 19:00
+                            </dd>
+
                         </div>
 
-                        <div
-                            class="location-info-value"
-                            id="location-hours">
-                            두골비 10:00 ~ 14:00<br>
-                            두골체 15:30 ~ 19:00
-                        </div>
-                    </div>
 
-                    <div class="location-info-row">
-                        <div class="location-info-label">
-                            상담문의
-                        </div>
+                        <!-- 상담문의 -->
+                        <div class="location-information-row">
 
-                        <div class="location-info-value">
-                            <p id="location-phone">031-717-5207</p>
-
-                            <a
-                                href="index.html#inquiry"
-                                class="cta-button">
+                            <dt>
+                                <img
+                                    src="images/introduce-educators/phone.png"
+                                    alt=""
+                                    width="23"
+                                    height="23">
                                 상담문의
-                            </a>
+                            </dt>
+
+                            <dd>
+
+                                <p id="location-phone">
+                                    031-717-5207
+                                </p>
+
+                                <a
+                                    href="index.html#inquiry"
+                                    class="cta-button w-fit location-contact">
+
+                                    상담문의
+
+                                    <img
+                                        src="images/introduce-educators/right-up.svg"
+                                        alt=""
+                                        class="arrow"
+                                        width="14"
+                                        height="14">
+
+                                </a>
+
+                            </dd>
+
                         </div>
-                    </div>
+
+                    </dl>
 
                 </div>
 
             </div>
+
         </div>
+
     </section>
 
 </main>
 
+
 <?php include __DIR__ . '/footer.html'; ?>
+
 
 <script
     charset="UTF-8"
+    class="daum_roughmap_loader_script"
     src="https://t1.kakaocdn.net/kakaomapweb/roughmap/loader/prod/roughmapLoader.js">
 </script>
 
 <script src="js/common.js"></script>
 <script src="js/location.js"></script>
+
 </body>
 </html>
