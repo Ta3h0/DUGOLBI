@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,237 +15,184 @@
 
 <body class="location">
 
-<?php include __DIR__ . '/header.html'; ?>
+    <?php include __DIR__ . '/header.html'; ?>
 
-<main id="wrap">
+    <main id="wrap">
 
-    <!-- HERO -->
-    <section class="introduce-hero location-hero" aria-labelledby="location-hero-title">
-        <div class="container">
+        <section class="introduce-hero location-hero subpage-simple-hero" aria-labelledby="location-hero-title">
+            <div class="container">
+                <h1 id="location-hero-title">
+                    <img src="images/introduce-educators/dugolbi-che.svg" alt="DUGOLBI·CHE" width="359" height="40">
+                </h1>
 
-            <h1 id="location-hero-title">
-                <img
-                    src="images/introduce-educators/dugolbi-che.svg"
-                    alt="DUGOLBI·CHE"
-                    width="359"
-                    height="40"
-                >
-            </h1>
-
-            <p class="introduce-hero-message">오시는 길</p>
-
-        </div>
-    </section>
-
-
-    <!-- LOCATION -->
-    <section class="location-section">
-
-        <div class="container">
-
-            <!-- 지점 선택 -->
-            <div class="location-tabs" role="tablist">
-
-                <button
-                    type="button"
-                    class="location-tab is-active"
-                    data-location="busan">
-                    부산 교육 본점
-                </button>
-
-                <button
-                    type="button"
-                    class="location-tab"
-                    data-location="seoul">
-                    서울 청담 교육장
-                </button>
-
+                <p class="subpage-simple-hero-title">오시는 길</p>
             </div>
+        </section>
 
 
-            <h2 class="location-title">
-                부산 교육 본점 오시는 길
-            </h2>
+        <!-- LOCATION -->
+        <section class="location-section">
+
+            <div class="container">
+
+                <!-- 지점 선택 -->
+                <div class="location-tabs" role="tablist">
+
+                    <button type="button" class="location-tab is-active" data-location="busan">
+                        부산 교육 본점
+                    </button>
+
+                    <button type="button" class="location-tab" data-location="seoul">
+                        서울 청담 교육장
+                    </button>
+
+                </div>
 
 
-            <div class="location-content">
-
-                <div class="location-map-panel">
-
-    <!-- 부산 교육 본점 -->
-    <div
-        id="location-map-busan"
-        class="location-map is-active">
-
-        <div
-            id="daumRoughmapContainer1791258098959"
-            class="root_daum_roughmap root_daum_roughmap_landing location-roughmap">
-        </div>
-
-    </div>
-
-    <!-- 서울 청담 교육장 -->
-    <div
-        id="location-map-seoul"
-        class="location-map">
-
-        <div
-            id="daumRoughmapContainer1791258123716"
-            class="root_daum_roughmap root_daum_roughmap_landing location-roughmap">
-        </div>
-
-    </div>
-
-</div>
+                <h2 class="location-title">
+                    부산 교육 본점 오시는 길
+                </h2>
 
 
-                <!-- INFORMATION -->
-                <div class="location-information">
+                <div class="location-content">
 
-                    <dl class="location-information-list">
+                    <div class="location-map-panel">
 
-                        <!-- 주소 -->
-                        <div class="location-information-row">
+                        <!-- 부산 교육 본점 -->
+                        <div id="location-map-busan" class="location-map is-active">
 
-                            <dt>
-                                <img
-                                    src="images/introduce-educators/location.png"
-                                    alt=""
-                                    width="24"
-                                    height="24">
-                                주소
-                            </dt>
-
-                            <dd>
-
-                                <p id="location-address">
-                                    부산 부산진구 서면로10, 207호
-                                </p>
-
-                                <div class="location-map-links">
-
-                                    <a
-                                        id="location-naver"
-                                        href="https://naver.me/FgHhGggM"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="cta-button">
-
-                                        네이버 지도
-
-                                        <img
-                                            src="images/introduce-educators/naver-map.png"
-                                            alt=""
-                                            width="22"
-                                            height="22">
-
-                                    </a>
-
-                                    <a
-                                        id="location-kakao"
-                                        href="https://place.map.kakao.com/1689881626"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="cta-button">
-
-                                        카카오 지도
-
-                                        <img
-                                            src="images/introduce-educators/kakao-map.png"
-                                            alt=""
-                                            width="23"
-                                            height="22">
-
-                                    </a>
-
-                                </div>
-
-                            </dd>
+                            <div id="daumRoughmapContainer1791258098959"
+                                class="root_daum_roughmap root_daum_roughmap_landing location-roughmap">
+                            </div>
 
                         </div>
 
+                        <!-- 서울 청담 교육장 -->
+                        <div id="location-map-seoul" class="location-map">
 
-                        <!-- 운영시간 -->
-                        <div class="location-information-row">
-
-                            <dt>
-                                <img
-                                    src="images/introduce-educators/calendar.png"
-                                    alt=""
-                                    width="24"
-                                    height="24">
-                                운영시간
-                            </dt>
-
-                            <dd id="location-hours">
-                                두골비 10:00 ~ 14:00<br>
-                                두골체 15:30 ~ 19:00
-                            </dd>
+                            <div id="daumRoughmapContainer1791258123716"
+                                class="root_daum_roughmap root_daum_roughmap_landing location-roughmap">
+                            </div>
 
                         </div>
 
+                    </div>
 
-                        <!-- 상담문의 -->
-                        <div class="location-information-row">
 
-                            <dt>
-                                <img
-                                    src="images/introduce-educators/phone.png"
-                                    alt=""
-                                    width="23"
-                                    height="23">
-                                상담문의
-                            </dt>
+                    <!-- INFORMATION -->
+                    <div class="location-information">
 
-                            <dd>
+                        <dl class="location-information-list">
 
-                                <p id="location-phone">
-                                    031-717-5207
-                                </p>
+                            <!-- 주소 -->
+                            <div class="location-information-row">
 
-                                <a
-                                    href="index.html#inquiry"
-                                    class="cta-button w-fit location-contact">
+                                <dt>
+                                    <img src="images/introduce-educators/location.png" alt="" width="24" height="24">
+                                    주소
+                                </dt>
 
+                                <dd>
+
+                                    <p id="location-address">
+                                        부산 부산진구 서면로10, 207호
+                                    </p>
+
+                                    <div class="location-map-links">
+
+                                        <a id="location-naver" href="https://naver.me/FgHhGggM" target="_blank"
+                                            rel="noopener noreferrer" class="cta-button">
+
+                                            네이버 지도
+
+                                            <img src="images/introduce-educators/naver-map.png" alt="" width="22"
+                                                height="22">
+
+                                        </a>
+
+                                        <a id="location-kakao" href="https://place.map.kakao.com/1689881626"
+                                            target="_blank" rel="noopener noreferrer" class="cta-button">
+
+                                            카카오 지도
+
+                                            <img src="images/introduce-educators/kakao-map.png" alt="" width="23"
+                                                height="22">
+
+                                        </a>
+
+                                    </div>
+
+                                </dd>
+
+                            </div>
+
+
+                            <!-- 운영시간 -->
+                            <div class="location-information-row">
+
+                                <dt>
+                                    <img src="images/introduce-educators/calendar.png" alt="" width="24" height="24">
+                                    운영시간
+                                </dt>
+
+                                <dd id="location-hours">
+                                    두골비 10:00 ~ 14:00<br>
+                                    두골체 15:30 ~ 19:00
+                                </dd>
+
+                            </div>
+
+
+                            <!-- 상담문의 -->
+                            <div class="location-information-row">
+
+                                <dt>
+                                    <img src="images/introduce-educators/phone.png" alt="" width="23" height="23">
                                     상담문의
+                                </dt>
 
-                                    <img
-                                        src="images/introduce-educators/right-up.svg"
-                                        alt=""
-                                        class="arrow"
-                                        width="14"
-                                        height="14">
+                                <dd>
 
-                                </a>
+                                    <p id="location-phone">
+                                        031-717-5207
+                                    </p>
 
-                            </dd>
+                                    <a href="index.html#inquiry" class="cta-button w-fit location-contact">
 
-                        </div>
+                                        상담문의
 
-                    </dl>
+                                        <img src="images/introduce-educators/right-up.svg" alt="" class="arrow"
+                                            width="14" height="14">
+
+                                    </a>
+
+                                </dd>
+
+                            </div>
+
+                        </dl>
+
+                    </div>
 
                 </div>
 
             </div>
 
-        </div>
+        </section>
 
-    </section>
-
-</main>
+    </main>
 
 
-<?php include __DIR__ . '/footer.html'; ?>
+    <?php include __DIR__ . '/footer.html'; ?>
 
 
-<script
-    charset="UTF-8"
-    class="daum_roughmap_loader_script"
-    src="https://t1.kakaocdn.net/kakaomapweb/roughmap/loader/prod/roughmapLoader.js">
-</script>
+    <script charset="UTF-8" class="daum_roughmap_loader_script"
+        src="https://t1.kakaocdn.net/kakaomapweb/roughmap/loader/prod/roughmapLoader.js">
+        </script>
 
-<script src="js/common.js"></script>
-<script src="js/location.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/location.js"></script>
 
 </body>
+
 </html>
