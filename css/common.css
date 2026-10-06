@@ -10866,6 +10866,10 @@ body.news main {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 :where(body.location) .location-hero-message {
