@@ -4114,45 +4114,6 @@ body.review .page-button {
   background: linear-gradient(to bottom, rgba(18, 26, 50, 0) 0%, rgba(18, 26, 50, 1) 100%);
 }
 
-:where(body.schedule) .schedule-calendar-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  border-top: 1px solid #e8edf3;
-  padding-top: 20px;
-}
-
-:where(body.schedule) .schedule-calendar-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-:where(body.schedule) .schedule-action {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 116px;
-  height: 44px;
-  padding: 0 18px;
-  border-radius: 10px;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-:where(body.schedule) .schedule-action-inquiry {
-  border: 1px solid var(--main-color);
-  color: var(--main-color);
-  background: #fff;
-}
-
-:where(body.schedule) .schedule-action-naver {
-  background: #03c75a;
-  color: #fff;
-}
-
 :where(body.home) .section05 .container .career-panel li {
   margin-bottom: 4px;
 }
@@ -9707,6 +9668,55 @@ body.schedule {
   color: var(--main-color);
 }
 
+:where(body.schedule) .schedule-calendar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* PC / 모바일 예약 버튼 공통 */
+:where(body.schedule) .schedule-calendar-actions .cta-button,
+:where(body.schedule) .schedule-sheet-actions .cta-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 100px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+/* PC 사이즈 */
+:where(body.schedule) .schedule-calendar-actions .cta-button {
+  min-width: 160px;
+  padding: 14px 24px;
+}
+
+/* 상담신청 = 기존 파란 버튼 스타일 */
+:where(body.schedule) .schedule-action-inquiry {
+  background: var(--main-color);
+  color: #fff;
+  border: 1px solid var(--main-color);
+}
+
+/* 네이버 예약 = 기존 네이버 예약 버튼 스타일 */
+:where(body.schedule) .schedule-action-naver {
+  background: #fff;
+  color: var(--main-color);
+  border: 1px solid var(--main-color);
+}
+
+/* 네이버 아이콘 */
+:where(body.schedule) .schedule-action-naver img {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
 :where(body.schedule) .schedule-empty {
   padding: 34px 24px;
   background: #f7f9fc;
@@ -9931,6 +9941,10 @@ body.schedule.reduce-motion .schedule-section * {
 }
 
 @media (max-width: 768px) {
+  :where(body.schedule) .schedule-calendar-actions {
+    display: none;
+  }
+
   :where(body.schedule) .schedule-section {
     padding-top: 120px;
   }
@@ -10116,13 +10130,14 @@ body.schedule.reduce-motion .schedule-section * {
     gap: 12px;
     margin-top: 24px;
   }
-
-  :where(body.schedule) .schedule-sheet-actions .cta-button {
-    justify-content: center;
-    padding: 12px 8px;
-    min-width: 0;
-  }
-
+:where(body.schedule) .schedule-sheet-actions .cta-button {
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  padding: 15px 12px;
+  border-radius: 100px;
+  font-size: 1.6rem;
+}
   :where(body.schedule) .schedule-booking-naver img {
     width: 24px;
     height: 24px;
