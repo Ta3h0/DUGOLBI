@@ -11119,7 +11119,7 @@ body.news main {
 
 /* TABLET */
 
-@media (max-width: 1024px) {
+@media (max-width: 1080px) {
 
   :where(body.location) .location-section {
     padding: 88px 0 110px;
