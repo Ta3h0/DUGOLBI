@@ -25,10 +25,9 @@ const locationData = {
 
         phone: "02-123-4567",
 
-        naverUrl: "https://naver.me/FgHhGggM",
-        kakaoUrl: "https://place.map.kakao.com/1689881626"
+        naverUrl: "https://naver.me/GWW50n7K",
+        kakaoUrl: "https://place.map.kakao.com/76091347"
     },
-
 };
 
 document.addEventListener("DOMContentLoaded", function () {
