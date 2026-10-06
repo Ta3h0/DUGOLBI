@@ -48,7 +48,7 @@ const educationData = [
             }
         ],
         "phone": "010-3450-1662",
-        "naverBookingUrl": ""
+        "naverBookingUrl": "https://naver.me/FgHhGggM"
     }
 ];
 
@@ -193,7 +193,7 @@ const promotionList = [
 const scheduleData = [
     {
         "id": "dugolbi-10",
-        "naverBookingUrl": "",
+        "naverBookingUrl": "https://naver.me/FgHhGggM",
         "color": "schedule-color-1",
         "title": "두골비 과정 10기 교육일정",
         "start": "2026-10-11",
@@ -201,7 +201,7 @@ const scheduleData = [
     },
     {
         "id": "sample-signature",
-        "naverBookingUrl": "",
+        "naverBookingUrl": "https://naver.me/FgHhGggM",
         "color": "schedule-color-2",
         "title": "시그니처 교육과정",
         "start": "2026-10-03",
@@ -210,7 +210,7 @@ const scheduleData = [
     },
     {
         "id": "sample-decollete",
-        "naverBookingUrl": "",
+        "naverBookingUrl": "https://naver.me/FgHhGggM",
         "color": "schedule-color-3",
         "title": "데콜테 실전 테크닉",
         "start": "2026-10-08",
@@ -219,7 +219,7 @@ const scheduleData = [
     },
     {
         "id": "sample-startup",
-        "naverBookingUrl": "",
+        "naverBookingUrl": "https://naver.me/FgHhGggM",
         "color": "schedule-color-4",
         "title": "창업반 실전 교육",
         "start": "2026-10-19",
@@ -228,7 +228,7 @@ const scheduleData = [
     },
     {
         "id": "sample-growth",
-        "naverBookingUrl": "",
+        "naverBookingUrl": "https://naver.me/FgHhGggM",
         "color": "schedule-color-5",
         "title": "어린이 성장 매니지먼트",
         "start": "2026-10-29",
