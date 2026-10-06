@@ -4606,6 +4606,7 @@ body.review .page-button {
   border-radius: 60px;
   background-color: #F7F9FC;
   margin: 12px 0;
+  cursor: pointer;
 }
 
 :where(body.home) .section09 .container .inner .faq-list .item .quest {
@@ -4630,6 +4631,7 @@ body.review .page-button {
   padding: 0 40px;
   word-break: keep-all;
   font-size: 1.6rem;
+  cursor: default;
 }
 
 :where(body.home) .section09 .container .inner .faq-list .item .quest strong {

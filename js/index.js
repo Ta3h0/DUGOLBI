@@ -346,9 +346,18 @@
 
         items.forEach(function (item) {
             const button = item.querySelector(".quest");
+            const answer = item.querySelector(".answe");
+
             setExpanded(item, false);
-            button.addEventListener("click", function () {
+
+            item.addEventListener("click", function (event) {
+                // 답변 영역 클릭은 열고 닫기에 사용하지 않음
+                if (answer.contains(event.target)) {
+                    return;
+                }
+
                 const shouldOpen = button.getAttribute("aria-expanded") !== "true";
+
                 items.forEach(function (other) {
                     setExpanded(other, other === item && shouldOpen);
                 });
