@@ -10841,3 +10841,90 @@ body.news main {
     width: 18%;
   }
 }
+
+:where(body.location) .location-content {
+    display: grid;
+    grid-template-columns: 624px minmax(0, 1fr);
+    gap: 60px;
+    align-items: stretch;
+}
+
+:where(body.location) .location-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+:where(body.location) .location-tab {
+    min-width: 160px;
+    height: 52px;
+    border-radius: 100px;
+    border: 1px solid #e4e9ef;
+    background: #fff;
+    color: #aab2bd;
+    font-weight: 700;
+}
+
+:where(body.location) .location-tab.is-active {
+    background: var(--main-color);
+    border-color: var(--main-color);
+    color: #fff;
+}
+
+:where(body.location) .location-map-wrap {
+    position: relative;
+    min-height: 420px;
+    overflow: hidden;
+    border-radius: 40px;
+}
+
+:where(body.location) .location-map {
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    opacity: 0;
+    visibility: hidden;
+
+    pointer-events: none;
+}
+
+:where(body.location) .location-map.is-active {
+    opacity: 1;
+    visibility: visible;
+}
+
+@media (max-width: 768px) {
+    :where(body.location) .location-content {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    :where(body.location) .location-map-wrap {
+        min-height: 320px;
+        border-radius: 24px;
+    }
+
+    :where(body.location) .location-tabs {
+        width: 100%;
+    }
+
+    :where(body.location) .location-tab {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+:where(body.introduce-educators) .introduce-hero {
+    background:
+        url('../images/introduce-educators/top-section-bg.png')
+        center / cover no-repeat;
+}
+
+:where(body.location) .location-hero {
+    background:
+        url('../images/introduce-educators/top-section-bg.png')
+        center / cover no-repeat;
+}
