@@ -69,7 +69,7 @@
         const title = section.querySelector(".section-title");
         if (!pagination) return;
 
-        const pageSize = 6;
+        const pageSize = pageClass === "network" ? 8 : 6;
         const groupSize = 10;
         const selectedFilter = filters.find(function (button) {
             return button.getAttribute("aria-pressed") === "true";
