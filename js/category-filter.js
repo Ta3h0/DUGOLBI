@@ -66,11 +66,10 @@
         const items = Array.from(section.querySelectorAll("." + pageClass + "-card"));
         const empty = section.querySelector("." + pageClass + "-empty");
         const pagination = section.querySelector("." + pageClass + "-pagination");
-        const title = section.querySelector(".section-title");
         if (!pagination) return;
 
         const pageSize = pageClass === "network" ? 8 : 6;
-        const groupSize = 10;
+        const mobileMedia = window.matchMedia("(max-width: 768px)");
         const selectedFilter = filters.find(function (button) {
             return button.getAttribute("aria-pressed") === "true";
         });
@@ -102,13 +101,14 @@
             pagination.replaceChildren();
             if (!pageCount) return;
 
+            const groupSize = mobileMedia.matches ? 5 : 10;
             const groupStart = Math.floor((currentPage - 1) / groupSize) * groupSize + 1;
             const groupEnd = Math.min(groupStart + groupSize - 1, pageCount);
             const hasGroups = pageCount > groupSize;
             if (hasGroups) {
                 pagination.append(
                     makeButton("«", 1, "첫 페이지", currentPage === 1),
-                    makeButton("‹", Math.max(1, groupStart - groupSize), "이전 10페이지", groupStart === 1)
+                    makeButton("‹", Math.max(1, groupStart - groupSize), "이전 " + groupSize + "페이지", groupStart === 1)
                 );
             }
 
@@ -123,7 +123,7 @@
 
             if (hasGroups) {
                 pagination.append(
-                    makeButton("›", groupEnd + 1, "다음 10페이지", groupEnd === pageCount),
+                    makeButton("›", groupEnd + 1, "다음 " + groupSize + "페이지", groupEnd === pageCount),
                     makeButton("»", pageCount, "마지막 페이지", currentPage === pageCount)
                 );
             }
@@ -145,14 +145,19 @@
             if (!button || button.disabled) return;
             const nextPage = Number(button.dataset.page);
             if (nextPage < 1 || nextPage > pageCount || nextPage === currentPage) return;
+            const paginationTop = pagination.getBoundingClientRect().top;
             currentPage = nextPage;
             render();
-            if (title) {
-                title.focus({ preventScroll: true });
-                title.scrollIntoView({ block: "start", behavior: "auto" });
-            }
+            // Keep the pagination in place even when the next page has fewer cards.
+            window.scrollBy({
+                top: pagination.getBoundingClientRect().top - paginationTop,
+                behavior: "instant"
+            });
+            const activeButton = pagination.querySelector('button[aria-current="page"]');
+            if (activeButton) activeButton.focus({ preventScroll: true });
         });
 
+        mobileMedia.addEventListener("change", render);
         render();
     }
 
