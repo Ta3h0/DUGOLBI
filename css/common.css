@@ -7784,6 +7784,12 @@ body.network.network-modal-open {
   white-space: nowrap;
 }
 
+:where(body.network) .network-certification {
+  border-color: var(--main-color);
+  background: transparent;
+  color: var(--main-color);
+}
+
 :where(body.network) .network-certification.is-certified {
   border-color: var(--main-color);
   background: var(--main-color);

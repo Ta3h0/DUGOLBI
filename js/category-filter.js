@@ -118,7 +118,7 @@
             if (branch.certification) {
                 const certification = document.createElement("span");
                 certification.className = "network-certification";
-                if (["공식 강사", "교육 마스터점", "교육 인증점"].includes(branch.certification)) {
+                if (branch.certification === "공식 강사") {
                     certification.classList.add("is-certified");
                 }
                 certification.textContent = branch.certification;
