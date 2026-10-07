@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <dl class="montly-detail-facts">
                 <div><dt>교육기간</dt><dd>${periodMarkup(item, true)}</dd></div>
                 <div><dt>교육시간</dt><dd>총 ${escapeHtml(item.durationHours)}시간</dd></div>
-                <div><dt>상담문의</dt><dd>${escapeHtml(phone)}</dd></div>
+                <div><dt>상담 신청</dt><dd>${escapeHtml(phone)}</dd></div>
             </dl>
             ${priceMarkup(item)}
         </div>`;
@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }).join("")}
         </section>
         <section class="montly-detail-contact" aria-labelledby="contact-title">
-            <h2 id="contact-title">상담문의</h2>
+            <h2 id="contact-title">상담 신청</h2>
             <p class="montly-contact-number">${escapeHtml(phone)}</p>
             <div class="montly-booking-actions">
                 <a class="cta-button montly-booking-naver" href="${escapeHtml(item.naverBookingUrl || "#")}"><img src="images/network/naver-map.png" alt="" width="33" height="33">네이버 예약</a>

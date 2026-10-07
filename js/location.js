@@ -8,7 +8,7 @@ const locationData = {
             "두골체 15:30 ~ 19:00"
         ],
 
-        phone: "031-717-5207",
+        phone: "010-3450-1662",
 
         naverUrl: "https://naver.me/FgHhGggM",
         kakaoUrl: "https://place.map.kakao.com/1689881626"
@@ -23,7 +23,7 @@ const locationData = {
             "두골체 15:30 ~ 19:00"
         ],
 
-        phone: "02-123-4567",
+        phone: "010-3450-1662",
 
         naverUrl: "https://naver.me/GWW50n7K",
         kakaoUrl: "https://place.map.kakao.com/76091347"
