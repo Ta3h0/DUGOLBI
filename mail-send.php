@@ -169,7 +169,7 @@ $routeText = $route
 
 $to = $name === 'testAdmin'
     ? 'ta3h0_@naver.com'
-    : 'contact@liumspace.com';
+    : 'mjk5407@naver.com';
 
 
 $fromEmail = getenv('RESERVATION_FROM_EMAIL') ?: '';
