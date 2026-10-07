@@ -47,8 +47,8 @@ const educationData = [
                 "description": "관찰 → 움직임 확인 → 연결 부위 파악 → 테크닉 선택까지.\n 현장에서 바로 활용할 수 있도록 원인에 따른 접근 방법을 직접 실습합니다."
             }
         ],
-        "phone": "010-3450-1662",
-        "naverBookingUrl": "https://naver.me/FgHhGggM"
+        get phone() { return business_info.phone; },
+        get naverBookingUrl() { return business_info.locations.busan.naverUrl; }
     }
 ];
 
@@ -78,7 +78,7 @@ const promotionList = [
             "신규등록한 회원님께 1:1 강습권을 드립니다.",
             "QR코드 인식 및 전화 문의를 통해\n상담을 예약해보세요."
         ],
-        "phone": "010-3450-1662"
+        get phone() { return business_info.phone; }
     },
     {
         "id": 2,
@@ -105,7 +105,7 @@ const promotionList = [
             "신규등록한 회원님께 1:1 강습권을 드립니다.",
             "QR코드 인식 및 전화 문의를 통해\n상담을 예약해보세요."
         ],
-        "phone": "010-3450-1662"
+        get phone() { return business_info.phone; }
     },
     {
         "id": 3,
@@ -132,7 +132,7 @@ const promotionList = [
             "신규등록한 회원님께 1:1 강습권을 드립니다.",
             "QR코드 인식 및 전화 문의를 통해\n상담을 예약해보세요."
         ],
-        "phone": "010-3450-1662"
+        get phone() { return business_info.phone; }
     },
     {
         "id": 4,
@@ -159,7 +159,7 @@ const promotionList = [
             "신규등록한 회원님께 1:1 강습권을 드립니다.",
             "QR코드 인식 및 전화 문의를 통해\n상담을 예약해보세요."
         ],
-        "phone": "010-3450-1662"
+        get phone() { return business_info.phone; }
     },
     {
         "id": 5,
@@ -186,14 +186,14 @@ const promotionList = [
             "신규등록한 회원님께 1:1 강습권을 드립니다.",
             "QR코드 인식 및 전화 문의를 통해\n상담을 예약해보세요."
         ],
-        "phone": "010-3450-1662"
+        get phone() { return business_info.phone; }
     }
 ];
 
 const scheduleData = [
     {
         "id": "dugolbi-10",
-        "naverBookingUrl": "https://naver.me/FgHhGggM",
+        get naverBookingUrl() { return business_info.locations.busan.naverUrl; },
         "color": "schedule-color-1",
         "title": "두골비 과정 10기 교육일정",
         "start": "2026-10-11",
@@ -201,7 +201,7 @@ const scheduleData = [
     },
     {
         "id": "sample-signature",
-        "naverBookingUrl": "https://naver.me/FgHhGggM",
+        get naverBookingUrl() { return business_info.locations.busan.naverUrl; },
         "color": "schedule-color-2",
         "title": "시그니처 교육과정",
         "start": "2026-10-03",
@@ -210,7 +210,7 @@ const scheduleData = [
     },
     {
         "id": "sample-decollete",
-        "naverBookingUrl": "https://naver.me/FgHhGggM",
+        get naverBookingUrl() { return business_info.locations.busan.naverUrl; },
         "color": "schedule-color-3",
         "title": "데콜테 실전 테크닉",
         "start": "2026-10-08",
@@ -219,7 +219,7 @@ const scheduleData = [
     },
     {
         "id": "sample-startup",
-        "naverBookingUrl": "https://naver.me/FgHhGggM",
+        get naverBookingUrl() { return business_info.locations.busan.naverUrl; },
         "color": "schedule-color-4",
         "title": "창업반 실전 교육",
         "start": "2026-10-19",
@@ -228,7 +228,7 @@ const scheduleData = [
     },
     {
         "id": "sample-growth",
-        "naverBookingUrl": "https://naver.me/FgHhGggM",
+        get naverBookingUrl() { return business_info.locations.busan.naverUrl; },
         "color": "schedule-color-5",
         "title": "어린이 성장 매니지먼트",
         "start": "2026-10-29",
@@ -837,3 +837,31 @@ const networkData = [
         "phone": "010-4654-5857"
     }
 ];
+
+
+// 공통 사업정보: 아래 값만 수정하면 푸터, 교육장, INFORMATION, 전화 예약에 반영됩니다.
+// 수료지점별 연락처는 위 networkData에서 별도로 관리합니다.
+// email은 화면에 공개하는 이메일입니다. 상담폼 수신자 분기는 서버 mail-send.php에서 관리합니다.
+const business_info = {
+    name: "두골비체 트레이닝 센터",
+    representative: "이희경",
+    registrationNumber: "254-27-02072",
+    email: "mjk5407-@naver.com",
+    phone: "010-3450-1662",
+    locations: {
+        busan: {
+            name: "부산 교육 본점",
+            address: "부산 부산진구 서면로10, 207호",
+            hours: ["두골비 10:00 ~ 14:00", "두골체 15:30 ~ 19:00"],
+            naverUrl: "https://naver.me/FgHhGggM",
+            kakaoUrl: "https://place.map.kakao.com/1689881626"
+        },
+        seoul: {
+            name: "서울 청담 교육장",
+            address: "서울 강남구 삼성로 723, 3층",
+            hours: ["두골비 10:00 ~ 14:00", "두골체 15:30 ~ 19:00"],
+            naverUrl: "https://naver.me/GWW50n7K",
+            kakaoUrl: "https://place.map.kakao.com/76091347"
+        }
+    }
+};

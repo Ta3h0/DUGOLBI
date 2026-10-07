@@ -20,6 +20,51 @@ window.DugolbiLinks = {
 /* Shared interactions moved from the existing DUGOLBI HTML pages. */
 (function () {
 
+    function initBusinessInfo() {
+        if (typeof business_info === "undefined") return;
+
+        function valueAt(path) {
+            return path.split(".").reduce(function (value, key) {
+                return value && Object.prototype.hasOwnProperty.call(value, key) ? value[key] : undefined;
+            }, business_info);
+        }
+
+        document.querySelectorAll("[data-business]").forEach(function (element) {
+            const value = valueAt(element.dataset.business);
+            if (typeof value !== "string") return;
+            element.textContent = (element.dataset.businessPrefix || "") + value + (element.dataset.businessSuffix || "");
+        });
+        document.querySelectorAll("[data-business-phone]").forEach(function (link) {
+            const phone = String(business_info.phone || "").replace(/[^0-9+]/g, "");
+            if (phone) link.setAttribute("href", "tel:" + phone);
+            else link.removeAttribute("href");
+        });
+        document.querySelectorAll("[data-business-email]").forEach(function (link) {
+            if (business_info.email) link.setAttribute("href", "mailto:" + business_info.email);
+            else link.removeAttribute("href");
+        });
+        document.querySelectorAll("[data-business-link]").forEach(function (link) {
+            window.DugolbiLinks.setOptionalLink(link, valueAt(link.dataset.businessLink));
+        });
+        document.querySelectorAll("[data-business-hours]").forEach(function (element) {
+            const hours = business_info.locations[element.dataset.businessHours]?.hours;
+            if (!Array.isArray(hours)) return;
+            element.replaceChildren();
+            hours.forEach(function (line, index) {
+                if (index) element.appendChild(document.createElement("br"));
+                element.appendChild(document.createTextNode(line));
+            });
+        });
+        document.querySelectorAll("[data-business-location-alt]").forEach(function (image) {
+            const location = business_info.locations[image.dataset.businessLocationAlt];
+            if (location) image.alt = location.name + " 위치: " + location.address;
+        });
+        document.querySelectorAll("[data-business-map-label]").forEach(function (map) {
+            const location = business_info.locations[map.dataset.businessMapLabel];
+            if (location) map.setAttribute("aria-label", business_info.name + " " + location.name + " 카카오맵");
+        });
+    }
+
     function initHeader() {
         const body =
             document.body;
@@ -502,6 +547,8 @@ window.DugolbiLinks = {
         if (!document.body) {
             return;
         }
+
+        initBusinessInfo();
 
         document.querySelectorAll('a[href="#"]').forEach(function (link) {
             window.DugolbiLinks.setOptionalLink(link, '');
