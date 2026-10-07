@@ -242,9 +242,11 @@ const scheduleData = [
 // 지점 추가/수정은 name(업체명), certification(인증 구분), region(상세 지역), phone(연락처) 항목을 편집하세요.
 // 인증 구분: 공식 강사 / 교육 마스터점 / 교육 인증점 / 교육 수료점
 // img: 지점별 이미지 경로를 입력하세요. 빈 문자열("")이면 인증 구분에 맞는 기본 이미지를 사용합니다.
+// graduateName: 수료자명. 팝업의 인증명과 설명은 certification에 따라 표시합니다.
 const networkData = [
     {
         "name": "두골비오브제랩본점",
+        "graduateName": "김미진",
         "certification": "공식 강사",
         "img": "",
         "region": "부산진구",
@@ -252,6 +254,7 @@ const networkData = [
     },
     {
         "name": "새온에스테틱",
+        "graduateName": "권진이",
         "certification": "공식 강사",
         "img": "",
         "region": "부산 명지",
@@ -259,6 +262,7 @@ const networkData = [
     },
     {
         "name": "매직필라테스",
+        "graduateName": "맹정숙",
         "certification": "공식 강사",
         "img": "",
         "region": "서울 노원·강남",
@@ -266,6 +270,7 @@ const networkData = [
     },
     {
         "name": "제이윤 에스테틱",
+        "graduateName": "최자윤",
         "certification": "교육 마스터점",
         "img": "",
         "region": "서울 강서구 방화",
@@ -273,6 +278,7 @@ const networkData = [
     },
     {
         "name": "케어유에스테틱",
+        "graduateName": "정미자",
         "certification": "교육 마스터점",
         "img": "",
         "region": "서울 목동",
@@ -280,6 +286,7 @@ const networkData = [
     },
     {
         "name": "로인웰니스",
+        "graduateName": "윤성아",
         "certification": "교육 마스터점",
         "img": "",
         "region": "서울 청담",
@@ -287,6 +294,7 @@ const networkData = [
     },
     {
         "name": "자웅에스떼",
+        "graduateName": "김자웅",
         "certification": "교육 마스터점",
         "img": "",
         "region": "서울 강서",
@@ -294,6 +302,7 @@ const networkData = [
     },
     {
         "name": "다결뷰티",
+        "graduateName": "오다결",
         "certification": "교육 마스터점",
         "img": "",
         "region": "서울 마포",
@@ -301,6 +310,7 @@ const networkData = [
     },
     {
         "name": "김기숙힐링숍",
+        "graduateName": "김기숙",
         "certification": "교육 마스터점",
         "img": "",
         "region": "서울 중구 을지로",
@@ -308,6 +318,7 @@ const networkData = [
     },
     {
         "name": "보아스에스테틱",
+        "graduateName": "오원숙",
         "certification": "교육 마스터점",
         "img": "",
         "region": "서울 신사동",
@@ -315,6 +326,7 @@ const networkData = [
     },
     {
         "name": "두윤에스테틱",
+        "graduateName": "박윤정",
         "certification": "교육 마스터점",
         "img": "",
         "region": "서울 동작구 흑석동",
@@ -322,6 +334,7 @@ const networkData = [
     },
     {
         "name": "에바다에스테틱얼굴축소연구소",
+        "graduateName": "김연례",
         "certification": "교육 마스터점",
         "img": "",
         "region": "경기 양주",
@@ -329,6 +342,7 @@ const networkData = [
     },
     {
         "name": "동안비결뷰티얼굴축소연구소",
+        "graduateName": "김미선",
         "certification": "교육 마스터점",
         "img": "",
         "region": "경기 평택",
@@ -336,6 +350,7 @@ const networkData = [
     },
     {
         "name": "배선영에스테틱",
+        "graduateName": "배선영",
         "certification": "교육 마스터점",
         "img": "",
         "region": "경기 파주",
@@ -343,6 +358,7 @@ const networkData = [
     },
     {
         "name": "스킨앤바디Joa",
+        "graduateName": "조유신",
         "certification": "교육 마스터점",
         "img": "",
         "region": "경기 용인",
@@ -350,6 +366,7 @@ const networkData = [
     },
     {
         "name": "플로라스킨케어",
+        "graduateName": "김기라",
         "certification": "교육 마스터점",
         "img": "",
         "region": "경기 안양·인덕원",
@@ -357,6 +374,7 @@ const networkData = [
     },
     {
         "name": "바른결by김현숙",
+        "graduateName": "김현숙",
         "certification": "교육 마스터점",
         "img": "",
         "region": "경기 부천 신중동역",
@@ -364,6 +382,7 @@ const networkData = [
     },
     {
         "name": "바른몸케어",
+        "graduateName": "허유경",
         "certification": "교육 마스터점",
         "img": "",
         "region": "경기 고양시 일산 백석동",
@@ -371,6 +390,7 @@ const networkData = [
     },
     {
         "name": "라움리포벨",
+        "graduateName": "최미선",
         "certification": "교육 마스터점",
         "img": "",
         "region": "대전 서구",
@@ -378,6 +398,7 @@ const networkData = [
     },
     {
         "name": "지연스킨앤바디",
+        "graduateName": "나지연",
         "certification": "교육 마스터점",
         "img": "",
         "region": "경북 포항",
@@ -385,6 +406,7 @@ const networkData = [
     },
     {
         "name": "비체 스킨&바디랩",
+        "graduateName": "유민정",
         "certification": "교육 마스터점",
         "img": "",
         "region": "부산 서구",
@@ -392,6 +414,7 @@ const networkData = [
     },
     {
         "name": "오오이게 밸런스테라피",
+        "graduateName": "오시라",
         "certification": "교육 마스터점",
         "img": "",
         "region": "부산 수영구",
@@ -399,6 +422,7 @@ const networkData = [
     },
     {
         "name": "로온",
+        "graduateName": "유정연",
         "certification": "교육 마스터점",
         "img": "",
         "region": "부산 서면",
@@ -406,6 +430,7 @@ const networkData = [
     },
     {
         "name": "두골비오브제랩서면점",
+        "graduateName": "조아랑",
         "certification": "교육 마스터점",
         "img": "",
         "region": "부산 서면",
@@ -413,6 +438,7 @@ const networkData = [
     },
     {
         "name": "더바른예뻐지는공간",
+        "graduateName": "최나윤",
         "certification": "교육 마스터점",
         "img": "",
         "region": "부산 가야동",
@@ -420,6 +446,7 @@ const networkData = [
     },
     {
         "name": "리셋뷰티(舊 몸이좋아지는 PTT)",
+        "graduateName": "김서은",
         "certification": "교육 마스터점",
         "img": "",
         "region": "부산 동래",
@@ -427,6 +454,7 @@ const networkData = [
     },
     {
         "name": "미주핏",
+        "graduateName": "박나비",
         "certification": "교육 마스터점",
         "img": "",
         "region": "부산 강서구 명지신도시",
@@ -434,6 +462,7 @@ const networkData = [
     },
     {
         "name": "율스바디앤스킨",
+        "graduateName": "이정희",
         "certification": "교육 마스터점",
         "img": "",
         "region": "부산 금정구",
@@ -441,6 +470,7 @@ const networkData = [
     },
     {
         "name": "편백더힐링에스테틱",
+        "graduateName": "김용자",
         "certification": "교육 마스터점",
         "img": "",
         "region": "부산 수영구",
@@ -448,6 +478,7 @@ const networkData = [
     },
     {
         "name": "도도하게내추럴하게",
+        "graduateName": "김지연",
         "certification": "교육 마스터점",
         "img": "",
         "region": "부산 연제구 연산동",
@@ -455,6 +486,7 @@ const networkData = [
     },
     {
         "name": "아르떼뷰티",
+        "graduateName": "서주연",
         "certification": "교육 마스터점",
         "img": "",
         "region": "부산 하단",
@@ -462,6 +494,7 @@ const networkData = [
     },
     {
         "name": "바룸앤블룸",
+        "graduateName": "엄태현",
         "certification": "교육 마스터점",
         "img": "",
         "region": "창원 진해구",
@@ -469,6 +502,7 @@ const networkData = [
     },
     {
         "name": "콤마피부관리",
+        "graduateName": "김연경",
         "certification": "교육 마스터점",
         "img": "",
         "region": "창원 용호동",
@@ -476,6 +510,7 @@ const networkData = [
     },
     {
         "name": "더예쁘다스킨케어",
+        "graduateName": "문미주",
         "certification": "교육 마스터점",
         "img": "",
         "region": "김해 내외동",
@@ -483,6 +518,7 @@ const networkData = [
     },
     {
         "name": "채움에스테틱",
+        "graduateName": "금이슬",
         "certification": "교육 마스터점",
         "img": "",
         "region": "창원 성산구",
@@ -490,6 +526,7 @@ const networkData = [
     },
     {
         "name": "여며들다116",
+        "graduateName": "정지혜",
         "certification": "교육 마스터점",
         "img": "",
         "region": "경남 양산",
@@ -497,6 +534,7 @@ const networkData = [
     },
     {
         "name": "수에스테틱",
+        "graduateName": "구지수",
         "certification": "교육 마스터점",
         "img": "",
         "region": "경남 김해",
@@ -504,6 +542,7 @@ const networkData = [
     },
     {
         "name": "라라에스테틱",
+        "graduateName": "강영주",
         "certification": "교육 마스터점",
         "img": "",
         "region": "경남 양산시 남부동",
@@ -511,6 +550,7 @@ const networkData = [
     },
     {
         "name": "미소바른체형관리샵",
+        "graduateName": "하경아",
         "certification": "교육 마스터점",
         "img": "",
         "region": "창원 진해 용원",
@@ -518,6 +558,7 @@ const networkData = [
     },
     {
         "name": "반듯한에스테틱",
+        "graduateName": "엄주은",
         "certification": "교육 마스터점",
         "img": "",
         "region": "창원 용원동",
@@ -525,6 +566,7 @@ const networkData = [
     },
     {
         "name": "청아피부체형관리실",
+        "graduateName": "염영숙",
         "certification": "교육 마스터점",
         "img": "",
         "region": "대구 감삼동",
@@ -532,6 +574,7 @@ const networkData = [
     },
     {
         "name": "큐사랑남목점가온에스테틱",
+        "graduateName": "강경숙",
         "certification": "교육 마스터점",
         "img": "",
         "region": "울산 동구 남목",
@@ -539,6 +582,7 @@ const networkData = [
     },
     {
         "name": "은에스테틱",
+        "graduateName": "김나은",
         "certification": "교육 마스터점",
         "img": "",
         "region": "울산 남구 옥동",
@@ -546,6 +590,7 @@ const networkData = [
     },
     {
         "name": "리디안에스테틱",
+        "graduateName": "김혜진",
         "certification": "교육 마스터점",
         "img": "",
         "region": "전북 전주 효자동",
@@ -553,6 +598,7 @@ const networkData = [
     },
     {
         "name": "치유하는 몸, 마음 센터",
+        "graduateName": "유시연",
         "certification": "교육 마스터점",
         "img": "",
         "region": "광주",
@@ -560,6 +606,7 @@ const networkData = [
     },
     {
         "name": "산후맘출장테라피",
+        "graduateName": "염은경",
         "certification": "교육 인증점",
         "img": "",
         "region": "서울 강서구 등촌",
@@ -567,6 +614,7 @@ const networkData = [
     },
     {
         "name": "에스테틱연 목동점",
+        "graduateName": "김정애",
         "certification": "교육 인증점",
         "img": "",
         "region": "서울 양천구",
@@ -574,6 +622,7 @@ const networkData = [
     },
     {
         "name": "올리즈에스테틱",
+        "graduateName": "박지혜",
         "certification": "교육 인증점",
         "img": "",
         "region": "서울 중구",
@@ -581,6 +630,7 @@ const networkData = [
     },
     {
         "name": "디아에스테틱",
+        "graduateName": "김혜선",
         "certification": "교육 인증점",
         "img": "",
         "region": "경기 부천",
@@ -588,6 +638,7 @@ const networkData = [
     },
     {
         "name": "산후맘소통테라피",
+        "graduateName": "염은경",
         "certification": "교육 인증점",
         "img": "",
         "region": "경기 파주 운정",
@@ -595,6 +646,7 @@ const networkData = [
     },
     {
         "name": "KJH스킨&아로마테라피",
+        "graduateName": "김정희",
         "certification": "교육 인증점",
         "img": "",
         "region": "부산 사하구",
@@ -602,6 +654,7 @@ const networkData = [
     },
     {
         "name": "우연우의바디리셋",
+        "graduateName": "우연우",
         "certification": "교육 인증점",
         "img": "",
         "region": "대구 수성구",
@@ -609,6 +662,7 @@ const networkData = [
     },
     {
         "name": "이뻐지는시간",
+        "graduateName": "탁영지",
         "certification": "교육 인증점",
         "img": "",
         "region": "경남 통영",
@@ -616,6 +670,7 @@ const networkData = [
     },
     {
         "name": "보결샵",
+        "graduateName": "차보결",
         "certification": "교육 인증점",
         "img": "",
         "region": "울산 북구",
@@ -623,6 +678,7 @@ const networkData = [
     },
     {
         "name": "채움스킨바디",
+        "graduateName": "이수희",
         "certification": "교육 인증점",
         "img": "",
         "region": "울산 북구 달천동",
@@ -630,6 +686,7 @@ const networkData = [
     },
     {
         "name": "도깨비언니에스테틱",
+        "graduateName": "김혜미",
         "certification": "교육 인증점",
         "img": "",
         "region": "울산 남구",
@@ -637,6 +694,7 @@ const networkData = [
     },
     {
         "name": "리애나뷰티",
+        "graduateName": "신정아",
         "certification": "교육 인증점",
         "img": "",
         "region": "서울 도봉·강북",
@@ -644,6 +702,7 @@ const networkData = [
     },
     {
         "name": "더숨에스테틱",
+        "graduateName": "한태희",
         "certification": "교육 인증점",
         "img": "",
         "region": "서울 중랑구 상봉동",
@@ -651,6 +710,7 @@ const networkData = [
     },
     {
         "name": "바른몸길",
+        "graduateName": "진무광",
         "certification": "교육 인증점",
         "img": "",
         "region": "서울 신촌",
@@ -658,6 +718,7 @@ const networkData = [
     },
     {
         "name": "김채영에스테틱",
+        "graduateName": "김채영",
         "certification": "교육 인증점",
         "img": "",
         "region": "경기 양주",
@@ -665,6 +726,7 @@ const networkData = [
     },
     {
         "name": "에스테틱유아",
+        "graduateName": "이유아",
         "certification": "교육 인증점",
         "img": "",
         "region": "경남 김해시 삼계동",
@@ -672,6 +734,7 @@ const networkData = [
     },
     {
         "name": "뷰티온에스테틱",
+        "graduateName": "고현주",
         "certification": "교육 인증점",
         "img": "",
         "region": "강원 원주",
@@ -679,6 +742,7 @@ const networkData = [
     },
     {
         "name": "이너리플",
+        "graduateName": "김태인",
         "certification": "교육 인증점",
         "img": "",
         "region": "광주",
@@ -686,6 +750,7 @@ const networkData = [
     },
     {
         "name": "두골비,체&통증케어",
+        "graduateName": "함지은",
         "certification": "교육 인증점",
         "img": "",
         "region": "강원 원주시 단구동",
@@ -693,6 +758,7 @@ const networkData = [
     },
     {
         "name": "에스테틱라뽀르청담",
+        "graduateName": "김애정",
         "certification": "교육 수료점",
         "img": "",
         "region": "서울 강남 삼성",
@@ -700,6 +766,7 @@ const networkData = [
     },
     {
         "name": "황원장스킨앤바디",
+        "graduateName": "황미숙",
         "certification": "교육 수료점",
         "img": "",
         "region": "서울 강서구 우장산역",
@@ -707,6 +774,7 @@ const networkData = [
     },
     {
         "name": "LK테라피",
+        "graduateName": "이해랑",
         "certification": "교육 수료점",
         "img": "",
         "region": "서울 마포",
@@ -714,6 +782,7 @@ const networkData = [
     },
     {
         "name": "라임스킨케어",
+        "graduateName": "최유성",
         "certification": "교육 수료점",
         "img": "",
         "region": "서울 상봉",
@@ -721,6 +790,7 @@ const networkData = [
     },
     {
         "name": "오르멜라뷰티에스테틱",
+        "graduateName": "김예진",
         "certification": "교육 수료점",
         "img": "",
         "region": "서울 강남구 봉은사로4길 24",
@@ -728,6 +798,7 @@ const networkData = [
     },
     {
         "name": "어현숙에스테틱",
+        "graduateName": "어현숙",
         "certification": "교육 수료점",
         "img": "",
         "region": "서울 영등포구 당산동",
@@ -735,6 +806,7 @@ const networkData = [
     },
     {
         "name": "아우룸스킨앤바디",
+        "graduateName": "장성미",
         "certification": "교육 수료점",
         "img": "",
         "region": "경기 광명",
@@ -742,6 +814,7 @@ const networkData = [
     },
     {
         "name": "무유에스테틱",
+        "graduateName": "김가영",
         "certification": "교육 수료점",
         "img": "",
         "region": "경남 김해 내동",
@@ -749,6 +822,7 @@ const networkData = [
     },
     {
         "name": "포유 에스테틱",
+        "graduateName": "유미영",
         "certification": "교육 수료점",
         "img": "",
         "region": "충남 아산",
@@ -756,6 +830,7 @@ const networkData = [
     },
     {
         "name": "청주피부관리왁싱 미라인",
+        "graduateName": "김미라",
         "certification": "교육 수료점",
         "img": "",
         "region": "충북 청주",

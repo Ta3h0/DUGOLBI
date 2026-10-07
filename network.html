@@ -124,6 +124,25 @@
         </section>
         <?php include __DIR__ . '/footer.html'; ?>
     </main>
+    <dialog class="network-dialog" id="network-detail" aria-labelledby="network-detail-title">
+        <div class="network-dialog-panel">
+            <div class="network-dialog-toolbar">
+                <button type="button" class="legal-dialog-close network-dialog-close" aria-label="지점 상세 닫기">
+                    <span></span><span></span>
+                </button>
+            </div>
+            <div class="network-dialog-content">
+                <img class="network-detail-image" src="images/network/network-img-04.jpg" alt="" width="600" height="450">
+                <h2 id="network-detail-title"></h2>
+                <dl class="network-detail-info">
+                    <div><dt>수료자명</dt><dd class="network-detail-graduate"></dd></div>
+                    <div><dt>지역</dt><dd class="network-detail-region"></dd></div>
+                    <div><dt class="network-detail-certification"></dt><dd class="network-detail-certification-description"></dd></div>
+                    <div><dt>연락처</dt><dd><a class="network-detail-phone"></a></dd></div>
+                </dl>
+            </div>
+        </div>
+    </dialog>
     
 
     

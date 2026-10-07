@@ -14,6 +14,63 @@
             "교육 인증점": "images/network/network-img-03.jpg",
             "교육 수료점": "images/network/network-img-04.jpg"
         };
+        const certificationDescriptions = {
+            "공식 강사": "두골비의 기술과 교육을 전달하는 공식 전문 교육진",
+            "교육 마스터점": "필수과목 두골비 · 두골체 · 신결비 전 과정 수료 및 공식 인증 기준 충족",
+            "교육 인증점": "두골비 + 추가 1개 전문 교육과정 수료 및 공식 인증 기준 충족",
+            "교육 수료점": "두골비 공식 교육과정 수료"
+        };
+        const dialog = document.getElementById("network-detail");
+        let dialogTrigger = null;
+        if (dialog) {
+            dialog.querySelector(".network-dialog-close").addEventListener("click", function () {
+                dialog.close();
+            });
+            dialog.addEventListener("click", function (event) {
+                if (event.target === dialog) dialog.close();
+            });
+            dialog.addEventListener("keydown", function (event) {
+                if (event.key !== "Tab") return;
+                const controls = Array.from(dialog.querySelectorAll('button:not(:disabled), a[href]'));
+                const first = controls[0];
+                const last = controls[controls.length - 1];
+                if (event.shiftKey && document.activeElement === first) {
+                    event.preventDefault();
+                    last.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                    event.preventDefault();
+                    first.focus();
+                }
+            });
+            dialog.addEventListener("close", function () {
+                document.body.classList.remove("network-modal-open");
+                if (dialogTrigger && dialogTrigger.isConnected && !dialogTrigger.hidden) {
+                    dialogTrigger.focus({ preventScroll: true });
+                }
+            });
+        }
+
+        function openDetail(branch, card, imageSrc) {
+            if (!dialog || typeof dialog.showModal !== "function") return;
+            dialogTrigger = card;
+            const image = dialog.querySelector(".network-detail-image");
+            image.hidden = !imageSrc;
+            if (imageSrc) image.src = imageSrc;
+            image.alt = branch.name + " 지점 이미지";
+            dialog.querySelector("#network-detail-title").textContent = branch.name;
+            dialog.querySelector(".network-detail-graduate").textContent = branch.graduateName || "확인 중";
+            dialog.querySelector(".network-detail-region").textContent = branch.region || "확인 중";
+            dialog.querySelector(".network-detail-certification").textContent = branch.certification || "인증 구분";
+            dialog.querySelector(".network-detail-certification-description").textContent = certificationDescriptions[branch.certification] || "확인 중";
+            const phone = dialog.querySelector(".network-detail-phone");
+            phone.textContent = branch.phone || "확인 중";
+            if (branch.phone) phone.href = "tel:" + branch.phone.replace(/[^0-9+]/g, "");
+            else phone.removeAttribute("href");
+            dialog.showModal();
+            document.body.classList.add("network-modal-open");
+            dialog.querySelector(".network-dialog-content").scrollTop = 0;
+            dialog.querySelector(".network-dialog-close").focus({ preventScroll: true });
+        }
         const branches = typeof networkData !== "undefined" && Array.isArray(networkData)
             ? networkData.filter(function (branch) {
                 return branch && typeof branch === "object" && typeof branch.name === "string";
@@ -32,6 +89,19 @@
             card.dataset.category = filterRegion;
             const customImage = typeof branch.img === "string" ? branch.img.trim() : "";
             const imageSrc = customImage || defaultImages[branch.certification];
+            if (dialog) {
+                card.tabIndex = 0;
+                card.setAttribute("role", "button");
+                card.setAttribute("aria-haspopup", "dialog");
+                card.setAttribute("aria-controls", "network-detail");
+                card.setAttribute("aria-label", branch.name + " 상세 보기");
+                card.addEventListener("click", function () { openDetail(branch, card, imageSrc); });
+                card.addEventListener("keydown", function (event) {
+                    if (event.key !== "Enter" && event.key !== " ") return;
+                    event.preventDefault();
+                    openDetail(branch, card, imageSrc);
+                });
+            }
             if (imageSrc) {
                 const poster = document.createElement("img");
                 poster.src = imageSrc;
