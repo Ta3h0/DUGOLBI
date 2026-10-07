@@ -19,7 +19,11 @@
         branches.forEach(function (branch) {
             const card = document.createElement("article");
             card.className = "network-card";
-            card.dataset.category = String(branch.region || "");
+            const regionName = String(branch.region || "");
+            const filterRegion = /^(창원|김해)/.test(regionName)
+                ? "경남"
+                : (regionName.match(/^(서울|경기|강원|충북|충남|대전|대구|경북|경남|부산|울산|전북|전남|광주)/) || [regionName])[0];
+            card.dataset.category = filterRegion;
             const image = branch.image || {};
             if (image.src) {
                 const poster = document.createElement("img");
@@ -31,11 +35,11 @@
             }
             const region = document.createElement("span");
             region.className = "network-region";
-            region.textContent = branch.region || "";
+            region.textContent = filterRegion;
             const name = document.createElement("h3");
             name.textContent = branch.name;
             const facts = document.createElement("dl");
-            [["주소", branch.address], ["연락처", branch.phone]].forEach(function (fact) {
+            [["지역", regionName], ["연락처", branch.phone]].forEach(function (fact) {
                 const row = document.createElement("div");
                 const label = document.createElement("dt");
                 label.textContent = fact[0];
