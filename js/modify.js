@@ -239,375 +239,525 @@ const scheduleData = [
 
 
 // 수료지점: ID 없이 업체명 가나다순으로 정렬하고 페이지당 8개씩 표시합니다.
-// 지점 추가/수정은 name(업체명), region(상세 지역), phone(연락처) 항목을 편집하세요.
+// 지점 추가/수정은 name(업체명), certification(인증 구분), region(상세 지역), phone(연락처) 항목을 편집하세요.
+// 인증 구분: 공식 강사 / 교육 마스터점 / 교육 인증점 / 교육 수료점
+// img: 지점별 이미지 경로를 입력하세요. 빈 문자열("")이면 인증 구분에 맞는 기본 이미지를 사용합니다.
 const networkData = [
     {
         "name": "두골비오브제랩본점",
+        "certification": "공식 강사",
+        "img": "",
         "region": "부산진구",
         "phone": "010-3450-1667"
     },
     {
         "name": "새온에스테틱",
+        "certification": "공식 강사",
+        "img": "",
         "region": "부산 명지",
         "phone": "010-6577-6782"
     },
     {
         "name": "매직필라테스",
+        "certification": "공식 강사",
+        "img": "",
         "region": "서울 노원·강남",
         "phone": "010-7108-5291"
     },
     {
         "name": "제이윤 에스테틱",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "서울 강서구 방화",
         "phone": "010-4381-0625"
     },
     {
         "name": "케어유에스테틱",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "서울 목동",
         "phone": "010-8940-5857"
     },
     {
         "name": "로인웰니스",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "서울 청담",
         "phone": "010-5520-6165"
     },
     {
         "name": "자웅에스떼",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "서울 강서",
         "phone": "010-5419-5395"
     },
     {
         "name": "다결뷰티",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "서울 마포",
         "phone": "010-9328-3093"
     },
     {
         "name": "김기숙힐링숍",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "서울 중구 을지로",
         "phone": "010-8617-4459"
     },
     {
         "name": "보아스에스테틱",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "서울 신사동",
         "phone": "010-2305-8490"
     },
     {
         "name": "두윤에스테틱",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "서울 동작구 흑석동",
         "phone": "010-5136-6388"
     },
     {
         "name": "에바다에스테틱얼굴축소연구소",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "경기 양주",
         "phone": "010-2497-0992"
     },
     {
         "name": "동안비결뷰티얼굴축소연구소",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "경기 평택",
         "phone": "010-7797-9113"
     },
     {
         "name": "배선영에스테틱",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "경기 파주",
         "phone": "010-3630-4071"
     },
     {
         "name": "스킨앤바디Joa",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "경기 용인",
         "phone": "010-7152-4617"
     },
     {
         "name": "플로라스킨케어",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "경기 안양·인덕원",
         "phone": "010-5314-3343"
     },
     {
         "name": "바른결by김현숙",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "경기 부천 신중동역",
         "phone": "010-3154-8846"
     },
     {
         "name": "바른몸케어",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "경기 고양시 일산 백석동",
         "phone": "010-6216-5843"
     },
     {
         "name": "라움리포벨",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "대전 서구",
         "phone": "010-2777-5761"
     },
     {
         "name": "지연스킨앤바디",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "경북 포항",
         "phone": "010-4537-8342"
     },
     {
         "name": "비체 스킨&바디랩",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "부산 서구",
         "phone": "010-4568-4162"
     },
     {
         "name": "오오이게 밸런스테라피",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "부산 수영구",
         "phone": "010-7406-0902"
     },
     {
         "name": "로온",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "부산 서면",
         "phone": "010-9346-1250"
     },
     {
         "name": "두골비오브제랩서면점",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "부산 서면",
         "phone": "010-9175-7709"
     },
     {
         "name": "더바른예뻐지는공간",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "부산 가야동",
         "phone": "010-9335-0085"
     },
     {
         "name": "리셋뷰티(舊 몸이좋아지는 PTT)",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "부산 동래",
         "phone": "010-9507-7005"
     },
     {
         "name": "미주핏",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "부산 강서구 명지신도시",
         "phone": "010-2394-6834"
     },
     {
         "name": "율스바디앤스킨",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "부산 금정구",
         "phone": "010-5555-7656"
     },
     {
         "name": "편백더힐링에스테틱",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "부산 수영구",
         "phone": "010-9628-9094"
     },
     {
         "name": "도도하게내추럴하게",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "부산 연제구 연산동",
         "phone": "010-6831-3811"
     },
     {
         "name": "아르떼뷰티",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "부산 하단",
         "phone": "010-9235-4071"
     },
     {
         "name": "바룸앤블룸",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "창원 진해구",
         "phone": "010-9363-7620"
     },
     {
         "name": "콤마피부관리",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "창원 용호동",
         "phone": "010-4858-0117"
     },
     {
         "name": "더예쁘다스킨케어",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "김해 내외동",
         "phone": "010-3502-1013"
     },
     {
         "name": "채움에스테틱",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "창원 성산구",
         "phone": "010-4861-7625"
     },
     {
         "name": "여며들다116",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "경남 양산",
         "phone": "010-5108-9262"
     },
     {
         "name": "수에스테틱",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "경남 김해",
         "phone": "010-9434-5706"
     },
     {
         "name": "라라에스테틱",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "경남 양산시 남부동",
         "phone": "010-6787-0239"
     },
     {
         "name": "미소바른체형관리샵",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "창원 진해 용원",
         "phone": "010-5361-6255"
     },
     {
         "name": "반듯한에스테틱",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "창원 용원동",
         "phone": "010-3337-2663"
     },
     {
         "name": "청아피부체형관리실",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "대구 감삼동",
         "phone": "010-5066-2333"
     },
     {
         "name": "큐사랑남목점가온에스테틱",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "울산 동구 남목",
         "phone": "010-4454-3552"
     },
     {
         "name": "은에스테틱",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "울산 남구 옥동",
         "phone": "010-2847-4032"
     },
     {
         "name": "리디안에스테틱",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "전북 전주 효자동",
         "phone": "010-4668-1603"
     },
     {
         "name": "치유하는 몸, 마음 센터",
+        "certification": "교육 마스터점",
+        "img": "",
         "region": "광주",
         "phone": "010-5098-5505"
     },
     {
         "name": "산후맘출장테라피",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "서울 강서구 등촌",
         "phone": "010-2207-7845"
     },
     {
         "name": "에스테틱연 목동점",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "서울 양천구",
         "phone": "010-2057-2715"
     },
     {
         "name": "올리즈에스테틱",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "서울 중구",
         "phone": "010-2567-5527"
     },
     {
         "name": "디아에스테틱",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "경기 부천",
         "phone": "0507-1411-5054"
     },
     {
         "name": "산후맘소통테라피",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "경기 파주 운정",
         "phone": "010-2207-7845"
     },
     {
         "name": "KJH스킨&아로마테라피",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "부산 사하구",
         "phone": "010-9311-9685"
     },
     {
         "name": "우연우의바디리셋",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "대구 수성구",
         "phone": "010-9551-0987"
     },
     {
         "name": "이뻐지는시간",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "경남 통영",
         "phone": "010-8924-6123"
     },
     {
         "name": "보결샵",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "울산 북구",
         "phone": "010-8232-8950"
     },
     {
         "name": "채움스킨바디",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "울산 북구 달천동",
         "phone": "010-8860-5589"
     },
     {
         "name": "도깨비언니에스테틱",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "울산 남구",
         "phone": "010-2386-7273"
     },
     {
         "name": "리애나뷰티",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "서울 도봉·강북",
         "phone": "010-9801-5660"
     },
     {
         "name": "더숨에스테틱",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "서울 중랑구 상봉동",
         "phone": "010-2221-3494"
     },
     {
         "name": "바른몸길",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "서울 신촌",
         "phone": "010-4456-5925"
     },
     {
         "name": "김채영에스테틱",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "경기 양주",
         "phone": "010-5043-4933"
     },
     {
         "name": "에스테틱유아",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "경남 김해시 삼계동",
         "phone": "010-6347-3398"
     },
     {
         "name": "뷰티온에스테틱",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "강원 원주",
         "phone": "010-9293-0090"
     },
     {
         "name": "이너리플",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "광주",
         "phone": "010-9098-4699"
     },
     {
         "name": "두골비,체&통증케어",
+        "certification": "교육 인증점",
+        "img": "",
         "region": "강원 원주시 단구동",
         "phone": "010-9282-0750"
     },
     {
         "name": "에스테틱라뽀르청담",
+        "certification": "교육 수료점",
+        "img": "",
         "region": "서울 강남 삼성",
         "phone": "010-8322-6116"
     },
     {
         "name": "황원장스킨앤바디",
+        "certification": "교육 수료점",
+        "img": "",
         "region": "서울 강서구 우장산역",
         "phone": "010-2273-8104"
     },
     {
         "name": "LK테라피",
+        "certification": "교육 수료점",
+        "img": "",
         "region": "서울 마포",
         "phone": "010-4191-0253"
     },
     {
         "name": "라임스킨케어",
+        "certification": "교육 수료점",
+        "img": "",
         "region": "서울 상봉",
         "phone": "010-2474-8355"
     },
     {
         "name": "오르멜라뷰티에스테틱",
+        "certification": "교육 수료점",
+        "img": "",
         "region": "서울 강남구 봉은사로4길 24",
         "phone": "010-4473-0992"
     },
     {
         "name": "어현숙에스테틱",
+        "certification": "교육 수료점",
+        "img": "",
         "region": "서울 영등포구 당산동",
         "phone": "010-9113-2939"
     },
     {
         "name": "아우룸스킨앤바디",
+        "certification": "교육 수료점",
+        "img": "",
         "region": "경기 광명",
         "phone": "010-9852-0610"
     },
     {
         "name": "무유에스테틱",
+        "certification": "교육 수료점",
+        "img": "",
         "region": "경남 김해 내동",
         "phone": "010-2310-1117"
     },
     {
         "name": "포유 에스테틱",
+        "certification": "교육 수료점",
+        "img": "",
         "region": "충남 아산",
         "phone": "010-4488-7932"
     },
     {
         "name": "청주피부관리왁싱 미라인",
+        "certification": "교육 수료점",
+        "img": "",
         "region": "충북 청주",
         "phone": "010-4654-5857"
     }

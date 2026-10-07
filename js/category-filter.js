@@ -8,6 +8,12 @@
         if (!grid) return;
 
         const collator = new Intl.Collator("ko", { numeric: true, sensitivity: "base" });
+        const defaultImages = {
+            "공식 강사": "images/network/network-img-01.jpg",
+            "교육 마스터점": "images/network/network-img-02.jpg",
+            "교육 인증점": "images/network/network-img-03.jpg",
+            "교육 수료점": "images/network/network-img-04.jpg"
+        };
         const branches = typeof networkData !== "undefined" && Array.isArray(networkData)
             ? networkData.filter(function (branch) {
                 return branch && typeof branch === "object" && typeof branch.name === "string";
@@ -24,18 +30,34 @@
                 ? "경남"
                 : (regionName.match(/^(서울|경기|강원|충북|충남|대전|대구|경북|경남|부산|울산|전북|전남|광주)/) || [regionName])[0];
             card.dataset.category = filterRegion;
-            const image = branch.image || {};
-            if (image.src) {
+            const customImage = typeof branch.img === "string" ? branch.img.trim() : "";
+            const imageSrc = customImage || defaultImages[branch.certification];
+            if (imageSrc) {
                 const poster = document.createElement("img");
-                poster.src = image.src;
-                poster.alt = image.alt || branch.name + " 내부";
-                if (Number(image.width) > 0) poster.width = Number(image.width);
-                if (Number(image.height) > 0) poster.height = Number(image.height);
+                poster.src = imageSrc;
+                poster.alt = branch.name + " 지점 이미지";
+                poster.loading = "lazy";
+                if (!customImage) {
+                    poster.width = 600;
+                    poster.height = 450;
+                }
                 card.append(poster);
+            }
+            const chips = document.createElement("div");
+            chips.className = "network-chips";
+            if (branch.certification) {
+                const certification = document.createElement("span");
+                certification.className = "network-certification";
+                if (["공식 강사", "교육 마스터점", "교육 인증점"].includes(branch.certification)) {
+                    certification.classList.add("is-certified");
+                }
+                certification.textContent = branch.certification;
+                chips.append(certification);
             }
             const region = document.createElement("span");
             region.className = "network-region";
             region.textContent = filterRegion;
+            chips.append(region);
             const name = document.createElement("h3");
             name.textContent = branch.name;
             const facts = document.createElement("dl");
@@ -48,7 +70,7 @@
                 row.append(label, value);
                 facts.append(row);
             });
-            card.append(region, name, facts);
+            card.append(chips, name, facts);
             fragment.append(card);
         });
         grid.replaceChildren(fragment);

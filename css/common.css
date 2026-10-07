@@ -7671,15 +7671,31 @@ body.brand-story main>section {
   height: auto;
 }
 
-:where(body.network) .network-region {
-  display: table;
+:where(body.network) .network-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
   margin-top: 20px;
+}
+
+:where(body.network) .network-region,
+:where(body.network) .network-certification {
+  display: inline-flex;
+  align-items: center;
   padding: 2px 15px;
   border: 1px solid #e2e6ec;
   border-radius: 100px;
   color: #a6aeb9;
   font-size: 1.4rem;
   line-height: 22px;
+  white-space: nowrap;
+}
+
+:where(body.network) .network-certification.is-certified {
+  border-color: var(--main-color);
+  background: var(--main-color);
+  color: #fff;
 }
 
 :where(body.network) .network-card h3 {
