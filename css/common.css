@@ -2996,9 +2996,9 @@ body.review .page-button {
 
   .network-pagination,
   .results-pagination {
-    display: grid;
-    grid-template-columns: repeat(4, 56px);
-    gap: 8px 4px;
+    display: flex;
+    max-width: 100%;
+    gap: 4px;
   }
 
   .network-pagination[hidden],
@@ -3008,15 +3008,13 @@ body.review .page-button {
 
   .network-page-numbers,
   .results-page-numbers {
-    grid-column: 1 / -1;
-    grid-row: 1;
-    flex-wrap: wrap;
+    min-width: 0;
+    flex-wrap: nowrap;
     gap: 4px;
   }
 
   :is(.network-pagination, .results-pagination)>button {
-    grid-row: 2;
-    justify-self: center;
+    flex-shrink: 0;
   }
 }
 

@@ -101,15 +101,19 @@
             pagination.replaceChildren();
             if (!pageCount) return;
 
-            const groupSize = mobileMedia.matches ? 5 : 10;
-            const groupStart = Math.floor((currentPage - 1) / groupSize) * groupSize + 1;
+            const isMobile = mobileMedia.matches;
+            const groupSize = isMobile ? 5 : 10;
+            const groupStart = isMobile
+                ? Math.max(1, Math.min(currentPage - 2, pageCount - groupSize + 1))
+                : Math.floor((currentPage - 1) / groupSize) * groupSize + 1;
             const groupEnd = Math.min(groupStart + groupSize - 1, pageCount);
             const hasGroups = pageCount > groupSize;
-            if (hasGroups) {
-                pagination.append(
-                    makeButton("«", 1, "첫 페이지", currentPage === 1),
-                    makeButton("‹", Math.max(1, groupStart - groupSize), "이전 " + groupSize + "페이지", groupStart === 1)
-                );
+            const hasControls = isMobile ? pageCount > 1 : hasGroups;
+            if (hasControls) {
+                pagination.append(makeButton("«", 1, "첫 페이지", currentPage === 1));
+                if (!isMobile) {
+                    pagination.append(makeButton("‹", Math.max(1, groupStart - groupSize), "이전 " + groupSize + "페이지", groupStart === 1));
+                }
             }
 
             const numbers = document.createElement("div");
@@ -121,11 +125,11 @@
             }
             pagination.append(numbers);
 
-            if (hasGroups) {
-                pagination.append(
-                    makeButton("›", groupEnd + 1, "다음 " + groupSize + "페이지", groupEnd === pageCount),
-                    makeButton("»", pageCount, "마지막 페이지", currentPage === pageCount)
-                );
+            if (hasControls) {
+                if (!isMobile) {
+                    pagination.append(makeButton("›", groupEnd + 1, "다음 " + groupSize + "페이지", groupEnd === pageCount));
+                }
+                pagination.append(makeButton("»", pageCount, "마지막 페이지", currentPage === pageCount));
             }
         }
 
