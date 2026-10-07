@@ -7948,9 +7948,16 @@ body.network.network-modal-open {
   row-gap: 84px;
 }
 
-:where(body.results) .results-card>img {
+:where(body.results) .results-card-image {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+:where(body.results) .results-card-image>img {
   display: block;
-  width: 400px;
+  width: 100%;
   height: auto;
 }
 
@@ -7990,10 +7997,6 @@ body.network.network-modal-open {
 
   :where(body.results) .results-card {
     min-width: 0;
-  }
-
-  :where(body.results) .results-card>img {
-    width: 100%;
   }
 
   :where(body.results) .results-card h3,
