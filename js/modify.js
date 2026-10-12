@@ -57,14 +57,14 @@ const promotionList = [
         "id": 1,
         "title": "경주 컨퍼런스",
         "image": {
-            "src": "okay2.speedgabia.com/_dugolbi/promotion/1.jpg",
+            "src": "https://okay2.speedgabia.com/_dugolbi/promotion/1.jpg",
             "alt": "두골비체 오브제랩 오픈행사",
             "width": 928,
             "height": 928
         },
 
         "detailImage": {
-            "src": "okay2.speedgabia.com/_dugolbi/promotion/1.jpg",
+            "src": "https://okay2.speedgabia.com/_dugolbi/promotion/1.jpg",
             "alt": "두골비체 오브제랩 오픈행사",
             "width": 928,
             "height": 928
