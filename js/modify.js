@@ -56,7 +56,19 @@ const promotionList = [
     {
         "id": 1,
         "title": "경주 컨퍼런스",
+        "image": {
+            "src": "okay2.speedgabia.com/_dugolbi/promotion/1.jpg",
+            "alt": "두골비체 오브제랩 오픈행사",
+            "width": 928,
+            "height": 928
+        },
 
+        "detailImage": {
+            "src": "okay2.speedgabia.com/_dugolbi/promotion/1.jpg",
+            "alt": "두골비체 오브제랩 오픈행사",
+            "width": 928,
+            "height": 928
+        },
         "detailTitle": "두골비·체 경주 컨퍼런스",
         "startDate": "2026-11-29",
         "endDate": "2026-11-30",
