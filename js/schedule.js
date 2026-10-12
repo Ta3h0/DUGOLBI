@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", function () {
             window.DugolbiLinks.setOptionalLink(
                 link,
                 (course && course.naverBookingUrl)
-                    || (typeof scheduleBookingUrl !== "undefined" ? scheduleBookingUrl : locations[selectedLocation].naverUrl)
+                    || (typeof scheduleBookingUrls !== "undefined" ? scheduleBookingUrls[selectedLocation] : locations[selectedLocation].naverUrl)
             );
         });
     }

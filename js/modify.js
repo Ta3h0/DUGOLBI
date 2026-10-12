@@ -196,7 +196,11 @@ const promotionList = [
 // 기간 일정: weekdays 없이 start/end를 모두 입력하면 기존처럼 연속 기간을 표시합니다.
 // times는 목록의 시작 시각 안내입니다. 날짜별 잔여석/휴강은 네이버 예약에서 확인합니다.
 // 반 선택 전 예약 버튼은 관리 예약이 아닌 교육센터 예약 목록으로 연결합니다.
-const scheduleBookingUrl = "https://map.naver.com/p/entry/place/2036901044?placePath=%2Fticket";
+// 교육일정 네이버 예약: 교육장별 공통 링크 (선택 전/후 및 모바일 팝업에 적용).
+const scheduleBookingUrls = {
+    busan: "https://naver.me/52aVPgcc",
+    seoul: "https://map.naver.com/p/entry/place/2036901044?placePath=%2Fhome"
+};
 const scheduleData = [
     {
         "id": "busan-sunday",
@@ -205,7 +209,7 @@ const scheduleData = [
         "color": "schedule-color-1",
         "weekdays": [0],
         "times": ["10:00", "15:30"],
-        "naverBookingUrl": "https://m.booking.naver.com/booking/6/bizes/1634937/items/8030156"
+        "naverBookingUrl": scheduleBookingUrls.busan
     },
     {
         "id": "busan-monday",
@@ -214,7 +218,7 @@ const scheduleData = [
         "color": "schedule-color-2",
         "weekdays": [1],
         "times": ["10:00", "15:30"],
-        "naverBookingUrl": "https://m.booking.naver.com/booking/6/bizes/1634937/items/8030172"
+        "naverBookingUrl": scheduleBookingUrls.busan
     },
     {
         "id": "seoul-wednesday",
@@ -223,7 +227,7 @@ const scheduleData = [
         "color": "schedule-color-3",
         "weekdays": [3],
         "times": ["10:00", "15:30"],
-        "naverBookingUrl": "https://m.booking.naver.com/booking/6/bizes/1634937/items/7595943"
+        "naverBookingUrl": scheduleBookingUrls.seoul
     },
     {
         "id": "seoul-thursday",
@@ -232,7 +236,7 @@ const scheduleData = [
         "color": "schedule-color-4",
         "weekdays": [4],
         "times": ["10:00", "15:30"],
-        "naverBookingUrl": "https://m.booking.naver.com/booking/6/bizes/1634937/items/7595982"
+        "naverBookingUrl": scheduleBookingUrls.seoul
     }
 ];
 

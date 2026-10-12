@@ -432,3 +432,13 @@
 - 수정 파일: css/common.css, RESPONSIVE_PROGRESS.md.
 - 적용 범위: 로컬 프로젝트. 운영 업로드 및 Git commit/push 미수행.
 - Current: 모션 설정별 배경색 전환 검수 완료.
+
+
+## 교육장별 네이버 예약 링크 변경 — 2026-10-12
+- [x] 서울: https://map.naver.com/p/entry/place/2036901044?placePath=%2Fhome
+- [x] 부산: https://naver.me/52aVPgcc
+- [x] modify.js의 scheduleBookingUrls에서 교육장별 링크 공통 관리. 각 반 링크와 선택 전 기본 링크 모두 반영. INFORMATION 지도 링크는 변경하지 않음.
+- [x] Edge 1366 / 375px에서 교육장 전환 전후·각 반 선택·다른 반 호버·모바일 바텀시트의 예약 링크 32건 검증. 모두 지정 주소 및 새 창 연결. 새 JS 실행 오류 없음. JS 구문·Git diff 공백 검사 통과.
+- 수정 파일: js/modify.js, js/schedule.js, RESPONSIVE_PROGRESS.md.
+- 적용 범위: 로컬 프로젝트. 운영 업로드 및 Git commit/push 미수행.
+- Current: 교육장별 지정 예약 링크 적용·검수 완료.
