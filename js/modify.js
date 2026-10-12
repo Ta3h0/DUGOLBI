@@ -55,188 +55,81 @@ const educationData = [
 const promotionList = [
     {
         "id": 1,
-        "title": "오픈 기념 이벤트",
-        "detailTitle": "두골비체 오픈 기념 이벤트",
-        "category": "PROMOTION",
-        "image": {
-            "src": "images/promotion-preview/opening-event.png",
-            "alt": "두골비체 오브제랩 오픈행사",
-            "width": 928,
-            "height": 928
-        },
-        "detailImage": {
-            "src": "images/promotion-detail/opening-event.png",
-            "alt": "두골비체 오브제랩 오픈행사. 신규등록한 회원님께 1:1 강습권을 드립니다. QR코드를 인식하여 상담을 예약해보세요.",
-            "width": 1904,
-            "height": 1904
-        },
-        "startDate": "2026-10-01",
-        "endDate": "2026-11-13",
-        "description": "어깨 통증을 이해하는 데콜테 실전 테크닉\n어깨가 불편하다고, 어깨만 관리하고 계신가요?",
+        "title": "경주 컨퍼런스",
+
+        "detailTitle": "두골비·체 경주 컨퍼런스",
+
+        "description": "성장관리 사례부터 고객 상담과 전문 테크닉까지,\n1박 2일 동안 함께 배우고 교류하는 두골비·체 컨퍼런스",
+
         "paragraphs": [
-            "두골비체 오브제랩에서 오픈을 기념하여\n스페셜 오픈 행사를 진행합니다.",
-            "신규등록한 회원님께 1:1 강습권을 드립니다.",
-            "QR코드 인식 및 전화 문의를 통해\n상담을 예약해보세요."
+            "두골비·체의 현장 경험과 전문 테크닉을 나누는\n경주 컨퍼런스에 여러분을 초대합니다.",
+
+            "장소: 경주 더 K호텔\n일정: 11월 29일~30일 · 1박 2일",
+
+            "【1일차 · 11월 29일】",
+
+            "어린이 성장관리\n에피오네 조아랑 원장님 · 50분\n성장관리 성공 사례와 부모 상담,\n지속적인 관리를 위한 상담 기법을 공유합니다.",
+
+            "청소년 성장관리\n두골비·체 청담 센터장 맹정숙 원장님 · 50분\n문제성 체형과 비대칭 관리 사례를 살펴보고,\n현장에서 활용하는 상담 기법을 소개합니다.",
+
+            "발만 봐도 한눈에 보이는 몸의 시그널\n김미진 교육이사님 · 90분\n발 리딩을 통해 고객의 발이 보내는 신호를 읽고,\n몸의 상태를 살펴보는 관점을 배웁니다.",
+
+            "석식 및 두골비 페스티벌\n밴드와 초청 가수의 공연을 함께 즐기며\n교류하는 시간을 갖습니다.",
+
+            "【2일차 · 11월 30일】",
+
+            "바리스타에서 두골비·체 체형센터 창업까지\n유정연 원장님 · 90분\n창업 후 매출 성과를 이룬 경험과 함께,\n고객과의 마찰을 줄이는 상담법을 공유합니다.\n\n• 이용권 사용기간 내 관리를 완료하도록 돕는 상담 기법\n• 고객 불만을 예방하는 소통 방법\n• 홈케어 참여를 이끄는 상담 스킬",
+
+            "모르면 손해다, 신경·혈관 도수 기법\n이희경 대표님\n통증과 부종을 함께 살펴보는\n신경·혈관 도수 기법을 소개합니다.\n\n‘안 빠지는 붓기, 반복되는 통증에는 이유가 있다.’\n‘아픈데 붓기까지 있다면 신경·혈관을 확인할 때.’"
         ],
         get phone() { return business_info.phone; }
-    },
-    {
-        "id": 2,
-        "title": "오픈 기념 이벤트",
-        "detailTitle": "두골비체 오픈 기념 이벤트",
-        "category": "PROMOTION",
-        "image": {
-            "src": "images/promotion-preview/opening-event.png",
-            "alt": "두골비체 오브제랩 오픈행사",
-            "width": 928,
-            "height": 928
-        },
-        "detailImage": {
-            "src": "images/promotion-detail/opening-event.png",
-            "alt": "두골비체 오브제랩 오픈행사. 신규등록한 회원님께 1:1 강습권을 드립니다. QR코드를 인식하여 상담을 예약해보세요.",
-            "width": 1904,
-            "height": 1904
-        },
-        "startDate": "2026-10-01",
-        "endDate": "2026-11-13",
-        "description": "어깨 통증을 이해하는 데콜테 실전 테크닉\n어깨가 불편하다고, 어깨만 관리하고 계신가요?",
-        "paragraphs": [
-            "두골비체 오브제랩에서 오픈을 기념하여\n스페셜 오픈 행사를 진행합니다.",
-            "신규등록한 회원님께 1:1 강습권을 드립니다.",
-            "QR코드 인식 및 전화 문의를 통해\n상담을 예약해보세요."
-        ],
-        get phone() { return business_info.phone; }
-    },
-    {
-        "id": 3,
-        "title": "오픈 기념 이벤트",
-        "detailTitle": "두골비체 오픈 기념 이벤트",
-        "category": "PROMOTION",
-        "image": {
-            "src": "images/promotion-preview/opening-event.png",
-            "alt": "두골비체 오브제랩 오픈행사",
-            "width": 928,
-            "height": 928
-        },
-        "detailImage": {
-            "src": "images/promotion-detail/opening-event.png",
-            "alt": "두골비체 오브제랩 오픈행사. 신규등록한 회원님께 1:1 강습권을 드립니다. QR코드를 인식하여 상담을 예약해보세요.",
-            "width": 1904,
-            "height": 1904
-        },
-        "startDate": "2026-10-01",
-        "endDate": "2026-11-13",
-        "description": "어깨 통증을 이해하는 데콜테 실전 테크닉\n어깨가 불편하다고, 어깨만 관리하고 계신가요?",
-        "paragraphs": [
-            "두골비체 오브제랩에서 오픈을 기념하여\n스페셜 오픈 행사를 진행합니다.",
-            "신규등록한 회원님께 1:1 강습권을 드립니다.",
-            "QR코드 인식 및 전화 문의를 통해\n상담을 예약해보세요."
-        ],
-        get phone() { return business_info.phone; }
-    },
-    {
-        "id": 4,
-        "title": "오픈 기념 이벤트",
-        "detailTitle": "두골비체 오픈 기념 이벤트",
-        "category": "PROMOTION",
-        "image": {
-            "src": "images/promotion-preview/opening-event.png",
-            "alt": "두골비체 오브제랩 오픈행사",
-            "width": 928,
-            "height": 928
-        },
-        "detailImage": {
-            "src": "images/promotion-detail/opening-event.png",
-            "alt": "두골비체 오브제랩 오픈행사. 신규등록한 회원님께 1:1 강습권을 드립니다. QR코드를 인식하여 상담을 예약해보세요.",
-            "width": 1904,
-            "height": 1904
-        },
-        "startDate": "2026-10-01",
-        "endDate": "2026-11-13",
-        "description": "어깨 통증을 이해하는 데콜테 실전 테크닉\n어깨가 불편하다고, 어깨만 관리하고 계신가요?",
-        "paragraphs": [
-            "두골비체 오브제랩에서 오픈을 기념하여\n스페셜 오픈 행사를 진행합니다.",
-            "신규등록한 회원님께 1:1 강습권을 드립니다.",
-            "QR코드 인식 및 전화 문의를 통해\n상담을 예약해보세요."
-        ],
-        get phone() { return business_info.phone; }
-    },
-    {
-        "id": 5,
-        "title": "오픈 기념 이벤트",
-        "detailTitle": "두골비체 오픈 기념 이벤트",
-        "category": "PROMOTION",
-        "image": {
-            "src": "images/promotion-preview/opening-event.png",
-            "alt": "두골비체 오브제랩 오픈행사",
-            "width": 928,
-            "height": 928
-        },
-        "detailImage": {
-            "src": "images/promotion-detail/opening-event.png",
-            "alt": "두골비체 오브제랩 오픈행사. 신규등록한 회원님께 1:1 강습권을 드립니다. QR코드를 인식하여 상담을 예약해보세요.",
-            "width": 1904,
-            "height": 1904
-        },
-        "startDate": "2026-10-01",
-        "endDate": "2026-11-13",
-        "description": "어깨 통증을 이해하는 데콜테 실전 테크닉\n어깨가 불편하다고, 어깨만 관리하고 계신가요?",
-        "paragraphs": [
-            "두골비체 오브제랩에서 오픈을 기념하여\n스페셜 오픈 행사를 진행합니다.",
-            "신규등록한 회원님께 1:1 강습권을 드립니다.",
-            "QR코드 인식 및 전화 문의를 통해\n상담을 예약해보세요."
-        ],
-        get phone() { return business_info.phone; }
-    }
+    }    
 ];
 
-// 교육장: location = "busan"(부산 교육 본점) / "seoul"(서울 청담 교육장)
-// 요일 반복: weekdays = [0~6] (일=0, 월=1, 화=2, 수=3, 목=4, 금=5, 토=6)
-// 요일만 지정하면 매주 반복합니다. start/end(YYYY-MM-DD)를 추가하면 반복 기간을 제한합니다.
-// 기간 일정: weekdays 없이 start/end를 모두 입력하면 기존처럼 연속 기간을 표시합니다.
-// times는 목록의 시작 시각 안내입니다. 날짜별 잔여석/휴강은 네이버 예약에서 확인합니다.
-// 반 선택 전 예약 버튼은 관리 예약이 아닌 교육센터 예약 목록으로 연결합니다.
-// 교육일정 네이버 예약: 교육장별 공통 링크 (선택 전/후 및 모바일 팝업에 적용).
-const scheduleBookingUrls = {
-    busan: "https://naver.me/52aVPgcc",
-    seoul: "https://map.naver.com/p/entry/place/2036901044?placePath=%2Fhome"
-};
 const scheduleData = [
     {
-        "id": "busan-sunday",
-        "location": "busan",
-        "title": "'부산 본원' 두골비.체 [일요반]",
+        "id": "dugolbi-10",
+        get naverBookingUrl() { return business_info.locations.busan.naverUrl; },
         "color": "schedule-color-1",
-        "weekdays": [0],
-        "times": ["10:00", "15:30"],
-        "naverBookingUrl": scheduleBookingUrls.busan
+        "title": "두골비 과정 10기 교육일정",
+        "start": "2026-10-11",
+        "end": "2026-10-28"
     },
     {
-        "id": "busan-monday",
-        "location": "busan",
-        "title": "'부산 본원' 두골비.체 [월요반]",
+        "id": "sample-signature",
+        get naverBookingUrl() { return business_info.locations.busan.naverUrl; },
         "color": "schedule-color-2",
-        "weekdays": [1],
-        "times": ["10:00", "15:30"],
-        "naverBookingUrl": scheduleBookingUrls.busan
+        "title": "시그니처 교육과정",
+        "start": "2026-10-03",
+        "end": "2026-10-05",
+        "temporary": true
     },
     {
-        "id": "seoul-wednesday",
-        "location": "seoul",
-        "title": "'서울 청담' 두골비.체 [수요반]",
+        "id": "sample-decollete",
+        get naverBookingUrl() { return business_info.locations.busan.naverUrl; },
         "color": "schedule-color-3",
-        "weekdays": [3],
-        "times": ["10:00", "15:30"],
-        "naverBookingUrl": scheduleBookingUrls.seoul
+        "title": "데콜테 실전 테크닉",
+        "start": "2026-10-08",
+        "end": "2026-10-09",
+        "temporary": true
     },
     {
-        "id": "seoul-thursday",
-        "location": "seoul",
-        "title": "'서울 청담' 두골비.체 [목요반]",
+        "id": "sample-startup",
+        get naverBookingUrl() { return business_info.locations.busan.naverUrl; },
         "color": "schedule-color-4",
-        "weekdays": [4],
-        "times": ["10:00", "15:30"],
-        "naverBookingUrl": scheduleBookingUrls.seoul
+        "title": "창업반 실전 교육",
+        "start": "2026-10-19",
+        "end": "2026-10-23",
+        "temporary": true
+    },
+    {
+        "id": "sample-growth",
+        get naverBookingUrl() { return business_info.locations.busan.naverUrl; },
+        "color": "schedule-color-5",
+        "title": "어린이 성장 매니지먼트",
+        "start": "2026-10-29",
+        "end": "2026-11-03",
+        "temporary": true
     }
 ];
 
