@@ -71,7 +71,7 @@ const promotionList = [
             "💳 참가비 입금 안내\n참가비 : 1인 200,000원\n은행 : 카카오뱅크\n계좌번호 : 79799366225\n예금주 : 권진이",
             "담당자 : 권진이 010-6577-6782"
         ],
-        get phone() { return business_info.phone; }
+        /* get phone() { return business_info.phone; } */
     }
 ];
 
