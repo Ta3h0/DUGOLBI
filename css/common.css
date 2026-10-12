@@ -4580,7 +4580,8 @@ body.review .page-button {
 /* Desktop/laptop mouse preview; touch layouts keep their existing links. */
 @media (min-width: 1025px) and (hover: hover) and (pointer: fine) {
   :where(body.home) .section08 .container .list-panel .item {
-    transition: background-color 260ms ease, color 260ms ease;
+    border-radius: 0;
+    transition: background-color 260ms ease, color 260ms ease, border-radius 260ms ease;
   }
 
   :where(body.home) .section08 .container .list-panel .item :is(.date, .title) {
@@ -4594,6 +4595,7 @@ body.review .page-button {
 
   :where(body.home) .section08 .container .list-panel .item:is(:hover, :focus-visible) {
     background: var(--main-color);
+    border-radius: 24px;
     color: #fff;
   }
 
