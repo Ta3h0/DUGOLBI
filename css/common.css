@@ -10299,10 +10299,18 @@ body.schedule {
   padding: 30px 0;
 }
 
-body.schedule.reduce-motion .schedule-section *,
-body.schedule.reduce-motion .schedule-calendar td::before,
-body.schedule.reduce-motion .schedule-calendar td::after {
+body.schedule.reduce-motion .schedule-section * {
   transition: none;
+}
+
+/* Keep gentle color fades, while reduced motion skips scale/shape movement. */
+body.schedule.reduce-motion .schedule-calendar td::before {
+  transform: none;
+  transition: opacity 280ms ease, background-color 280ms ease;
+}
+
+body.schedule.reduce-motion .schedule-calendar td::after {
+  transition: opacity 280ms ease;
 }
 
 :where(body.schedule) .schedule-date-select {
