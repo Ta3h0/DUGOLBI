@@ -412,3 +412,13 @@
 - 수정 파일: schedule.html, css/common.css, js/schedule.js, RESPONSIVE_PROGRESS.md.
 - 적용 범위: 로컬 프로젝트. 운영 업로드 및 Git commit/push 미수행.
 - Current: 교육장 커스텀 셀렉트 구현·검수 완료.
+
+
+## 교육일정 선택 영역 전환 보정 — 2026-10-12
+- [x] 선택 해제 직후 일정 색상과 range-start/end를 제거하여 사각형으로 바뀌던 문제 수정. 투명도가 사라질 때까지 이전 색상·둥근 끝·좌우 간격 유지.
+- [x] 다음 선택이 겹치는 날짜의 색상·모서리·좌우 간격도 transition으로 전환. 회색 호버는 날짜 칸 전체를 채우며 선택 영역 아래에 유지.
+- [x] 모션 줄이기 설정은 달력 배경 가상 요소에도 적용.
+- [x] Edge 1366 / 1024 / 375px에서 전환 중간(70ms)의 색상·둥근 모서리·좌우 간격 유지 및 opacity 감소, 전환 완료 후 opacity 0 검증. 빠른 연속 선택, 회색 호버 레이어·전체 채움, 모바일 팝업, 모션 줄이기 확인. 새 JS 오류·가로 넘침 없음.
+- 수정 파일: css/common.css, js/schedule.js, RESPONSIVE_PROGRESS.md.
+- 적용 범위: 로컬 프로젝트. 운영 업로드 및 Git commit/push 미수행.
+- Current: 선택 영역의 사각형 전환 현상 수정·검수 완료.

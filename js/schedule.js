@@ -255,12 +255,16 @@ document.addEventListener("DOMContentLoaded", function () {
         days.querySelectorAll("td").forEach(cell => {
             const selected = matchesDate(selectedCourse, cell.dataset.date);
             const preview = matchesDate(previewCourse, cell.dataset.date);
-            courses.forEach(item => cell.classList.remove(item.color));
-            if (selected) cell.classList.add(selectedCourse.color);
+            // Keep the outgoing fill's color and rounded ends while its opacity fades.
+            // Inactive fills stay transparent; the next selection updates their geometry.
+            if (selected) {
+                courses.forEach(item => cell.classList.remove(item.color));
+                cell.classList.add(selectedCourse.color);
+                cell.classList.toggle("range-start", cell.cellIndex === 0 || !matchesDate(selectedCourse, adjacentDate(cell.dataset.date, -1)));
+                cell.classList.toggle("range-end", cell.cellIndex === 6 || !matchesDate(selectedCourse, adjacentDate(cell.dataset.date, 1)));
+            }
             cell.classList.toggle("is-highlighted", selected);
             cell.classList.toggle("is-preview", preview);
-            cell.classList.toggle("range-start", selected && (cell.cellIndex === 0 || !matchesDate(selectedCourse, adjacentDate(cell.dataset.date, -1))));
-            cell.classList.toggle("range-end", selected && (cell.cellIndex === 6 || !matchesDate(selectedCourse, adjacentDate(cell.dataset.date, 1))));
         });
     }
 

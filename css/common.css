@@ -10147,7 +10147,9 @@ body.schedule {
   background: var(--course-color, var(--main-color));
   opacity: 0;
   transform: scaleY(.7);
-  transition: opacity 260ms ease, transform 260ms ease;
+  transition: opacity 260ms ease, transform 260ms ease,
+    background-color 260ms ease, border-radius 260ms ease,
+    left 260ms ease, right 260ms ease;
 }
 
 :where(body.schedule) .schedule-calendar td.is-highlighted::before {
@@ -10297,7 +10299,9 @@ body.schedule {
   padding: 30px 0;
 }
 
-body.schedule.reduce-motion .schedule-section * {
+body.schedule.reduce-motion .schedule-section *,
+body.schedule.reduce-motion .schedule-calendar td::before,
+body.schedule.reduce-motion .schedule-calendar td::after {
   transition: none;
 }
 
@@ -10503,7 +10507,8 @@ body.schedule.reduce-motion .schedule-section * {
     z-index: 1;
     transform: none;
     pointer-events: none;
-    transition: opacity 280ms ease, background-color 280ms ease;
+    transition: opacity 280ms ease, background-color 280ms ease,
+      border-radius 280ms ease, left 280ms ease, right 280ms ease;
   }
 
   /* Preview fills the entire date cell behind the selected range. */
