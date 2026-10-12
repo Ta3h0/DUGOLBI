@@ -459,3 +459,8 @@
 ## Media & News 호버 모서리 — 2026-10-12
 - [x] PC/노트북 행 호버·키보드 포커스 시 파란 배경과 함께 모서리를 24px로 260ms 동안 부드럽게 전환. 호버 해제 시 원복. 기존 적용 범위 유지.
 - 수정 파일: css/common.css, RESPONSIVE_PROGRESS.md.
+
+
+## Media & News 사각형 복구 — 2026-10-12
+- [x] 사용자 요청으로 직전에 추가한 24px 모서리 및 border-radius transition만 제거. 기존 사각형 파란 배경·흰 글씨·화살표 회전·좌측 미리보기 전환 유지.
+- 수정 파일: css/common.css, RESPONSIVE_PROGRESS.md.
