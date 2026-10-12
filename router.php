@@ -10,6 +10,11 @@ if ($uri === '/') {
     $uri = '/index.html';
 }
 
+// 임시 관리자 시안의 디렉터리 진입 (공개 사이트 라우팅은 유지).
+if ($uri === '/temp-board' || $uri === '/temp-board/') {
+    $uri = '/temp-board/index.html';
+}
+
 $file = realpath(__DIR__ . $uri);
 $root = __DIR__ . DIRECTORY_SEPARATOR;
 

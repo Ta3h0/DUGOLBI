@@ -354,7 +354,7 @@ const networkData = [
         "certification": "교육 마스터점",
         "img": "",
         "region": "경기 파주",
-        "phone": "010-3630-4071"
+        "phone": "010-6257-1113"
     },
     {
         "name": "스킨앤바디Joa",
@@ -497,7 +497,7 @@ const networkData = [
         "graduateName": "엄태현",
         "certification": "교육 마스터점",
         "img": "",
-        "region": "창원 진해구",
+        "region": "창원 진해 장천동",
         "phone": "010-9363-7620"
     },
     {
@@ -786,7 +786,7 @@ const networkData = [
         "certification": "교육 수료점",
         "img": "",
         "region": "서울 상봉",
-        "phone": "010-2474-8355"
+        "phone": "010-7580-8532"
     },
     {
         "name": "오르멜라뷰티에스테틱",
