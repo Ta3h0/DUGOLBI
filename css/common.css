@@ -9865,6 +9865,34 @@ body.schedule {
   border-bottom: 2px solid var(--main-color);
 }
 
+/* Classroom selection shares the existing month toolbar. */
+:where(body.schedule) .schedule-toolbar-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px 32px;
+  max-width: 100%;
+}
+
+:where(body.schedule) .schedule-location-select {
+  max-width: 100%;
+  min-height: 44px;
+  padding: 8px 32px 8px 16px;
+  border: 1px solid #dfe5ed;
+  border-radius: 24px;
+  background: #fff;
+  color: var(--main-color);
+  font-size: 1.6rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+:where(body.schedule) .schedule-location-select:focus-visible {
+  outline: 2px solid var(--main-color);
+  outline-offset: 4px;
+}
+
 :where(body.schedule) .schedule-month-control {
   display: flex;
   align-items: center;
@@ -9921,7 +9949,8 @@ body.schedule {
 :where(body.schedule) .schedule-list-heading {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px 12px;
+  flex-wrap: wrap;
   margin-bottom: 22px;
 }
 
@@ -10308,16 +10337,42 @@ body.schedule.reduce-motion .schedule-section * {
 
 :where(body.schedule) .schedule-calendar-panel {
   position: sticky;
-  top: max(120px, calc(50vh - 300px));
+  top: calc(var(--header-height) + 20px);
   align-self: start;
 }
 
-:where(body.schedule) .schedule-calendar-panel:has(tbody tr:nth-child(6)) {
-  top: max(120px, calc(50vh - 350px));
+/* Preserve 100px desktop cells on tall screens; shrink safely on laptops. */
+@media (min-width: 769px) {
+  :where(body.schedule) .schedule-calendar-panel {
+    --schedule-weeks: 5;
+    --schedule-foot-space: 164px;
+    --schedule-row-height: clamp(60px, calc((100vh - var(--header-height) - var(--schedule-foot-space)) / var(--schedule-weeks, 5)), 100px);
+    --schedule-row-height: clamp(60px, calc((100dvh - var(--header-height) - var(--schedule-foot-space)) / var(--schedule-weeks, 5)), 100px);
+    min-height: calc(60px * var(--schedule-weeks, 5) + 120px);
+  }
+
+  :where(body.schedule) .schedule-calendar-panel:has(tbody tr:nth-child(6)) {
+    --schedule-weeks: 6;
+  }
+
+  :where(body.schedule) .schedule-calendar-panel:has(tbody tr:nth-child(4):last-child) {
+    --schedule-weeks: 4;
+  }
+
+  :where(body.schedule) .schedule-calendar td {
+    height: var(--schedule-row-height);
+  }
+
+  :where(body.schedule) .schedule-calendar td::before {
+    inset-block: clamp(10px, calc(var(--schedule-row-height) * .2), 20px);
+  }
 }
 
-:where(body.schedule) .schedule-calendar-panel:has(tbody tr:nth-child(4):last-child) {
-  top: max(120px, calc(50vh - 250px));
+/* Very short windows scroll normally instead of trapping a clipped sticky panel. */
+@media (min-width: 769px) and (max-height: 620px) {
+  :where(body.schedule) .schedule-calendar-panel {
+    position: static;
+  }
 }
 
 :where(body.schedule) .schedule-list-panel {
@@ -10407,6 +10462,19 @@ body.schedule.reduce-motion .schedule-section * {
   }
 }
 
+@media (min-width: 769px) and (max-width: 1024px) {
+  :where(body.schedule) .schedule-calendar-panel {
+    --schedule-foot-space: 200px;
+    min-height: calc(60px * var(--schedule-weeks, 5) + 156px);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) and (max-height: 640px) {
+  :where(body.schedule) .schedule-calendar-panel {
+    position: static;
+  }
+}
+
 /* Keep the existing month/year controls and list/calendar colors. */
 @media (max-width: 1439px) {
   :where(body.schedule) .schedule-section {
@@ -10443,7 +10511,7 @@ body.schedule.reduce-motion .schedule-section * {
   }
 
   :where(body.schedule) .schedule-calendar td {
-    height: 76px;
+    height: min(76px, var(--schedule-row-height));
   }
 
   :where(body.schedule) .schedule-calendar td::before {

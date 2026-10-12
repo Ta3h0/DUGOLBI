@@ -190,50 +190,49 @@ const promotionList = [
     }
 ];
 
+// 교육장: location = "busan"(부산 교육 본점) / "seoul"(서울 청담 교육장)
+// 요일 반복: weekdays = [0~6] (일=0, 월=1, 화=2, 수=3, 목=4, 금=5, 토=6)
+// 요일만 지정하면 매주 반복합니다. start/end(YYYY-MM-DD)를 추가하면 반복 기간을 제한합니다.
+// 기간 일정: weekdays 없이 start/end를 모두 입력하면 기존처럼 연속 기간을 표시합니다.
+// times는 목록의 시작 시각 안내입니다. 날짜별 잔여석/휴강은 네이버 예약에서 확인합니다.
+// 반 선택 전 예약 버튼은 관리 예약이 아닌 교육센터 예약 목록으로 연결합니다.
+const scheduleBookingUrl = "https://map.naver.com/p/entry/place/2036901044?placePath=%2Fticket";
 const scheduleData = [
     {
-        "id": "dugolbi-10",
-        get naverBookingUrl() { return business_info.locations.busan.naverUrl; },
+        "id": "busan-sunday",
+        "location": "busan",
+        "title": "'부산 본원' 두골비.체 [일요반]",
         "color": "schedule-color-1",
-        "title": "두골비 과정 10기 교육일정",
-        "start": "2026-10-11",
-        "end": "2026-10-28"
+        "weekdays": [0],
+        "times": ["10:00", "15:30"],
+        "naverBookingUrl": "https://m.booking.naver.com/booking/6/bizes/1634937/items/8030156"
     },
     {
-        "id": "sample-signature",
-        get naverBookingUrl() { return business_info.locations.busan.naverUrl; },
+        "id": "busan-monday",
+        "location": "busan",
+        "title": "'부산 본원' 두골비.체 [월요반]",
         "color": "schedule-color-2",
-        "title": "시그니처 교육과정",
-        "start": "2026-10-03",
-        "end": "2026-10-05",
-        "temporary": true
+        "weekdays": [1],
+        "times": ["10:00", "15:30"],
+        "naverBookingUrl": "https://m.booking.naver.com/booking/6/bizes/1634937/items/8030172"
     },
     {
-        "id": "sample-decollete",
-        get naverBookingUrl() { return business_info.locations.busan.naverUrl; },
+        "id": "seoul-wednesday",
+        "location": "seoul",
+        "title": "'서울 청담' 두골비.체 [수요반]",
         "color": "schedule-color-3",
-        "title": "데콜테 실전 테크닉",
-        "start": "2026-10-08",
-        "end": "2026-10-09",
-        "temporary": true
+        "weekdays": [3],
+        "times": ["10:00", "15:30"],
+        "naverBookingUrl": "https://m.booking.naver.com/booking/6/bizes/1634937/items/7595943"
     },
     {
-        "id": "sample-startup",
-        get naverBookingUrl() { return business_info.locations.busan.naverUrl; },
+        "id": "seoul-thursday",
+        "location": "seoul",
+        "title": "'서울 청담' 두골비.체 [목요반]",
         "color": "schedule-color-4",
-        "title": "창업반 실전 교육",
-        "start": "2026-10-19",
-        "end": "2026-10-23",
-        "temporary": true
-    },
-    {
-        "id": "sample-growth",
-        get naverBookingUrl() { return business_info.locations.busan.naverUrl; },
-        "color": "schedule-color-5",
-        "title": "어린이 성장 매니지먼트",
-        "start": "2026-10-29",
-        "end": "2026-11-03",
-        "temporary": true
+        "weekdays": [4],
+        "times": ["10:00", "15:30"],
+        "naverBookingUrl": "https://m.booking.naver.com/booking/6/bizes/1634937/items/7595982"
     }
 ];
 

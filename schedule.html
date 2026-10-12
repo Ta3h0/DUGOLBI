@@ -31,6 +31,11 @@
                     <p class="section-desc">배움의 다음 단계, 두골비·체와 함께하세요.</p>
                 </div>
                 <div class="schedule-toolbar">
+                    <div class="schedule-toolbar-controls">
+                        <select class="schedule-location-select" id="schedule-location" aria-label="교육장 선택">
+                            <option value="busan">부산 교육 본점</option>
+                            <option value="seoul">서울 청담 교육장</option>
+                        </select>
                     <div class="schedule-month-control">
                         <button class="schedule-month-button" id="schedule-prev" type="button" aria-label="이전 달"><svg
                                 viewBox="0 0 24 24" aria-hidden="true">
@@ -63,12 +68,13 @@
                                 <path d="m10 6 6 6-6 6" />
                             </svg></button>
                     </div>
-                    <p class="schedule-guide">교육 일정을 선택하면 달력에서 교육 기간을 확인할 수 있습니다.</p>
+                    </div>
+                    <p class="schedule-guide">교육 일정을 선택하면 달력에서 교육 날짜를 확인할 수 있습니다.</p>
                 </div>
                 <div class="schedule-layout">
                     <div class="schedule-list-panel">
                         <div class="schedule-list-heading">
-                            <h3>교육 일정</h3><span id="schedule-count"></span>
+                            <h3 id="schedule-location-title">부산 교육 본점 교육일정</h3><span id="schedule-count" role="status" aria-atomic="true"></span>
                         </div>
                         <ul class="schedule-list" id="schedule-list"></ul>
                         <p class="schedule-empty" id="schedule-empty" hidden>등록된 교육 일정이 없습니다.<br>다른 달의 일정을 확인해
@@ -90,7 +96,7 @@
                                     <path d="m6 6 12 12M18 6 6 18" />
                                 </svg></button>
                         </div>
-                        <table class="schedule-calendar" aria-labelledby="schedule-month">
+                        <table class="schedule-calendar" aria-labelledby="schedule-location-title schedule-month">
                             <thead>
                                 <tr>
                                     <th scope="col">일</th>
@@ -106,7 +112,7 @@
                         </table>
                         <div class="schedule-calendar-foot">
                             <p id="schedule-selection" role="status">
-                                목록에 마우스를 올려 교육 기간을 확인해 보세요.
+                                목록에서 교육을 선택해 날짜를 확인해 보세요.
                             </p>
 
                             <!-- PC 전용 -->

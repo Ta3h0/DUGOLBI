@@ -12,18 +12,54 @@ document.addEventListener("DOMContentLoaded", function () {
         const date = new Date(y, m - 1, d);
         return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d ? date : null;
     };
-    // Dates in modify.js are inclusive local calendar dates.
+    const locationSelect = document.getElementById("schedule-location");
+    const locationTitle = document.getElementById("schedule-location-title");
+    const locations = typeof business_info !== "undefined" ? business_info.locations : {
+        busan: { name: "부산 교육 본점" }, seoul: { name: "서울 청담 교육장" }
+    };
+    let selectedLocation = "busan";
+    locationSelect?.querySelectorAll("option").forEach(option => {
+        if (locations[option.value]) option.textContent = locations[option.value].name;
+    });
+    // Inclusive dates remain supported; weekly schedules may omit either date bound.
     const source = typeof scheduleData !== "undefined" && Array.isArray(scheduleData) ? scheduleData : [];
-    const courses = source.filter(course => {
-        return course && parseDate(course.start) && parseDate(course.end) && course.start <= course.end;
+    const allCourses = source.filter(course => {
+        if (!course || !locations[course.location || "busan"]) return false;
+        if ((course.start && !parseDate(course.start)) || (course.end && !parseDate(course.end))) return false;
+        if (course.start && course.end && course.start > course.end) return false;
+        if (course.weekdays !== undefined) {
+            return Array.isArray(course.weekdays) && course.weekdays.length > 0
+                && course.weekdays.every(day => Number.isInteger(day) && day >= 0 && day <= 6);
+        }
+        return Boolean(parseDate(course.start) && parseDate(course.end));
     }).map((course, index) => ({
         ...course,
+        weekdays: course.weekdays ? [...new Set(course.weekdays)].sort((a, b) => a - b) : null,
+        location: course.location || "busan",
         id: course.id ? String(course.id) : `schedule-${index + 1}`,
         color: /^schedule-color-[1-5]$/.test(course.color) ? course.color : `schedule-color-${index % 5 + 1}`
     }));
+    let courses = allCourses.filter(course => course.location === selectedLocation);
     const dateKey = date => [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
     const displayDate = value => value.replaceAll("-", ".");
-    let month = courses.length ? parseDate(courses[0].start) : new Date();
+    const weekdayNames = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+    const matchesDate = (course, key) => Boolean(course
+        && (!course.start || key >= course.start)
+        && (!course.end || key <= course.end)
+        && (!course.weekdays || course.weekdays.includes(parseDate(key).getDay())));
+    const adjacentDate = (key, offset) => {
+        const date = parseDate(key);
+        date.setDate(date.getDate() + offset);
+        return dateKey(date);
+    };
+    function scheduleLabel(course) {
+        const bounds = course.start && course.end ? `${displayDate(course.start)} ~ ${displayDate(course.end)}`
+            : course.start ? `${displayDate(course.start)}부터` : course.end ? `${displayDate(course.end)}까지` : "";
+        const repeat = course.weekdays ? `매주 ${course.weekdays.map(day => weekdayNames[day]).join(", ")}` : "";
+        const times = Array.isArray(course.times) ? course.times.join(" / ") : "";
+        return [repeat, bounds, times].filter(Boolean).join(" · ");
+    }
+    let month = courses.length && !courses[0].weekdays ? parseDate(courses[0].start) : new Date();
     month.setDate(1);
     let pinned = null;
     let hovered = null;
@@ -49,7 +85,8 @@ document.addEventListener("DOMContentLoaded", function () {
         bookingLinks.forEach(link => {
             window.DugolbiLinks.setOptionalLink(
                 link,
-                course && course.naverBookingUrl
+                (course && course.naverBookingUrl)
+                    || (typeof scheduleBookingUrl !== "undefined" ? scheduleBookingUrl : locations[selectedLocation].naverUrl)
             );
         });
     }
@@ -90,8 +127,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
         if (guide) guide.textContent = mobile.matches
-            ? "교육 일정을 터치하면 달력에서 교육 기간을 확인할 수 있습니다."
-            : "교육 일정을 선택하면 달력에서 교육 기간을 확인할 수 있습니다.";
+            ? "교육 일정을 터치하면 달력에서 교육 날짜를 확인할 수 있습니다."
+            : "교육 일정을 선택하면 달력에서 교육 날짜를 확인할 수 있습니다.";
         hovered = focused = previewed = null;
         highlight();
     }
@@ -100,7 +137,7 @@ document.addEventListener("DOMContentLoaded", function () {
         closePicker();
         sheetTrigger = button;
         sheetTitle.textContent = course.title;
-        sheetMonth.textContent = monthLabel.textContent;
+        sheetMonth.textContent = `${locations[selectedLocation].name} · ${monthLabel.textContent}`;
         background.forEach(element => { backgroundState.set(element, element.inert); element.inert = true; });
         panel.inert = false;
         panel.setAttribute("aria-hidden", "false");
@@ -141,25 +178,30 @@ document.addEventListener("DOMContentLoaded", function () {
             button.setAttribute("aria-pressed", String(selected));
         });
         days.querySelectorAll("td").forEach(cell => {
-            const selected = Boolean(selectedCourse && cell.dataset.date >= selectedCourse.start && cell.dataset.date <= selectedCourse.end);
-            const preview = Boolean(previewCourse && cell.dataset.date >= previewCourse.start && cell.dataset.date <= previewCourse.end);
+            const selected = matchesDate(selectedCourse, cell.dataset.date);
+            const preview = matchesDate(previewCourse, cell.dataset.date);
             courses.forEach(item => cell.classList.remove(item.color));
             if (selected) cell.classList.add(selectedCourse.color);
             cell.classList.toggle("is-highlighted", selected);
             cell.classList.toggle("is-preview", preview);
-            cell.classList.toggle("range-start", selected && (cell.dataset.date === selectedCourse.start || cell.cellIndex === 0));
-            cell.classList.toggle("range-end", selected && (cell.dataset.date === selectedCourse.end || cell.cellIndex === 6));
+            cell.classList.toggle("range-start", selected && (cell.cellIndex === 0 || !matchesDate(selectedCourse, adjacentDate(cell.dataset.date, -1))));
+            cell.classList.toggle("range-end", selected && (cell.cellIndex === 6 || !matchesDate(selectedCourse, adjacentDate(cell.dataset.date, 1))));
         });
     }
 
     function render() {
-        const start = dateKey(month);
         const end = dateKey(new Date(month.getFullYear(), month.getMonth() + 1, 0));
-        const visible = courses.filter(course => course.start <= end && course.end >= start);
+        const monthDates = Array.from({ length: parseDate(end).getDate() }, (_, index) => dateKey(new Date(month.getFullYear(), month.getMonth(), index + 1)));
+        const visible = courses.filter(course => monthDates.some(key => matchesDate(course, key)));
         pinned = hovered = focused = previewed = null;
         if (monthLabel) monthLabel.textContent = `${month.getFullYear()}. ${String(month.getMonth() + 1).padStart(2, "0")}`;
+        const locationName = locations[selectedLocation].name;
+        if (locationTitle) locationTitle.textContent = `${locationName} 교육일정`;
         if (countLabel) countLabel.textContent = `${visible.length}개 과정`;
-        if (emptyMessage) emptyMessage.hidden = visible.length > 0;
+        if (emptyMessage) {
+            emptyMessage.hidden = visible.length > 0;
+            emptyMessage.textContent = `${locationName}의 이번 달 등록된 교육 일정이 없습니다. 다른 달 또는 교육장을 확인해 주세요.`;
+        }
         list.replaceChildren();
         visible.forEach(course => {
             const li = document.createElement("li");
@@ -179,7 +221,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             const period = document.createElement("span");
             period.className = "schedule-course-date";
-            period.textContent = `${displayDate(course.start)} ~ ${displayDate(course.end)}`;
+            period.textContent = scheduleLabel(course);
             button.append(title, period);
             button.addEventListener("mouseenter", () => { if (mobile.matches) return; hovered = previewed = course.id; highlight(); });
             button.addEventListener("mouseleave", () => { hovered = null; highlight(); });
@@ -213,7 +255,7 @@ document.addEventListener("DOMContentLoaded", function () {
             time.className = "schedule-day";
             time.dateTime = key;
             time.textContent = cursor.getDate();
-            const scheduled = courses.filter(course => key >= course.start && key <= course.end);
+            const scheduled = courses.filter(course => matchesDate(course, key));
             time.setAttribute("aria-label", `${cursor.getFullYear()}년 ${cursor.getMonth() + 1}월 ${cursor.getDate()}일${scheduled.length ? ", " + scheduled.map(course => course.title).join(", ") : ""}`);
             if (key === today) time.setAttribute("aria-current", "date");
             cell.append(time);
@@ -284,6 +326,15 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     document.getElementById("schedule-prev")?.addEventListener("click", () => { month.setMonth(month.getMonth() - 1); render(); });
     document.getElementById("schedule-next")?.addEventListener("click", () => { month.setMonth(month.getMonth() + 1); render(); });
+    locationSelect?.addEventListener("change", () => {
+        if (!locations[locationSelect.value]) return;
+        closeSheet(false);
+        closePicker();
+        selectedLocation = locationSelect.value;
+        courses = allCourses.filter(course => course.location === selectedLocation);
+        // Keep the chosen month when switching classrooms.
+        render();
+    });
     render();
     syncSheetMode();
 });
