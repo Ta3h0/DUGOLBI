@@ -4573,6 +4573,46 @@ body.review .page-button {
   max-width: 1000px;
 }
 
+:where(body.home) .section08 .container .img-box img[hidden] {
+  display: none;
+}
+
+/* Desktop/laptop mouse preview; touch layouts keep their existing links. */
+@media (min-width: 1025px) and (hover: hover) and (pointer: fine) {
+  :where(body.home) .section08 .container .list-panel .item {
+    transition: background-color 260ms ease, color 260ms ease;
+  }
+
+  :where(body.home) .section08 .container .list-panel .item :is(.date, .title) {
+    transition: color 260ms ease;
+  }
+
+  :where(body.home) .section08 .container .list-panel .item>img {
+    flex-shrink: 0;
+    transition: transform 260ms ease, filter 260ms ease;
+  }
+
+  :where(body.home) .section08 .container .list-panel .item:is(:hover, :focus-visible) {
+    background: var(--main-color);
+    color: #fff;
+  }
+
+  :where(body.home) .section08 .container .list-panel .item:is(:hover, :focus-visible) :is(.date, .title) {
+    color: #fff;
+  }
+
+  :where(body.home) .section08 .container .list-panel .item:is(:hover, :focus-visible)>img {
+    filter: brightness(0) invert(1);
+    transform: rotate(-45deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(body.home) .section08 .container .list-panel .item>img {
+    transition: none;
+  }
+}
+
 @media (max-width: 1024px) {
   :where(body.home) .section08 .container .inner {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

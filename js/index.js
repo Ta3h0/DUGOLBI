@@ -1180,18 +1180,35 @@
         const featuredTitle = featured.querySelector('.img-title');
         const list = target.querySelector('.list-panel');
         const fallback = 'images/alert.jpg';
+        const desktopPreview = window.matchMedia('(min-width: 1025px) and (hover: hover) and (pointer: fine)');
         status.textContent = '게시글을 불러오는 중입니다.';
 
         // A second failure hides the image rather than retrying the fallback forever.
         let usingFallback = false;
         poster.addEventListener('error', function () {
             if (usingFallback) {
-                poster.remove();
+                poster.hidden = true;
                 return;
             }
             usingFallback = true;
             poster.src = fallback;
         });
+
+        function showFeatured(item) {
+            featured.href = `${item.board}.html?wr_id=${item.id}`;
+            featuredTitle.textContent = item.title;
+            poster.alt = item.title;
+            let imageUrl;
+            try { imageUrl = new URL(item.image || '', window.location.href); } catch (_) {}
+            usingFallback = !item.image || !imageUrl || !/^https?:$/.test(imageUrl.protocol);
+            const source = usingFallback ? new URL(fallback, window.location.href).href : imageUrl.href;
+            // Avoid restarting the same image request on repeated focus/hover.
+            if (poster.src !== source) {
+                poster.hidden = false;
+                poster.src = source;
+            }
+            featured.hidden = false;
+        }
 
         try {
             const response = await fetch('community-feed.php', {
@@ -1211,15 +1228,10 @@
                 return;
             }
             const first = items[0];
-            featured.href = `${first.board}.html?wr_id=${first.id}`;
-            featuredTitle.textContent = first.title;
-            poster.alt = first.title;
-            let imageUrl;
-            try { imageUrl = new URL(first.image || '', window.location.href); } catch (_) {}
-            usingFallback = !first.image || !imageUrl || !/^https?:$/.test(imageUrl.protocol);
-            poster.src = usingFallback ? fallback : imageUrl.href;
-            poster.hidden = false;
-            featured.hidden = false;
+            showFeatured(first);
+            desktopPreview.addEventListener('change', function () {
+                if (!desktopPreview.matches) showFeatured(first);
+            });
             const fragment = document.createDocumentFragment();
             items.forEach(function (item) {
                 const link = document.createElement('a');
@@ -1235,6 +1247,11 @@
                 arrow.src = 'images/arrow-right.svg';
                 arrow.alt = '바로가기';
                 link.append(date, title, arrow);
+                const preview = function () {
+                    if (desktopPreview.matches) showFeatured(item);
+                };
+                link.addEventListener('mouseenter', preview);
+                link.addEventListener('focus', preview);
                 fragment.append(link);
             });
             list.replaceChildren(fragment);
