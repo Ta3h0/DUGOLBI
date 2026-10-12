@@ -401,3 +401,14 @@
 - 적용 범위: 로컬 프로젝트. 운영 업로드 및 Git commit/push 미수행.
 - Current: 4개 교육반의 요일 반복 및 예약 상품 연결 완료.
 - Next: 휴강/운영기간이 확정되면 데이터에 반영. 현재 요일 표시는 매주 수업 규칙이며 네이버 잔여석·마감·예약 가능 기간의 실시간 연동은 아님.
+
+
+## 교육장 커스텀 셀렉트 — 2026-10-12
+- [x] 기존 타원형 교육장 버튼 유지. 펼쳐지는 옵션은 index 상담폼 커스텀 셀렉트의 모서리·그림자·여백·호버·선택 색상으로 통일. 모바일 옵션 스타일도 상담폼 기준 적용.
+- [x] 교육장명은 business_info에서 표시. 기존 select/change 처리와 연결해 선택 월 유지, 교육장별 일정 및 예약 링크 전환 유지.
+- [x] 방향키/Home/End 이동, Enter 선택, Escape 닫기·포커스 복원, Tab/외부 클릭 닫기 지원. 교육장 목록과 월 선택 메뉴는 동시에 열리지 않음.
+- [x] JavaScript 비활성화 시 기존 기본 select 표시 유지.
+- [x] Edge 1440 / 1024 / 768 / 375px에서 선택·닫기·키보드·모바일 달력 팝업 및 예약 링크 검증. 타원형 border-radius 24px 유지, 가로 넘침·JS 실행 오류 없음. PC/Mobile 화면 확인 및 JS/PHP 구문·Git diff 공백 검사 통과.
+- 수정 파일: schedule.html, css/common.css, js/schedule.js, RESPONSIVE_PROGRESS.md.
+- 적용 범위: 로컬 프로젝트. 운영 업로드 및 Git commit/push 미수행.
+- Current: 교육장 커스텀 셀렉트 구현·검수 완료.

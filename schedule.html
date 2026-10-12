@@ -32,10 +32,25 @@
                 </div>
                 <div class="schedule-toolbar">
                     <div class="schedule-toolbar-controls">
-                        <select class="schedule-location-select" id="schedule-location" aria-label="교육장 선택">
-                            <option value="busan">부산 교육 본점</option>
-                            <option value="seoul">서울 청담 교육장</option>
-                        </select>
+                        <div class="schedule-location-control">
+                            <select class="schedule-location-select" id="schedule-location" aria-label="교육장 선택">
+                                <option value="busan">부산 교육 본점</option>
+                                <option value="seoul">서울 청담 교육장</option>
+                            </select>
+                            <button class="schedule-location-select schedule-location-trigger" id="schedule-location-trigger"
+                                type="button" aria-haspopup="listbox" aria-expanded="false"
+                                aria-controls="schedule-location-menu" hidden>
+                                <span class="schedule-location-value">부산 교육 본점</span>
+                                <span class="schedule-location-arrow" aria-hidden="true"></span>
+                            </button>
+                            <div class="schedule-location-menu" id="schedule-location-menu" role="listbox"
+                                aria-label="교육장 선택" hidden>
+                                <button class="schedule-location-option" type="button" role="option"
+                                    data-value="busan" aria-selected="true" tabindex="-1">부산 교육 본점</button>
+                                <button class="schedule-location-option" type="button" role="option"
+                                    data-value="seoul" aria-selected="false" tabindex="-1">서울 청담 교육장</button>
+                            </div>
+                        </div>
                     <div class="schedule-month-control">
                         <button class="schedule-month-button" id="schedule-prev" type="button" aria-label="이전 달"><svg
                                 viewBox="0 0 24 24" aria-hidden="true">

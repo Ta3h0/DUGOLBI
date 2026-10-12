@@ -9893,6 +9893,85 @@ body.schedule {
   outline-offset: 4px;
 }
 
+/* Keep the pill trigger; dropdown options follow the inquiry custom select. */
+:where(body.schedule) .schedule-location-control {
+  position: relative;
+  max-width: 100%;
+}
+
+:where(body.schedule) .schedule-location-trigger:not([hidden]) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-right: 18px;
+  font-family: inherit;
+  text-align: left;
+}
+
+:where(body.schedule) .schedule-location-arrow {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  margin-top: -4px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform .2s ease;
+}
+
+:where(body.schedule) .schedule-location-control.is-open .schedule-location-arrow {
+  transform: translateY(4px) rotate(225deg);
+}
+
+:where(body.schedule) .schedule-location-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 30;
+  width: max-content;
+  min-width: 100%;
+  max-width: calc(100vw - 40px);
+  max-height: 320px;
+  padding: 8px;
+  overflow-y: auto;
+  border: 1px solid #E4E9EF;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 18px 40px rgba(16, 24, 40, .12);
+  scrollbar-width: thin;
+}
+
+:where(body.schedule) .schedule-location-option {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #344054;
+  font-family: inherit;
+  font-size: 1.6rem;
+  font-weight: 400;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color .15s ease, color .15s ease;
+}
+
+:where(body.schedule) .schedule-location-option:hover,
+:where(body.schedule) .schedule-location-option:focus-visible {
+  background: #F3F7FC;
+  color: #17468c;
+  outline: none;
+}
+
+:where(body.schedule) .schedule-location-option[aria-selected="true"] {
+  background: rgba(23, 70, 140, .08);
+  color: #17468c;
+  font-weight: 700;
+}
+
 :where(body.schedule) .schedule-month-control {
   display: flex;
   align-items: center;
@@ -10526,6 +10605,18 @@ body.schedule.reduce-motion .schedule-section * {
 }
 
 @media (max-width: 768px) {
+  :where(body.schedule) .schedule-location-menu {
+    top: calc(100% + 6px);
+    padding: 6px;
+    border-radius: 16px;
+  }
+
+  :where(body.schedule) .schedule-location-option {
+    padding: 13px 14px;
+    border-radius: 11px;
+    font-size: 15px;
+  }
+
   :where(body.schedule) .schedule-calendar-actions {
     display: none;
   }

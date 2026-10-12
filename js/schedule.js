@@ -21,6 +21,80 @@ document.addEventListener("DOMContentLoaded", function () {
     locationSelect?.querySelectorAll("option").forEach(option => {
         if (locations[option.value]) option.textContent = locations[option.value].name;
     });
+    const locationControl = document.querySelector(".schedule-location-control");
+    const locationTrigger = document.getElementById("schedule-location-trigger");
+    const locationMenu = document.getElementById("schedule-location-menu");
+    const locationValue = document.querySelector(".schedule-location-value");
+    const locationOptions = Array.from(document.querySelectorAll(".schedule-location-option"));
+    const hasLocationMenu = Boolean(locationSelect && locationControl && locationTrigger && locationMenu && locationValue);
+    function syncLocationMenu() {
+        if (!hasLocationMenu) return;
+        locationValue.textContent = locations[selectedLocation].name;
+        locationTrigger.setAttribute("aria-label", `교육장 선택: ${locations[selectedLocation].name}`);
+        locationOptions.forEach(option => {
+            if (locations[option.dataset.value]) option.textContent = locations[option.dataset.value].name;
+            option.setAttribute("aria-selected", String(option.dataset.value === selectedLocation));
+        });
+    }
+    function closeLocationMenu(restoreFocus = false) {
+        if (!hasLocationMenu) return;
+        locationMenu.hidden = true;
+        locationControl.classList.remove("is-open");
+        locationTrigger.setAttribute("aria-expanded", "false");
+        if (restoreFocus) locationTrigger.focus({ preventScroll: true });
+    }
+    function openLocationMenu() {
+        if (!hasLocationMenu) return;
+        closePicker();
+        locationMenu.hidden = false;
+        locationControl.classList.add("is-open");
+        locationTrigger.setAttribute("aria-expanded", "true");
+        const selected = locationOptions.find(option => option.dataset.value === selectedLocation);
+        selected?.focus({ preventScroll: true });
+    }
+    if (hasLocationMenu) {
+        syncLocationMenu();
+        locationSelect.hidden = true;
+        locationTrigger.hidden = false;
+        locationTrigger.addEventListener("click", () => {
+            if (locationMenu.hidden) openLocationMenu();
+            else closeLocationMenu();
+        });
+        locationTrigger.addEventListener("keydown", event => {
+            if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+            event.preventDefault();
+            openLocationMenu();
+        });
+        locationOptions.forEach((option, index) => {
+            option.addEventListener("click", () => {
+                locationSelect.value = option.dataset.value;
+                locationSelect.dispatchEvent(new Event("change", { bubbles: true }));
+                closeLocationMenu(true);
+            });
+            option.addEventListener("keydown", event => {
+                let target;
+                if (event.key === "ArrowDown") target = (index + 1) % locationOptions.length;
+                else if (event.key === "ArrowUp") target = (index - 1 + locationOptions.length) % locationOptions.length;
+                else if (event.key === "Home") target = 0;
+                else if (event.key === "End") target = locationOptions.length - 1;
+                else return;
+                event.preventDefault();
+                locationOptions[target].focus({ preventScroll: true });
+            });
+        });
+        document.addEventListener("click", event => {
+            if (!locationControl.contains(event.target)) closeLocationMenu();
+        });
+        document.addEventListener("focusin", event => {
+            if (!locationControl.contains(event.target)) closeLocationMenu();
+        });
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape" && !locationMenu.hidden) {
+                event.preventDefault();
+                closeLocationMenu(true);
+            }
+        });
+    }
     // Inclusive dates remain supported; weekly schedules may omit either date bound.
     const source = typeof scheduleData !== "undefined" && Array.isArray(scheduleData) ? scheduleData : [];
     const allCourses = source.filter(course => {
@@ -133,6 +207,7 @@ document.addEventListener("DOMContentLoaded", function () {
         highlight();
     }
     function openSheet(course, button) {
+        closeLocationMenu();
         if (!panel || !mobile.matches) return;
         closePicker();
         sheetTrigger = button;
@@ -308,6 +383,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     if (hasPicker) pickerToggle.addEventListener("click", () => {
         if (!picker.hidden) { closePicker(); return; }
+        closeLocationMenu();
         pickerYear = month.getFullYear();
         renderPicker();
         picker.hidden = false;
@@ -331,6 +407,8 @@ document.addEventListener("DOMContentLoaded", function () {
         closeSheet(false);
         closePicker();
         selectedLocation = locationSelect.value;
+        syncLocationMenu();
+        closeLocationMenu();
         courses = allCourses.filter(course => course.location === selectedLocation);
         // Keep the chosen month when switching classrooms.
         render();
