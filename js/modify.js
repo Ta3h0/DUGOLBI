@@ -238,6 +238,9 @@ const scheduleData = [
 ];
 
 
+// 현판 호스팅 주소: plaques 폴더를 업로드한 주소로 이 값만 변경하세요.
+const networkImageBaseUrl = "https://okay2.speedgabia.com/_dugolbi/cert/";
+
 // 수료지점: ID 없이 업체명 가나다순으로 정렬하고 페이지당 8개씩 표시합니다.
 // 지점 추가/수정은 name(업체명), certification(인증 구분), region(상세 지역), phone(연락처) 항목을 편집하세요.
 // 인증 구분: 공식 강사 / 교육 마스터점 / 교육 인증점 / 교육 수료점
@@ -248,7 +251,7 @@ const networkData = [
         "name": "두골비오브제랩본점",
         "graduateName": "김미진",
         "certification": "공식 강사",
-        "img": "",
+        "img": "images/network/plaques/instructors/dugolbi-objet-lab-main.jpg",
         "region": "부산진구",
         "phone": "010-3450-1667"
     },
@@ -264,7 +267,7 @@ const networkData = [
         "name": "매직필라테스",
         "graduateName": "맹정숙",
         "certification": "공식 강사",
-        "img": "",
+        "img": "images/network/plaques/instructors/magic-pilates.jpg",
         "region": "서울 노원·강남",
         "phone": "010-7108-5291"
     },
@@ -272,7 +275,7 @@ const networkData = [
         "name": "제이윤 에스테틱",
         "graduateName": "최자윤",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/j-yoon-esthetic.jpg",
         "region": "서울 강서구 방화",
         "phone": "010-4381-0625"
     },
@@ -288,7 +291,7 @@ const networkData = [
         "name": "로인웰니스",
         "graduateName": "윤성아",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/roin-wellness.jpg",
         "region": "서울 청담",
         "phone": "010-5520-6165"
     },
@@ -296,7 +299,7 @@ const networkData = [
         "name": "자웅에스떼",
         "graduateName": "김자웅",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/jaung-esthe.jpg",
         "region": "서울 강서",
         "phone": "010-5419-5395"
     },
@@ -304,7 +307,7 @@ const networkData = [
         "name": "다결뷰티",
         "graduateName": "오다결",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/dagyeol-beauty.jpg",
         "region": "서울 마포",
         "phone": "010-9328-3093"
     },
@@ -312,7 +315,7 @@ const networkData = [
         "name": "김기숙힐링숍",
         "graduateName": "김기숙",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/kim-gisuk-healing-shop.jpg",
         "region": "서울 중구 을지로",
         "phone": "010-8617-4459"
     },
@@ -328,7 +331,7 @@ const networkData = [
         "name": "두윤에스테틱",
         "graduateName": "박윤정",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/duyun-esthetic.jpg",
         "region": "서울 동작구 흑석동",
         "phone": "010-5136-6388"
     },
@@ -336,7 +339,7 @@ const networkData = [
         "name": "에바다에스테틱얼굴축소연구소",
         "graduateName": "김연례",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/ebada-esthetic.jpg",
         "region": "경기 양주",
         "phone": "010-2497-0992"
     },
@@ -344,7 +347,7 @@ const networkData = [
         "name": "동안비결뷰티얼굴축소연구소",
         "graduateName": "김미선",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/dongan-bigyeol-beauty.jpg",
         "region": "경기 평택",
         "phone": "010-7797-9113"
     },
@@ -352,7 +355,7 @@ const networkData = [
         "name": "배선영에스테틱",
         "graduateName": "배선영",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/bae-seonyeong-esthetic.jpg",
         "region": "경기 파주",
         "phone": "010-6257-1113"
     },
@@ -360,7 +363,7 @@ const networkData = [
         "name": "스킨앤바디Joa",
         "graduateName": "조유신",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/skin-body-joa.jpg",
         "region": "경기 용인",
         "phone": "010-7152-4617"
     },
@@ -368,7 +371,7 @@ const networkData = [
         "name": "플로라스킨케어",
         "graduateName": "김기라",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/flora-skin-care.jpg",
         "region": "경기 안양·인덕원",
         "phone": "010-5314-3343"
     },
@@ -376,7 +379,7 @@ const networkData = [
         "name": "바른결by김현숙",
         "graduateName": "김현숙",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/bareungyeol-by-kim-hyeonsuk.jpg",
         "region": "경기 부천 신중동역",
         "phone": "010-3154-8846"
     },
@@ -384,7 +387,7 @@ const networkData = [
         "name": "바른몸케어",
         "graduateName": "허유경",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/bareunmom-care.jpg",
         "region": "경기 고양시 일산 백석동",
         "phone": "010-6216-5843"
     },
@@ -392,7 +395,7 @@ const networkData = [
         "name": "라움리포벨",
         "graduateName": "최미선",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/raum-ripobell.jpg",
         "region": "대전 서구",
         "phone": "010-2777-5761"
     },
@@ -400,7 +403,7 @@ const networkData = [
         "name": "지연스킨앤바디",
         "graduateName": "나지연",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/jiyeon-skin-body.jpg",
         "region": "경북 포항",
         "phone": "010-4537-8342"
     },
@@ -408,7 +411,7 @@ const networkData = [
         "name": "비체 스킨&바디랩",
         "graduateName": "유민정",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/biche-skin-body-lab.jpg",
         "region": "부산 서구",
         "phone": "010-4568-4162"
     },
@@ -416,7 +419,7 @@ const networkData = [
         "name": "오오이게 밸런스테라피",
         "graduateName": "오시라",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/ooige-balance-therapy.jpg",
         "region": "부산 수영구",
         "phone": "010-7406-0902"
     },
@@ -424,7 +427,7 @@ const networkData = [
         "name": "로온",
         "graduateName": "유정연",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/roon.jpg",
         "region": "부산 서면",
         "phone": "010-9346-1250"
     },
@@ -472,7 +475,7 @@ const networkData = [
         "name": "편백더힐링에스테틱",
         "graduateName": "김용자",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/pyeonbaek-the-healing.jpg",
         "region": "부산 수영구",
         "phone": "010-9628-9094"
     },
@@ -488,7 +491,7 @@ const networkData = [
         "name": "아르떼뷰티",
         "graduateName": "서주연",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/arte-beauty.jpg",
         "region": "부산 하단",
         "phone": "010-9235-4071"
     },
@@ -496,7 +499,7 @@ const networkData = [
         "name": "바룸앤블룸",
         "graduateName": "엄태현",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/barum-and-bloom.jpg",
         "region": "창원 진해 장천동",
         "phone": "010-9363-7620"
     },
@@ -512,7 +515,7 @@ const networkData = [
         "name": "더예쁘다스킨케어",
         "graduateName": "문미주",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/deo-yeppeuda-skin-care.jpg",
         "region": "김해 내외동",
         "phone": "010-3502-1013"
     },
@@ -528,7 +531,7 @@ const networkData = [
         "name": "여며들다116",
         "graduateName": "정지혜",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/yeomyeodeulda-116.jpg",
         "region": "경남 양산",
         "phone": "010-5108-9262"
     },
@@ -568,7 +571,7 @@ const networkData = [
         "name": "청아피부체형관리실",
         "graduateName": "염영숙",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/cheonga-skin-body-care.jpg",
         "region": "대구 감삼동",
         "phone": "010-5066-2333"
     },
@@ -592,7 +595,7 @@ const networkData = [
         "name": "리디안에스테틱",
         "graduateName": "김혜진",
         "certification": "교육 마스터점",
-        "img": "",
+        "img": "images/network/plaques/masters/lydian-esthetic.jpg",
         "region": "전북 전주 효자동",
         "phone": "010-4668-1603"
     },
@@ -616,7 +619,7 @@ const networkData = [
         "name": "에스테틱연 목동점",
         "graduateName": "김정애",
         "certification": "교육 인증점",
-        "img": "",
+        "img": "images/network/plaques/certified/esthetic-yeon-mokdong.jpg",
         "region": "서울 양천구",
         "phone": "010-2057-2715"
     },
@@ -632,7 +635,7 @@ const networkData = [
         "name": "디아에스테틱",
         "graduateName": "김혜선",
         "certification": "교육 인증점",
-        "img": "",
+        "img": "images/network/plaques/certified/dia-esthetic.jpg",
         "region": "경기 부천",
         "phone": "0507-1411-5054"
     },
@@ -664,7 +667,7 @@ const networkData = [
         "name": "이뻐지는시간",
         "graduateName": "탁영지",
         "certification": "교육 인증점",
-        "img": "",
+        "img": "images/network/plaques/certified/ippeojineun-sigan.jpg",
         "region": "경남 통영",
         "phone": "010-8924-6123"
     },
@@ -672,7 +675,7 @@ const networkData = [
         "name": "보결샵",
         "graduateName": "차보결",
         "certification": "교육 인증점",
-        "img": "",
+        "img": "images/network/plaques/certified/bogyeol-shop.jpg",
         "region": "울산 북구",
         "phone": "010-8232-8950"
     },
@@ -688,7 +691,7 @@ const networkData = [
         "name": "도깨비언니에스테틱",
         "graduateName": "김혜미",
         "certification": "교육 인증점",
-        "img": "",
+        "img": "images/network/plaques/certified/dokkaebi-eonni-esthetic.jpg",
         "region": "울산 남구",
         "phone": "010-2386-7273"
     },
@@ -704,7 +707,7 @@ const networkData = [
         "name": "더숨에스테틱",
         "graduateName": "한태희",
         "certification": "교육 인증점",
-        "img": "",
+        "img": "images/network/plaques/certified/deosum-esthetic.jpg",
         "region": "서울 중랑구 상봉동",
         "phone": "010-2221-3494"
     },
@@ -736,7 +739,7 @@ const networkData = [
         "name": "뷰티온에스테틱",
         "graduateName": "고현주",
         "certification": "교육 인증점",
-        "img": "",
+        "img": "images/network/plaques/certified/beauty-on-esthetic.jpg",
         "region": "강원 원주",
         "phone": "010-9293-0090"
     },
@@ -744,7 +747,7 @@ const networkData = [
         "name": "이너리플",
         "graduateName": "김태인",
         "certification": "교육 인증점",
-        "img": "",
+        "img": "images/network/plaques/certified/inner-ripple.jpg",
         "region": "광주",
         "phone": "010-9098-4699"
     },
@@ -776,7 +779,7 @@ const networkData = [
         "name": "LK테라피",
         "graduateName": "이해랑",
         "certification": "교육 수료점",
-        "img": "",
+        "img": "images/network/plaques/graduates/lk-therapy.jpg",
         "region": "서울 마포",
         "phone": "010-4191-0253"
     },
@@ -784,7 +787,7 @@ const networkData = [
         "name": "라임스킨케어",
         "graduateName": "최유성",
         "certification": "교육 수료점",
-        "img": "",
+        "img": "images/network/plaques/graduates/lime-skin-care.jpg",
         "region": "서울 상봉",
         "phone": "010-7580-8532"
     },

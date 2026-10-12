@@ -88,7 +88,11 @@
                 : (regionName.match(/^(서울|경기|강원|충북|충남|대전|대구|경북|경남|부산|울산|전북|전남|광주)/) || [regionName])[0];
             card.dataset.category = filterRegion;
             const customImage = typeof branch.img === "string" ? branch.img.trim() : "";
-            const imageSrc = customImage || defaultImages[branch.certification];
+            const plaquePrefix = "images/network/plaques/";
+            const hostedImage = customImage.startsWith(plaquePrefix) && typeof networkImageBaseUrl === "string"
+                ? networkImageBaseUrl.replace(/\/?$/, "/") + customImage.slice(plaquePrefix.length)
+                : customImage;
+            const imageSrc = hostedImage || defaultImages[branch.certification];
             if (dialog) {
                 card.tabIndex = 0;
                 card.setAttribute("role", "button");

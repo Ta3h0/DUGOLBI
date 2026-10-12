@@ -7669,7 +7669,7 @@ body.brand-story main>section {
 :where(body.network) .network-card>img {
   width: 100%;
   height: auto;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
 }
 
@@ -7723,7 +7723,7 @@ body.brand-story main>section {
 
 :where(body.network) .network-detail-image {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
 }
 
