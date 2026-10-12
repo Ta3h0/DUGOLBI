@@ -4579,6 +4579,15 @@ body.review .page-button {
 
 /* Desktop/laptop mouse preview; touch layouts keep their existing links. */
 @media (min-width: 1025px) and (hover: hover) and (pointer: fine) {
+  :where(body.home) .section08 .container .img-title {
+    height: 3.2em;
+    height: 2lh;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+
   :where(body.home) .section08 .container .list-panel .item {
     transition: background-color 260ms ease, color 260ms ease;
   }
