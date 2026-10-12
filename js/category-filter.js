@@ -8,12 +8,7 @@
         if (!grid) return;
 
         const collator = new Intl.Collator("ko", { numeric: true, sensitivity: "base" });
-        const defaultImages = {
-            "공식 강사": "images/network/network-img-01.jpg",
-            "교육 마스터점": "images/network/network-img-02.jpg",
-            "교육 인증점": "images/network/network-img-03.jpg",
-            "교육 수료점": "images/network/network-img-04.jpg"
-        };
+        const defaultImage = (typeof networkImageBaseUrl === "string" ? networkImageBaseUrl : "https://okay2.speedgabia.com/_dugolbi/cert/").replace(/\/?$/, "/") + "replace.jpg";
         const certificationDescriptions = {
             "공식 강사": "두골비의 기술과 교육을 전달하는 공식 전문 교육진",
             "교육 마스터점": "필수과목 두골비 · 두골체 · 신결비 전 과정 수료 및 공식 인증 기준 충족",
@@ -92,7 +87,7 @@
             const hostedImage = customImage.startsWith(plaquePrefix) && typeof networkImageBaseUrl === "string"
                 ? networkImageBaseUrl.replace(/\/?$/, "/") + customImage.slice(plaquePrefix.length)
                 : customImage;
-            const imageSrc = hostedImage || defaultImages[branch.certification];
+            const imageSrc = hostedImage || defaultImage;
             if (dialog) {
                 card.tabIndex = 0;
                 card.setAttribute("role", "button");
