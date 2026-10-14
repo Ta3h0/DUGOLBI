@@ -12648,6 +12648,20 @@ body.legal-modal-open {
 :where(body.temp-admin) .admin-avatar { width: 34px; height: 34px; border-radius: 50%; background: #eaf0f9; color: var(--main-color); display: grid; place-items: center; font-weight: 700; }
 :where(body.temp-admin) .admin-profile strong { font-size: 12px; }
 :where(body.temp-admin) .admin-profile small { display: block; color: var(--admin-muted); font-size: 11px; }
+/* Standalone temporary-account login uses the existing admin palette. */
+:where(body.temp-admin).admin-login { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 24px; }
+:where(body.temp-admin) .admin-login-card { width: min(100%, 420px); padding: 32px 28px; background: #fff; border: 1px solid var(--admin-line); border-radius: 12px; }
+:where(body.temp-admin) .admin-login-logo { width: 220px; max-width: 100%; height: auto; margin-bottom: 32px; }
+:where(body.temp-admin) .admin-login-card h1 { font-size: 26px; line-height: 1.4; }
+:where(body.temp-admin) .admin-login-description { margin-top: 8px; margin-bottom: 28px; font-size: 13px; color: var(--admin-muted); word-break: keep-all; }
+:where(body.temp-admin) .admin-login-form { display: grid; gap: 20px; }
+:where(body.temp-admin) .admin-login-form input:not([type="hidden"]) { width: 100%; min-height: 48px; padding: 11px 12px; border: 1px solid #d4dce8; border-radius: 6px; background: #fff; font: inherit; font-size: 16px; }
+:where(body.temp-admin) .admin-login-form input:focus-visible { outline: 2px solid var(--main-color); outline-offset: 2px; }
+:where(body.temp-admin) .admin-login-form .admin-button { width: 100%; min-height: 48px; }
+:where(body.temp-admin) .admin-login-error { margin-bottom: 20px; padding: 12px; border: 1px solid #ebc9cd; border-radius: 6px; background: #fff6f7; color: #a22e38; font-size: 13px; word-break: keep-all; }
+:where(body.temp-admin) .admin-login-back { display: inline-block; margin-top: 24px; font-size: 12px; color: var(--admin-muted); }
+:where(body.temp-admin) .admin-logout-button { min-height: 44px; padding: 6px 12px; font-size: 12px; }
+
 :where(body.temp-admin) .admin-shell { margin-left: 232px; min-width: 0; }
 :where(body.temp-admin) .admin-topbar { background: white; min-height: 74px; padding: 0 36px; display: flex; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid var(--admin-line); }
 :where(body.temp-admin) .admin-breadcrumb { display: flex; align-items: center; gap: 13px; color: var(--admin-muted); font-size: 12px; }

@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/auth.php';
+dugolbiAdminRequireLogin(true);
 // This inventory is public on results.html; no private board data is exposed.
 require_once dirname(__DIR__) . '/includes/results-data.php';
 header('Content-Type: application/javascript; charset=UTF-8');

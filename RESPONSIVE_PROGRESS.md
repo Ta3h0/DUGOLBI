@@ -522,3 +522,14 @@
 - 제거 파일: temp-board/seed.js(고정 사본 대체). 운영 배포 및 Git commit/push 미수행.
 - Current: 계획 1~4의 관리자 화면·임시 편집 보완 완료. 실제 운영 저장은 아직 브라우저 임시 저장이며 연동 완료로 표시하지 않음.
 - Next: 개발용 그누보드 설치·DB·관리자 세션 환경 연결 후 계획 5~8 구현 및 운영 동작 검증.
+
+
+## 독립 관리자 로그인 — 2026-10-14
+- [x] 사용자 지정 고정 계정으로 PHP 세션 로그인. 비밀번호는 서버 PHP 해시로 저장하며 그누보드 DB/로그인과 분리.
+- [x] 관리자 본문과 seed.php에 인증 검사, 비로그인 진입은 로그인 이동/401 응답. index.php로 본문 이동, index.html 기존 주소는 호환 진입. 로컬 라우터 및 Apache 기본 진입 설정.
+- [x] 로그인 시 세션 ID/요청 토큰 변경, POST 로그아웃/요청 토큰 검증, HttpOnly/SameSite 쿠키, HTTPS Secure, 캐시 저장 방지. 미사용 2시간/최대 8시간 만료, 계정 변경 시 기존 세션 무효화. 세션별 5회 실패 후 60초 제한.
+- [x] HTTP/Edge 검사 35건 통과: 비로그인 직접 접근, 설정 파일 차단, 잘못된 비밀번호/요청 토큰, 로그인 성공/세션 교체, 보호된 데이터, 로그아웃/재접근, 재시도 제한. PC 1440px/모바일 375px 로그인·대시보드 시각 확인, 뒤로가기 로그인 유지 차단, 새 JS 오류/가로 넘침 없음. PHP 구문 및 Git diff 공백 검사 통과.
+- [ ] 실제 서버 PHP 세션 저장 권한·HTTPS 쿠키는 배포 후 확인 필요. 사용자 요청에 따라 DB 저장/그누보드 연동/서버 업로드는 보류. 콘텐츠 편집은 기존 브라우저 임시 저장 그대로.
+- 생성: temp-board/auth-config.php, temp-board/auth.php, temp-board/login.php, temp-board/logout.php, temp-board/index.php, temp-board/.htaccess.
+- 수정: temp-board/index.html, temp-board/seed.php, router.php, css/common.css, temp-board/README.md, RESPONSIVE_PROGRESS.md. 이미지 자산 추가 없음.
+- Current: 로컬 독립 로그인 완료. 운영 배포 및 Git commit/push 미수행.

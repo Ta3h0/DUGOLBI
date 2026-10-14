@@ -12,7 +12,7 @@ if ($uri === '/') {
 
 // 임시 관리자 시안의 디렉터리 진입 (공개 사이트 라우팅은 유지).
 if ($uri === '/temp-board' || $uri === '/temp-board/') {
-    $uri = '/temp-board/index.html';
+    $uri = '/temp-board/index.php';
 }
 
 $file = realpath(__DIR__ . $uri);
