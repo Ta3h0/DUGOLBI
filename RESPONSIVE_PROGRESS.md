@@ -594,3 +594,10 @@
 - [x] Edge 1440/375px 격리 fixture 검사 38건 통과: 단일·복수 삭제 실제 새로고침, 게시판/검색 복귀, 선택/취소, 마지막 페이지·빈 목록, 일부 실패, 불명 결과 중단, storage 차단, JS 오류/가로 넘침. 운영 DB 삭제는 테스트하지 않음. JS/PHP 구문·Git diff 공백 검사 통과.
 - 수정: temp-board/posts.js, temp-board/post-editor.js, temp-board/boards.js, temp-board/index.php, css/common.css, temp-board/README.md, RESPONSIVE_PROGRESS.md. 신규 파일/자산 없음.
 - Current: 자동 새로고침·선택 삭제 로컬 반영 완료. Next: temp-board 및 css/common.css 운영 업로드 후 확인. 운영 배포/Git commit/push 미수행.
+
+## 게시글 목록 도구 모음 배치 보완 — 2026-10-14
+
+- [x] 게시글 수·선택 기능·제목 검색을 같은 도구 모음에 배치. 상태 안내의 하단 여백 제거, 검색 입력 왼쪽 정렬. 기존 게시판 목록 등 다른 화면 스타일 유지.
+- [x] Edge 1440/1100/1024/768/375px 조회 응답 대체 검사: 화면 넘침/JS 오류 없음, 선택 개수·전체 선택·검색 후 초기화 정상. 운영 DB 변경 없음.
+- 수정: temp-board/posts.js, css/common.css, temp-board/README.md, 이 문서. 새 파일/이미지 자산 없음.
+- Current: 로컬 레이아웃 보완 완료. Next: posts.js와 css/common.css 운영 업로드 후 실제 화면 확인. 운영 배포/Git commit/push 미수행.

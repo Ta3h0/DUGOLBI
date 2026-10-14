@@ -176,3 +176,10 @@
 - Edge PC 1440px/Mobile 375px, 격리 PHP 연결 fixture에서 38건 통과: 단일/복수 삭제 실제 페이지 navigation, 게시판·검색 복귀, 현재 페이지 선택/부분 선택/해제 및 취소, 마지막 페이지/0개, 부분 실패/불명 결과 중단, blocked storage 재조회, JS 오류/가로 넘침. 운영 DB에 직접 삭제한 검증은 아님.
 - 수정: `temp-board/posts.js`, `temp-board/post-editor.js`, `temp-board/boards.js`, `temp-board/index.php`, `css/common.css`, 이 문서, `RESPONSIVE_PROGRESS.md`. 새 파일/이미지 자산 없음.
 - 운영 업로드 및 Git commit/push 미수행. 현재 temp-board 및 css/common.css 업로드 후 삭제 자동 새로고침/선택 삭제 운영 확인 필요.
+
+## 게시글 목록 도구 모음 간격 보완 (2026-10-14)
+
+- 게시글 수·선택 기능은 왼쪽, 제목 검색은 오른쪽에 한 도구 모음으로 배치. 목록 상태 안내 아래의 불필요한 여백 제거, 검색 입력의 불필요한 아이콘 여백 제거 및 왼쪽 정렬.
+- 좁은 화면에서는 자연스럽게 줄바꿈하고 검색은 별도 전체 너비 행 사용. 기존 선택/검색/삭제 처리와 API 변경 없음.
+- Edge 1440/1100/1024/768/375px에서 가로 넘침·JS 오류 없음, 선택 개수/전체 선택/검색 후 선택 초기화 확인. 로그인된 로컬 화면에 게시판 조회 응답만 대체하여 검증했으며 운영 DB 변경 없음.
+- 수정: temp-board/posts.js, css/common.css, 이 문서, RESPONSIVE_PROGRESS.md. 신규 파일/이미지 자산 없음. 운영 업로드 및 Git commit/push 미수행.
