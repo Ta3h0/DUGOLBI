@@ -135,6 +135,7 @@ const scheduleData = [
 const networkImageBaseUrl = "https://okay2.speedgabia.com/_dugolbi/cert/";
 
 // 수료지점: ID 없이 업체명 가나다순으로 정렬하고 페이지당 8개씩 표시합니다.
+// regionPriority: 전국 및 해당 지역 탭에서 우선 표시할 지점에 1을 입력합니다. 나머지는 가나다순입니다.
 // 지점 추가/수정은 name(업체명), certification(인증 구분), region(상세 지역), phone(연락처) 항목을 편집하세요.
 // 인증 구분: 공식 강사 / 교육 마스터점 / 교육 인증점 / 교육 수료점
 // img: 지점별 이미지 경로를 입력하세요. 빈 문자열("")이면 인증 구분에 맞는 기본 이미지를 사용합니다.
@@ -142,6 +143,7 @@ const networkImageBaseUrl = "https://okay2.speedgabia.com/_dugolbi/cert/";
 const networkData = [
     {
         "name": "두골비오브제랩본점",
+        "regionPriority": 1,
         "graduateName": "김미진",
         "certification": "공식 강사",
         "img": "images/network/plaques/instructors/dugolbi-objet-lab-main.jpg",

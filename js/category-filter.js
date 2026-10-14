@@ -82,6 +82,7 @@
                 ? "경남"
                 : (regionName.match(/^(서울|경기|강원|충북|충남|대전|대구|경북|경남|부산|울산|전북|전남|광주)/) || [regionName])[0];
             card.dataset.category = filterRegion;
+            card.dataset.regionPriority = String(Number(branch.regionPriority) || 0);
             const customImage = typeof branch.img === "string" ? branch.img.trim() : "";
             const plaquePrefix = "images/network/plaques/";
             const hostedImage = customImage.startsWith(plaquePrefix) && typeof networkImageBaseUrl === "string"
@@ -158,6 +159,7 @@
         const empty = section.querySelector("." + pageClass + "-empty");
         const pagination = section.querySelector("." + pageClass + "-pagination");
         if (!pagination) return;
+        const networkGrid = pageClass === "network" ? section.querySelector(".network-grid") : null;
 
         const pageSize = pageClass === "network" ? 8 : 6;
         const mobileMedia = window.matchMedia("(max-width: 768px)");
@@ -182,6 +184,14 @@
             const matching = items.filter(function (item) {
                 return selected === "전체" || selected === "전국" || item.dataset.category === selected;
             });
+            if (networkGrid) {
+                // Pin the main branch in national/regional views; others stay alphabetical.
+                matching.sort(function (first, second) {
+                    return Number(second.dataset.regionPriority) - Number(first.dataset.regionPriority);
+                });
+                // Reuse the cards so their detail-dialog handlers remain attached.
+                matching.forEach(function (item) { networkGrid.append(item); });
+            }
             pageCount = Math.ceil(matching.length / pageSize);
             currentPage = Math.min(Math.max(currentPage, 1), Math.max(pageCount, 1));
             const start = (currentPage - 1) * pageSize;
