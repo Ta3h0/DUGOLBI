@@ -54,6 +54,9 @@
                     find('[data-board-group]').innerHTML = '<option value="">모든 그룹</option>' + groups.map(([id, name]) => `<option value="${escape(id)}" ${group === id ? 'selected' : ''}>${escape(name)}</option>`).join('');
                     find('[data-board-status]').innerHTML = '<p class="admin-board-note">DB 연결 정상 · 실제 게시판 목록 · 조회 전용</p>';
                     find('[data-board-toolbar]').hidden = false;
+                    const resume = window.dugolbiBoardPosts.takeRefreshContext();
+                    const resumeBoard = resume && boards.find(item => item.id === resume.board);
+                    if (resumeBoard) { this.unmount(); window.dugolbiBoardPosts.mount(root, resumeBoard, () => this.mount(root), resume); return; }
                     display();
                 } catch (error) {
                     if (!active) return;

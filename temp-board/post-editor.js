@@ -6,22 +6,29 @@
     let dispose = () => {};
     const confirmations = new Set();
     const request = async (board, id) => {
-        const response = await fetch('post-action.php?' + new URLSearchParams({ board, id: String(id) }), { credentials: 'same-origin', cache: 'no-store' });
-        if (response.status === 401) { location.assign('login.php'); throw new Error('로그인이 필요합니다.'); }
-        const result = await response.json();
-        if (!response.ok || !result.ok) throw new Error(result.message || '편집 정보를 불러오지 못했습니다.');
-        if (result.board?.id !== board || result.post?.id !== id) throw new Error('게시글 정보를 확인해주세요.');
-        return result;
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 20000);
+        try {
+            const response = await fetch('post-action.php?' + new URLSearchParams({ board, id: String(id) }), { credentials: 'same-origin', cache: 'no-store', signal: controller.signal });
+            if (response.status === 401) { location.assign('login.php'); throw Object.assign(new Error('로그인이 필요합니다.'), { code: 'LOGIN_REQUIRED' }); }
+            const result = await response.json();
+            if (!response.ok || !result.ok) throw new Error(result.message || '편집 정보를 불러오지 못했습니다.');
+            if (result.board?.id !== board || result.post?.id !== id) throw new Error('게시글 정보를 확인해주세요.');
+            return result;
+        } catch (failure) {
+            if (failure.name === 'AbortError') throw Object.assign(new Error('편집 정보 응답이 늦어 조회를 중단했습니다. 다시 시도해주세요.'), { name: 'AbortError' });
+            throw failure;
+        } finally { clearTimeout(timeout); }
     };
     const send = async data => {
         const response = await fetch('post-action.php', { method: 'POST', body: data, credentials: 'same-origin', cache: 'no-store' });
-        if (response.status === 401) { location.assign('login.php'); throw new Error('로그인이 필요합니다.'); }
+        if (response.status === 401) { location.assign('login.php'); throw Object.assign(new Error('로그인이 필요합니다.'), { code: 'LOGIN_REQUIRED' }); }
         const result = await response.json();
         if (!response.ok || !result.ok) throw Object.assign(new Error(result.message || '처리에 실패했습니다.'), { code: result.code });
         return result;
     };
     const confirm = (title, message, label) => new Promise(resolve => {
-        const dialog = document.createElement('dialog'); dialog.className = 'admin-confirm';
+        const dialog = document.createElement('dialog'); dialog.className = 'admin-confirm admin-post-confirm';
         dialog.setAttribute('aria-labelledby', 'admin-post-confirm-title');
         dialog.innerHTML = `<form method="dialog"><h2 id="admin-post-confirm-title">${escape(title)}</h2><p>${escape(message)}</p><div class="admin-confirm-actions"><button class="admin-button" value="cancel">취소</button><button class="admin-button admin-danger" value="confirm">${escape(label)}</button></div></form>`;
         confirmations.add(dialog);
@@ -107,6 +114,35 @@
                 const data = new FormData(); data.set('action', 'delete'); data.set('board', board.id); data.set('id', String(id)); data.set('csrf_token', meta.csrfToken); data.set('operation_token', meta.deleteToken);
                 onSaved(await send(data));
             } catch (failure) { onError(failure instanceof SyntaxError || failure instanceof TypeError ? '처리 결과를 확인하지 못했습니다. 게시글 목록을 다시 확인해주세요.' : failure.message); }
+        },
+        async removeMany(board, items, onComplete, onProgress, isActive = () => true) {
+            if (!items.length || items.length > 20 || new Set(items.map(item => item.id)).size !== items.length) return;
+            const preview = items.slice(0, 5).map(item => '· ' + item.title).join('\n');
+            const more = items.length > 5 ? `\n외 ${items.length - 5}개` : '';
+            if (!await confirm(`${items.length}개 게시글을 삭제할까요?`, `${preview}${more}\n\n선택한 글과 해당 댓글·첨부파일이 운영 게시판에서 삭제됩니다. 이 작업은 되돌릴 수 없습니다.`, '선택 삭제')) return;
+            if (!isActive()) return;
+            const outcome = { deleted: 0, failed: [], skipped: 0 };
+            for (let index = 0; index < items.length; index++) {
+                if (!isActive()) return;
+                const item = items[index];
+                onProgress(index + 1, items.length);
+                try {
+                    // Each item gets its own current snapshot and bound native-core token.
+                    const meta = await request(board.id, item.id);
+                    if (!isActive()) return;
+                    const data = new FormData();
+                    data.set('action', 'delete'); data.set('board', board.id); data.set('id', String(item.id));
+                    data.set('csrf_token', meta.csrfToken); data.set('operation_token', meta.deleteToken);
+                    await send(data);
+                    outcome.deleted++;
+                } catch (failure) {
+                    if (failure.code === 'LOGIN_REQUIRED') return;
+                    const uncertain = failure instanceof SyntaxError || failure instanceof TypeError || failure.name === 'AbortError' || ['CORE_FAILED', 'CORE_INCOMPLETE', 'CORE_REDIRECT', 'SERVER_ERROR', 'ALREADY_SUBMITTED'].includes(failure.code);
+                    outcome.failed.push({ id: item.id, uncertain, message: uncertain ? '결과를 확인하지 못했습니다. 목록을 확인해주세요.' : failure.message });
+                    if (uncertain) { outcome.skipped = items.length - index - 1; break; }
+                }
+            }
+            if (isActive()) onComplete(outcome);
         },
     };
 })();

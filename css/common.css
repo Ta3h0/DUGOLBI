@@ -12830,6 +12830,15 @@ body.legal-modal-open {
 :where(body.temp-admin) .admin-upload-label { margin-top: 9px; position: relative; overflow: clip; }
 :where(body.temp-admin) .admin-upload-label input { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; }
 :where(body.temp-admin) .admin-image-field small { color: var(--admin-muted); font-size: 10px; margin-left: 9px; }
+:where(body.temp-admin) .admin-post-bulk-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 20px; border-bottom: 1px solid var(--admin-line); font-size: 12px; }
+:where(body.temp-admin) .admin-post-bulk-actions .admin-check { min-height: 44px; }
+:where(body.temp-admin) [data-post-bulk-delete]:disabled { background: #f4f6fa; border-color: var(--admin-line); color: var(--admin-muted); cursor: not-allowed; }
+:where(body.temp-admin) .admin-post-title { display: flex; align-items: flex-start; gap: 4px; }
+:where(body.temp-admin) .admin-post-title > div { min-width: 0; }
+:where(body.temp-admin) .admin-post-pick { display: grid; place-items: center; width: 44px; min-height: 44px; flex: 0 0 44px; cursor: pointer; }
+:where(body.temp-admin) .admin-post-pick input { width: 16px; height: 16px; accent-color: var(--main-color); }
+:where(body.temp-admin) .admin-post-confirm { max-height: calc(100dvh - 32px); overflow-y: auto; }
+:where(body.temp-admin) .admin-post-confirm p { white-space: pre-line; }
 :where(body.temp-admin) .admin-post-editor .admin-field > .admin-check { display: flex; align-items: center; gap: 9px; }
 :where(body.temp-admin) .admin-post-attachment { padding: 16px; border: 1px solid var(--admin-line); border-radius: 6px; }
 :where(body.temp-admin) .admin-post-attachment .admin-image-field { margin-bottom: 16px; }

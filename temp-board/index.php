@@ -11,7 +11,7 @@ dugolbiAdminRequireLogin();
     <title>두골비 홈페이지 관리 · 임시 대시보드</title>
     <link rel="icon" href="../images/logo-black.svg" type="image/svg+xml">
     <link rel="stylesheet" href="../css/reset.css">
-    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/common.css?v=<?= filemtime(dirname(__DIR__) . '/css/common.css') ?>">
     <script src="../js/modify.js" defer></script>
     <script src="seed.php" defer></script>
     <script src="boards.js?v=<?= filemtime(__DIR__ . '/boards.js') ?>" defer></script>
