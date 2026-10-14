@@ -481,3 +481,10 @@
 - 수정 파일: js/modify.js, deploy.txt, RESPONSIVE_PROGRESS.md.
 - 적용 범위: 로컬 복구 완료. 이번 작업에서는 운영 재배포 및 Git commit/push 미수행. deploy.bat 재실행 필요.
 - Current: 로컬 일정 복구·검수 완료. 운영 서버는 재배포 대기.
+
+
+## 10월 이달의 교육 기간 확정 — 2026-10-14
+- [x] educationData의 기간을 2026-10-01~2026-10-31로 변경하고 temporary:false로 임시 일정 표시 제거.
+- [x] 이달의 교육 목록 및 상세 화면에서 2026.10.01~2026.10.31 표시, 임시 일정 문구 없음 확인. JS 구문·Git diff 공백 검사 통과.
+- 수정 파일: js/modify.js, RESPONSIVE_PROGRESS.md. 로컬 반영 완료. 운영 업로드 및 Git commit/push 미수행.
+- 대시보드 구현은 사용자 요청에 따라 오늘 10:47(한국 시간) 이 대화에서 한 번 재개하도록 예약.
