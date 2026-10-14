@@ -25,7 +25,7 @@
         promotion: { name: '프로모션', singular: '프로모션', description: '진행하는 혜택과 이벤트 내용을 관리하세요.', link: 'promotion-preview.html' },
         results: { name: '임상 결과', singular: '임상 이미지', description: '과정별 임상 이미지를 확인하고 등록하세요.', link: 'results.html' },
         network: { name: '수료지점', singular: '수료지점', description: '수료지점의 인증 구분과 연락처를 관리하세요.', link: 'network.html' },
-        boards: { name: '게시판', singular: '게시글', description: '공지사항, 질문답변, 후기, 언론보도를 같은 화면에서 관리하세요.', link: 'notice.html' },
+        boards: { name: '게시판 관리', singular: '게시글', description: '운영 그누보드에 등록된 게시판을 확인하세요.', link: 'notice.html' },
         business: { name: '사업정보', description: '푸터와 교육장 안내에 사용하는 공통 정보를 관리하세요.', link: 'location.html' },
     };
     const boardNames = { notice: '공지사항', qa: 'Q&A', review: '수강생 후기', news: '언론보도' };
@@ -153,7 +153,7 @@
             <div class="admin-overview-counts">${stats.map(([key, label]) => `<a href="#${key}"><span>${label}</span><strong>${data[key].length}<small>개</small></strong></a>`).join('')}</div>
             <div class="admin-overview-grid">
                 <section class="admin-panel admin-feature"><div class="admin-panel-heading"><h2>이달의 교육</h2><a href="#education">전체 관리 ${icon('arrow')}</a></div>${education ? `<div class="admin-feature-content">${thumbnail(education.image?.src, 'admin-feature-image')}<div><div class="admin-inline-chips">${status(education)}${education.badge ? `<span class="admin-chip">${escape(education.badge)}</span>` : ''}</div><h3>${escape(titleOf(education))}</h3><p>${date(education.startDate)} – ${date(education.endDate)}<br>총 ${escape(education.durationHours)}시간</p><div class="admin-feature-price">${education.discountPercent ? `<span>${escape(education.discountPercent)}% 할인</span>` : ''}<strong>${money(Math.round(education.originalPrice * (1 - (education.discountPercent || 0) / 100)))}</strong></div><button class="admin-button" data-open-type="education" data-key="${escape(education._key)}">교육 수정 ${icon('edit')}</button></div></div>` : `<div class="admin-empty"><p>등록된 교육이 없습니다.</p><button class="admin-button admin-primary" data-new-type="education">교육 등록</button></div>`}</section>
-                <section class="admin-panel admin-quick"><div class="admin-panel-heading"><h2>자주 하는 작업</h2></div>${[['education', '교육 등록', '교육 소개 · 기간 · 수강료'], ['schedule', '일정 추가', '교육장 · 반복 요일 · 예약 안내'], ['boards', '게시글 작성', '공지사항 · Q&A · 후기 · 언론보도'], ['network', '수료지점 등록', '인증 구분 · 지점 정보']].map(([key, title, detail]) => `<button class="admin-quick-row" data-new-type="${key}"><span class="admin-quick-icon">${icon(key)}</span><span><strong>${title}</strong><small>${detail}</small></span>${icon('arrow')}</button>`).join('')}</section>
+                <section class="admin-panel admin-quick"><div class="admin-panel-heading"><h2>자주 하는 작업</h2></div>${[['education', '교육 등록', '교육 소개 · 기간 · 수강료'], ['schedule', '일정 추가', '교육장 · 반복 요일 · 예약 안내'], ['boards', '게시판 확인', '운영 게시판 · 그룹 · 게시글 수'], ['network', '수료지점 등록', '인증 구분 · 지점 정보']].map(([key, title, detail]) => `<button class="admin-quick-row" data-new-type="${key}"><span class="admin-quick-icon">${icon(key)}</span><span><strong>${title}</strong><small>${detail}</small></span>${icon('arrow')}</button>`).join('')}</section>
                 <section class="admin-panel"><div class="admin-panel-heading"><h2>예정된 교육일정</h2><a href="#schedule">일정 관리 ${icon('arrow')}</a></div><div class="admin-upcoming">${upcoming.length ? upcoming.map(({ item, nextDate }) => `<button class="admin-upcoming-row" data-open-type="schedule" data-key="${escape(item._key)}"><span class="admin-date-block"><small>${escape(nextDate.slice(5, 7))}월</small><strong>${escape(nextDate.slice(8))}</strong></span><span><strong>${escape(item.title)}</strong><small>${escape(locationName(item))}<br>${escape(schedulePeriod(item))}</small></span>${icon('arrow')}</button>`).join('') : '<div class="admin-empty"><p>예정된 교육일정이 없습니다.</p></div>'}</div></section>
                 <section class="admin-panel"><div class="admin-panel-heading"><h2>최근 변경 내용</h2><span class="admin-muted">이 브라우저 기준</span></div>${data.logs.length ? `<ol class="admin-log-list">${data.logs.slice(0, 5).map(log => `<li><span class="admin-log-dot" aria-hidden="true"></span><div><strong>${escape(log.title)}</strong><p>${escape(log.action)} · ${escape(new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul' }).format(new Date(log.at)))}</p></div></li>`).join('')}</ol>` : `<div class="admin-history-empty">${icon('edit')}<strong>아직 변경한 내용이 없습니다.</strong><p>등록하거나 수정한 내용이 여기에 표시됩니다.</p></div>`}</section>
             </div><div class="admin-bottom-note"><p>내용을 수정한 뒤 ‘변경 내용 내보내기’로 보관할 수 있습니다.</p><button class="admin-text-button" data-reset>임시 데이터 초기화</button></div>`;
@@ -215,8 +215,10 @@
         return `${header('사업정보', definitions.business.description, '<button class="admin-button admin-primary" data-edit-business>사업정보 수정</button>')}<div class="admin-business-layout"><section class="admin-panel"><div class="admin-panel-heading"><h2>기본 사업정보</h2></div><dl class="admin-business-info">${[['상호명', info.name], ['대표자', info.representative], ['사업자등록번호', info.registrationNumber], ['이메일', info.email], ['대표 연락처', info.phone]].map(([label, value]) => `<div><dt>${label}</dt><dd>${escape(value)}</dd></div>`).join('')}</dl></section><section class="admin-panel"><div class="admin-panel-heading"><h2>교육장 안내</h2></div>${Object.values(info.locations).map(location => `<div class="admin-location"><h3>${escape(location.name)}</h3><p>${escape(location.address)}</p><small>${location.hours.map(escape).join('<br>')}</small><div><span class="admin-chip">네이버 지도 ${location.naverUrl ? '등록됨' : '미등록'}</span><span class="admin-chip">카카오 지도 ${location.kakaoUrl ? '등록됨' : '미등록'}</span></div></div>`).join('')}</section></div><div class="admin-bottom-note"><p>수료지점별 연락처는 ‘수료지점’ 메뉴에서 별도로 관리합니다.</p></div>`;
     }
     function render() {
+        window.dugolbiBoards.unmount();
         renderNavigation();
         renderSourceStatus();
+        if (route === 'boards') { window.dugolbiBoards.mount(view); return; }
         view.innerHTML = route === 'overview' ? overview() : route === 'business' ? businessPage() : listPage();
         if (route !== 'overview' && route !== 'business') renderListBody();
     }
@@ -279,6 +281,7 @@
         });
     }
     function openEditor(type, key) {
+        if (type === 'boards') { if (route !== 'boards') location.hash = 'boards'; else render(); return; }
         const current = type === 'business' ? data.business : data[type].find(item => item._key === key);
         editContext = { type, key, item: clone(current || newItem(type)), fields: fieldsFor(type), dirty: false, pendingUploads: 0 };
         if (type === 'schedule') { editContext.item.location ||= 'busan'; editContext.item._scheduleMode = isWeekly(editContext.item) ? 'weekly' : 'period'; editContext.bookingLocation = editContext.item.location; }

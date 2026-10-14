@@ -533,3 +533,15 @@
 - 생성: temp-board/auth-config.php, temp-board/auth.php, temp-board/login.php, temp-board/logout.php, temp-board/index.php, temp-board/.htaccess.
 - 수정: temp-board/index.html, temp-board/seed.php, router.php, css/common.css, temp-board/README.md, RESPONSIVE_PROGRESS.md. 이미지 자산 추가 없음.
 - Current: 로컬 독립 로그인 완료. 운영 배포 및 Git commit/push 미수행.
+
+
+## 게시판 연동 1단계: 서버 목록 조회 — 2026-10-14
+- [x] 운영 설치 파일/DB 설정 존재는 사용자가 확인. 기존 dbconfig.php 설정을 읽는 인증된 GET API 추가. 게시판/그룹 설정을 SELECT로만 조회하며 게시글/회원 본문·저장·삭제·업로드는 처리하지 않음.
+- [x] 제공된 common.php의 방문 기록/자동 정리/세션 초기화 부작용 확인 후 이번 단계에서는 DB 설정만 재사용. 현재 독립 관리자 세션 유지. 실제 그누보드 권한 연동은 후속 단계.
+- [x] 기존 디자인으로 게시판 목록·이름/ID 검색·그룹 필터·8개 페이지·새 창 확인·재시도 구현. 샘플 게시글 대체 표시/편집 진입 차단, 기존 임시 저장본은 보존. 다른 콘텐츠 편집 유지.
+- [x] 미설치/설정/확장/접속/조회 실패 안내와 세션 만료 처리, 20초 응답 제한, 메뉴 이동 시 요청 취소. 오류 응답에 민감한 접속 설정·SQL 원문 미포함.
+- [x] PC 1440px/모바일 375px HTTP 및 브라우저 32건, 별도 임시 PHP+mysqli 서버의 실패 처리 5건 통과. 성공 목록은 브라우저 응답 fixture로 검증했으며 실제 운영 DB 성공으로 간주하지 않음. JS/PHP 구문·Git diff 공백 검사 통과. CSS/이미지 변경 없음.
+- [ ] 운영 업로드 후 DB 조회 성공과 실제 게시판 이름/개수 확인 필요. DB 쓰기/업로드/게시글 목록과 CRUD/게시판 추가·삭제는 다음 단계.
+- 생성: temp-board/boards-api.php, temp-board/boards.js.
+- 수정: temp-board/admin.js, temp-board/index.php, temp-board/README.md, RESPONSIVE_PROGRESS.md. 기존 board/DB 설정과 홈페이지 데이터 수정 없음. 운영 배포 및 Git commit/push 미수행.
+- Current: 게시판 목록 조회 연결 코드 및 로컬 검증 완료. Next: 운영 서버에 temp-board 업로드 후 게시판 관리 화면 확인.
