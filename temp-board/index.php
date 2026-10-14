@@ -14,7 +14,8 @@ dugolbiAdminRequireLogin();
     <link rel="stylesheet" href="../css/common.css">
     <script src="../js/modify.js" defer></script>
     <script src="seed.php" defer></script>
-    <script src="boards.js" defer></script>
+    <script src="boards.js?v=<?= filemtime(__DIR__ . '/boards.js') ?>" defer></script>
+    <script src="posts.js?v=<?= filemtime(__DIR__ . '/posts.js') ?>" defer></script>
     <script src="admin.js" defer></script>
 </head>
 <body class="temp-admin">

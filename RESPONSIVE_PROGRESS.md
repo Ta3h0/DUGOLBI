@@ -545,3 +545,15 @@
 - 생성: temp-board/boards-api.php, temp-board/boards.js.
 - 수정: temp-board/admin.js, temp-board/index.php, temp-board/README.md, RESPONSIVE_PROGRESS.md. 기존 board/DB 설정과 홈페이지 데이터 수정 없음. 운영 배포 및 Git commit/push 미수행.
 - Current: 게시판 목록 조회 연결 코드 및 로컬 검증 완료. Next: 운영 서버에 temp-board 업로드 후 게시판 관리 화면 확인.
+
+
+## 게시판 연동 2단계: 게시글 목록 조회 — 2026-10-14
+- [x] 사용자 제공 운영 화면으로 게시판 목록 연결 확인: news/review/notice/qa 4개, news 4글/notice 1글 표시. 운영 DB를 에이전트가 직접 조회한 검증은 아님.
+- [x] 게시판의 '게시글 목록' 버튼으로 관리자 내부 목록 이동. 제목/작성자/날짜/조회·댓글 수/분류/공지·비밀글·답글 표시. 원본 글 새 창 링크와 게시판 목록 복귀.
+- [x] 서버 제목 검색과 페이지당 20개 조회, 숫자 5개 및 첫/이전/다음/마지막 페이지. 등록된 게시판/입력값 검증, prepared SQL, 설정의 write_prefix 사용. COUNT에서 댓글 제외. 공지 우선 후 기본 글·답글 순서.
+- [x] 조회 전용 및 현재 독립 세션 인증 유지. 작성·수정·삭제·첨부 업로드/그누보드 권한 연동 없음. 목록 API는 게시글 본문·이메일·IP·전화번호를 읽거나 조회 수를 변경하지 않음.
+- [x] PC 1440px/모바일 375px 및 HTTP 검사 40건 통과. 성공 목록은 브라우저 응답 fixture 검증. 빈 목록/검색/페이지/재시도/연속 검색/메뉴 이동/직접 접근·잘못된 입력·POST 차단/가로 넘침/JS 오류 확인. JS/PHP 구문·Git diff 공백 검사 통과.
+- [ ] 운영 서버 파일 갱신 후 news/notice의 실제 게시글 제목·목록 검색 및 review/qa의 빈 목록 확인 필요.
+- 생성: temp-board/posts.js, temp-board/posts-query.php.
+- 수정: temp-board/boards-api.php, temp-board/boards.js, temp-board/index.php, temp-board/README.md, RESPONSIVE_PROGRESS.md. CSS/이미지/홈페이지 데이터/그누보드 원본 수정 없음. 운영 배포 및 Git commit/push 미수행.
+- Current: 게시글 목록 조회 코드 완료. Next: 현재 temp-board 폴더 업로드 후 실제 게시글 확인.

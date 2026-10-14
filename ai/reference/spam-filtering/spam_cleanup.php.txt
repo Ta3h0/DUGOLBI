@@ -1,0 +1,3975 @@
+<?php
+/**
+ * GNUBOARD5 스팸 게시글 일괄 정리/복원/IP차단 도구 v7
+ *
+ * 설치 위치 예시: /board/adm/spam_cleanup.php
+ *
+ * 삭제 기준
+ * 1) 특정 wr_id부터 삭제
+ * 2) 특정 wr_id 구간 삭제
+ * 3) 특정 날짜/시간 이후 삭제
+ *
+ * 추가 기능
+ * - 삭제 제외(정상글) wr_id 여러 개 지정 가능
+ * - 댓글은 wr_id 자체가 아니라 삭제 대상 부모 게시글을 기준으로 함께 정리
+ * - 미리보기 시점의 최대 wr_id를 스냅샷으로 고정해, 미리보기 이후 새 글이 실수로 삭제되지 않도록 보호
+ * - 삭제 직전 게시글/댓글 및 첨부파일 메타데이터 자동 백업
+ * - g5_board_new / scrap / board_good / board_file 정리
+ * - 게시글/댓글 수 재계산 + 공지글 목록 정리 + latest 캐시 삭제
+ *
+ * 안전상 v3에서도 하지 않는 것
+ * - 실제 첨부파일(/data/file/...) 삭제하지 않음
+ * - 회원 포인트 내역 조정하지 않음
+ *
+ * v4 추가
+ * - 삭제 대상 일반 게시글의 작성 IP(wr_ip)를 그누보드 접근차단 IP(cf_intercept_ip)에 자동 추가 가능
+ * - 현재 관리자 접속 IP / 접근가능 IP / 사설·예약 IP / 이미 차단된 IP는 자동 제외
+ * - 자동 추가한 차단 IP를 백업 이력에 기록하고, 복원 시 선택적으로 해제 가능
+ * - 동일 /24(앞 3옥텟)에서 반복되는 스팸 IP를 분석하여 사람이 검토 후 대역 차단(예: 116.48.41.+) 선택 가능
+ * - 유지되는 정상글 / 관리자 IP / 접근가능 IP와 충돌하는 대역은 자동으로 선택 불가 처리
+ * - 커스텀 플러그인/별도 연동 테이블 정리하지 않음
+ *
+ * v6 추가
+ * - 대량 대역 체크박스를 JSON 1개 값으로 전송해 PHP max_input_vars 초과로 confirm_text가 잘리는 문제 방지
+ * - 동일 /16(앞 2옥텟) 아래 /24 후보가 12개 이상이면 49.254.+ 형태의 상위 대역 후보 제공
+ * - /16 선택 시 포함되는 /24 및 개별 IP는 중복 추가하지 않음
+ */
+
+$sub_menu = '300100';
+require_once './_common.php';
+
+if ($is_admin !== 'super') {
+    alert('최고관리자만 접근할 수 있습니다.', G5_URL);
+}
+
+$g5['title'] = '스팸 게시글 일괄 정리/복원/IP차단 v7.1';
+
+/* =========================================================
+ * 공통 함수
+ * ========================================================= */
+function spam_clean_valid_bo_table($bo_table)
+{
+    return is_string($bo_table) && preg_match('/^[A-Za-z0-9_]+$/', $bo_table);
+}
+
+function spam_clean_get_board($bo_table)
+{
+    global $g5;
+
+    if (!spam_clean_valid_bo_table($bo_table)) {
+        return array();
+    }
+
+    $escaped = sql_real_escape_string($bo_table);
+
+    return sql_fetch(
+        " select *
+            from {$g5['board_table']}
+           where bo_table = '{$escaped}' "
+    );
+}
+
+function spam_clean_get_write_table($bo_table)
+{
+    global $g5;
+
+    if (!spam_clean_valid_bo_table($bo_table)) {
+        return '';
+    }
+
+    return $g5['write_prefix'] . $bo_table;
+}
+
+function spam_clean_table_works($table)
+{
+    if (!preg_match('/^[A-Za-z0-9_]+$/', $table)) {
+        return false;
+    }
+
+    $result = sql_query(" select 1 from `{$table}` limit 1 ", false);
+    return $result ? true : false;
+}
+
+function spam_clean_get_count($sql)
+{
+    $row = sql_fetch($sql);
+    return isset($row['cnt']) ? (int) $row['cnt'] : 0;
+}
+
+function spam_clean_h($str)
+{
+    return htmlspecialchars((string) $str, ENT_QUOTES, 'UTF-8');
+}
+
+
+/* =========================================================
+ * IP 차단 관련 함수 (v6)
+ * ========================================================= */
+function spam_clean_ip_list_lines($raw)
+{
+    $raw = str_replace("\r", "", (string) $raw);
+    $parts = explode("\n", $raw);
+    $lines = array();
+
+    foreach ($parts as $line) {
+        $line = trim($line);
+        if ($line === '') {
+            continue;
+        }
+        if (!isset($lines[$line])) {
+            $lines[$line] = $line;
+        }
+    }
+
+    return array_values($lines);
+}
+
+/**
+ * 그누보드 common.php의 + 와일드카드 규칙과 같은 의미로 IP가 목록에 걸리는지 확인합니다.
+ */
+function spam_clean_ip_matches_list($ip, $raw_list)
+{
+    $ip = trim((string) $ip);
+    if ($ip === '') {
+        return false;
+    }
+
+    $lines = spam_clean_ip_list_lines($raw_list);
+    foreach ($lines as $line) {
+        if (strpos($line, '+') === false) {
+            if ($line === $ip) {
+                return true;
+            }
+            continue;
+        }
+
+        $pattern = preg_quote($line, '/');
+        $pattern = str_replace('\\+', '[0-9\\.]+', $pattern);
+        if (@preg_match('/^' . $pattern . '$/', $ip)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function spam_clean_is_public_ip($ip)
+{
+    $ip = trim((string) $ip);
+    if ($ip === '') {
+        return false;
+    }
+
+    return filter_var(
+        $ip,
+        FILTER_VALIDATE_IP,
+        FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+    ) !== false;
+}
+
+function spam_clean_collect_post_ips($write_table, $where_sql)
+{
+    $ips = array();
+    if (!spam_clean_table_exists($write_table)) {
+        return $ips;
+    }
+
+    $res = sql_query(
+        " select distinct w.wr_ip
+            from `{$write_table}` w
+           where {$where_sql}
+             and w.wr_ip <> '' ",
+        false
+    );
+
+    if (!$res) {
+        return $ips;
+    }
+
+    while ($row = sql_fetch_array($res)) {
+        $ip = isset($row['wr_ip']) ? trim($row['wr_ip']) : '';
+        if ($ip !== '') {
+            $ips[$ip] = $ip;
+        }
+    }
+
+    return array_values($ips);
+}
+
+function spam_clean_prepare_block_ips($source_ips, $possible_raw, $intercept_raw, $current_ip)
+{
+    $result = array(
+        'source_count' => 0,
+        'public_count' => 0,
+        'to_add' => array(),
+        'already_blocked' => array(),
+        'trusted' => array(),
+        'current' => array(),
+        'invalid_private' => array(),
+    );
+
+    $seen = array();
+    foreach ((array) $source_ips as $ip) {
+        $ip = trim((string) $ip);
+        if ($ip === '' || isset($seen[$ip])) {
+            continue;
+        }
+        $seen[$ip] = true;
+        $result['source_count']++;
+
+        if (!spam_clean_is_public_ip($ip)) {
+            $result['invalid_private'][] = $ip;
+            continue;
+        }
+        $result['public_count']++;
+
+        if ($current_ip !== '' && $ip === $current_ip) {
+            $result['current'][] = $ip;
+            continue;
+        }
+
+        // 접근가능 IP는 차단목록보다 먼저 "허용"되는 것이 아니라,
+        // 그누보드에서 두 검사를 모두 통과해야 하므로 충돌 방지를 위해 자동 차단하지 않습니다.
+        if (spam_clean_ip_matches_list($ip, $possible_raw)) {
+            $result['trusted'][] = $ip;
+            continue;
+        }
+
+        if (spam_clean_ip_matches_list($ip, $intercept_raw)) {
+            $result['already_blocked'][] = $ip;
+            continue;
+        }
+
+        $result['to_add'][] = $ip;
+    }
+
+    sort($result['to_add'], SORT_STRING);
+    return $result;
+}
+
+/**
+ * cf_intercept_ip는 그누보드 기본 스키마에서 TEXT이므로 안전 여유를 두고 약 60KB까지만 사용합니다.
+ * 반환값 added 배열에는 실제 DB에 새로 추가된 정확한 IP만 담습니다.
+ */
+function spam_clean_append_intercept_ips($source_ips)
+{
+    global $g5;
+
+    $row = sql_fetch(
+        " select cf_possible_ip, cf_intercept_ip
+            from {$g5['config_table']}
+           limit 1 "
+    );
+
+    $possible_raw = isset($row['cf_possible_ip']) ? $row['cf_possible_ip'] : '';
+    $intercept_raw = isset($row['cf_intercept_ip']) ? $row['cf_intercept_ip'] : '';
+    $current_ip = isset($_SERVER['REMOTE_ADDR']) ? trim($_SERVER['REMOTE_ADDR']) : '';
+
+    $plan = spam_clean_prepare_block_ips($source_ips, $possible_raw, $intercept_raw, $current_ip);
+    $lines = spam_clean_ip_list_lines($intercept_raw);
+    $new_value = implode("\n", $lines);
+    $added = array();
+    $capacity_skipped = array();
+
+    // TEXT 65,535 bytes 한계에 여유를 둠
+    $safe_max_bytes = 60000;
+    $current_bytes = strlen($new_value);
+    foreach ($plan['to_add'] as $ip) {
+        $piece = ($new_value === '' ? '' : "\n") . $ip;
+        $piece_bytes = strlen($piece);
+        if (($current_bytes + $piece_bytes) > $safe_max_bytes) {
+            $capacity_skipped[] = $ip;
+            continue;
+        }
+        $new_value .= $piece;
+        $current_bytes += $piece_bytes;
+        $added[] = $ip;
+    }
+    $updated = true;
+
+    if ($added) {
+        $escaped = sql_real_escape_string($new_value);
+        $updated = sql_query(
+            " update {$g5['config_table']}
+                 set cf_intercept_ip = '{$escaped}'
+               limit 1 ",
+            false
+        ) ? true : false;
+    }
+
+    if (!$updated) {
+        $added = array();
+    }
+
+    $plan['added'] = $added;
+    $plan['capacity_skipped'] = $capacity_skipped;
+    $plan['updated'] = $updated;
+    $plan['bytes_after'] = strlen($new_value);
+    return $plan;
+}
+
+function spam_clean_remove_exact_intercept_ips($ips)
+{
+    global $g5;
+
+    $remove = array();
+    foreach ((array) $ips as $ip) {
+        $ip = trim((string) $ip);
+        if ($ip !== '') {
+            $remove[$ip] = true;
+        }
+    }
+    if (!$remove) {
+        return array('removed' => array(), 'updated' => true);
+    }
+
+    $row = sql_fetch(" select cf_intercept_ip from {$g5['config_table']} limit 1 ");
+    $current = isset($row['cf_intercept_ip']) ? spam_clean_ip_list_lines($row['cf_intercept_ip']) : array();
+    $keep = array();
+    $removed = array();
+
+    foreach ($current as $line) {
+        // 이 도구가 추가한 정확한 차단 문자열(IP 또는 + 대역 규칙)만 제거합니다.
+        if (isset($remove[$line])) {
+            $removed[] = $line;
+            continue;
+        }
+        $keep[] = $line;
+    }
+
+    if (!$removed) {
+        return array('removed' => array(), 'updated' => true);
+    }
+
+    $escaped = sql_real_escape_string(implode("\n", $keep));
+    $ok = sql_query(
+        " update {$g5['config_table']}
+             set cf_intercept_ip = '{$escaped}'
+           limit 1 ",
+        false
+    ) ? true : false;
+
+    return array(
+        'removed' => $ok ? $removed : array(),
+        'updated' => $ok,
+    );
+}
+
+
+/**
+ * IPv4 주소를 /24(앞 3옥텟), /16(앞 2옥텟) 접두어로 변환합니다.
+ */
+function spam_clean_ipv4_parts($ip)
+{
+    $ip = trim((string) $ip);
+    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) === false) {
+        return array();
+    }
+
+    $parts = explode('.', $ip);
+    if (count($parts) !== 4) {
+        return array();
+    }
+
+    $out = array();
+    foreach ($parts as $part) {
+        $out[] = (int) $part;
+    }
+    return $out;
+}
+
+function spam_clean_ipv4_prefix24($ip)
+{
+    $parts = spam_clean_ipv4_parts($ip);
+    if (count($parts) !== 4) {
+        return '';
+    }
+
+    return $parts[0] . '.' . $parts[1] . '.' . $parts[2];
+}
+
+function spam_clean_ipv4_prefix16($ip)
+{
+    $parts = spam_clean_ipv4_parts($ip);
+    if (count($parts) !== 4) {
+        return '';
+    }
+
+    return $parts[0] . '.' . $parts[1];
+}
+
+function spam_clean_subnet_rule24($prefix)
+{
+    $prefix = trim((string) $prefix);
+    if (!preg_match('/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/', $prefix, $m)) {
+        return '';
+    }
+
+    for ($i = 1; $i <= 3; $i++) {
+        if ((int) $m[$i] < 0 || (int) $m[$i] > 255) {
+            return '';
+        }
+    }
+
+    return (int) $m[1] . '.' . (int) $m[2] . '.' . (int) $m[3] . '.+';
+}
+
+function spam_clean_subnet_rule16($prefix)
+{
+    $prefix = trim((string) $prefix);
+    if (!preg_match('/^(\d{1,3})\.(\d{1,3})$/', $prefix, $m)) {
+        return '';
+    }
+
+    for ($i = 1; $i <= 2; $i++) {
+        if ((int) $m[$i] < 0 || (int) $m[$i] > 255) {
+            return '';
+        }
+    }
+
+    return (int) $m[1] . '.' . (int) $m[2] . '.+';
+}
+
+/**
+ * 이 도구에서 허용하는 대역 규칙을 파싱합니다.
+ * - /24 수준: 49.254.205.+
+ * - /16 수준: 49.254.+
+ */
+function spam_clean_parse_subnet_rule($rule)
+{
+    $rule = trim((string) $rule);
+
+    if (preg_match('/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.\+$/', $rule, $m)) {
+        for ($i = 1; $i <= 3; $i++) {
+            if ((int) $m[$i] < 0 || (int) $m[$i] > 255) {
+                return array();
+            }
+        }
+        $parts = array((int) $m[1], (int) $m[2], (int) $m[3]);
+        return array(
+            'level' => 24,
+            'parts' => $parts,
+            'prefix' => implode('.', $parts),
+            'rule' => implode('.', $parts) . '.+',
+            'parent16' => $parts[0] . '.' . $parts[1],
+        );
+    }
+
+    if (preg_match('/^(\d{1,3})\.(\d{1,3})\.\+$/', $rule, $m)) {
+        for ($i = 1; $i <= 2; $i++) {
+            if ((int) $m[$i] < 0 || (int) $m[$i] > 255) {
+                return array();
+            }
+        }
+        $parts = array((int) $m[1], (int) $m[2]);
+        return array(
+            'level' => 16,
+            'parts' => $parts,
+            'prefix' => implode('.', $parts),
+            'rule' => implode('.', $parts) . '.+',
+            'parent16' => implode('.', $parts),
+        );
+    }
+
+    return array();
+}
+
+/**
+ * 기존 함수명 호환용. /16, /24 모두 prefix를 반환합니다.
+ */
+function spam_clean_subnet_prefix_from_rule($rule)
+{
+    $parsed = spam_clean_parse_subnet_rule($rule);
+    return !empty($parsed['prefix']) ? $parsed['prefix'] : '';
+}
+
+function spam_clean_ip_in_subnet_rule($ip, $rule)
+{
+    $parts = spam_clean_ipv4_parts($ip);
+    $parsed = spam_clean_parse_subnet_rule($rule);
+
+    if (count($parts) !== 4 || empty($parsed['parts'])) {
+        return false;
+    }
+
+    foreach ($parsed['parts'] as $idx => $value) {
+        if (!isset($parts[$idx]) || (int) $parts[$idx] !== (int) $value) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * cf_possible_ip / cf_intercept_ip의 일반적인 prefix.+ 규칙을 파싱합니다.
+ * 1~3 옥텟 와일드카드를 지원합니다.
+ */
+function spam_clean_parse_wildcard_prefix($rule)
+{
+    $rule = trim((string) $rule);
+    if (!preg_match('/^(\d{1,3})(?:\.(\d{1,3}))?(?:\.(\d{1,3}))?\.\+$/', $rule, $m)) {
+        return array();
+    }
+
+    $parts = array();
+    for ($i = 1; $i <= 3; $i++) {
+        if (!isset($m[$i]) || $m[$i] === '') {
+            continue;
+        }
+        $value = (int) $m[$i];
+        if ($value < 0 || $value > 255) {
+            return array();
+        }
+        $parts[] = $value;
+    }
+
+    return $parts;
+}
+
+function spam_clean_prefix_parts_overlap($a, $b)
+{
+    $a = array_values((array) $a);
+    $b = array_values((array) $b);
+    if (!$a || !$b) {
+        return false;
+    }
+
+    $length = min(count($a), count($b));
+    for ($i = 0; $i < $length; $i++) {
+        if ((int) $a[$i] !== (int) $b[$i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function spam_clean_rule_covers_rule($broad_rule, $narrow_rule)
+{
+    $broad = spam_clean_parse_subnet_rule($broad_rule);
+    $narrow = spam_clean_parse_subnet_rule($narrow_rule);
+    if (empty($broad['parts']) || empty($narrow['parts'])) {
+        return false;
+    }
+
+    if (count($broad['parts']) > count($narrow['parts'])) {
+        return false;
+    }
+
+    for ($i = 0; $i < count($broad['parts']); $i++) {
+        if ((int) $broad['parts'][$i] !== (int) $narrow['parts'][$i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function spam_clean_subnet_rule_samples($rule)
+{
+    $parsed = spam_clean_parse_subnet_rule($rule);
+    if (empty($parsed['parts'])) {
+        return array();
+    }
+
+    if ((int) $parsed['level'] === 16) {
+        $base = $parsed['prefix'];
+        return array($base . '.0.1', $base . '.127.127', $base . '.255.254');
+    }
+
+    $base = $parsed['prefix'];
+    return array($base . '.1', $base . '.127', $base . '.254');
+}
+
+/**
+ * 접근가능 IP 목록과 선택 대역이 조금이라도 겹치는지 보수적으로 검사합니다.
+ */
+function spam_clean_rule_conflicts_list($rule, $raw_list)
+{
+    $parsed = spam_clean_parse_subnet_rule($rule);
+    if (empty($parsed['parts'])) {
+        return true;
+    }
+
+    $lines = spam_clean_ip_list_lines($raw_list);
+    $samples = spam_clean_subnet_rule_samples($rule);
+
+    foreach ($lines as $line) {
+        if (strpos($line, '+') === false) {
+            if (spam_clean_ip_in_subnet_rule($line, $rule)) {
+                return true;
+            }
+            continue;
+        }
+
+        $wild_parts = spam_clean_parse_wildcard_prefix($line);
+        if ($wild_parts) {
+            if (spam_clean_prefix_parts_overlap($parsed['parts'], $wild_parts)) {
+                return true;
+            }
+            continue;
+        }
+
+        // 비표준 와일드카드는 기존 매칭 함수로 대표 샘플을 보수적으로 확인합니다.
+        foreach ($samples as $sample) {
+            if (spam_clean_ip_matches_list($sample, $line)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/**
+ * 이미 동일하거나 더 넓은 와일드카드 차단 규칙에 포함되는지 검사합니다.
+ * 하위 대역/개별 IP가 이미 있다는 이유로 상위 대역 전체가 차단되었다고 보지는 않습니다.
+ */
+function spam_clean_rule_covered_by_intercept($rule, $intercept_raw)
+{
+    $parsed = spam_clean_parse_subnet_rule($rule);
+    if (empty($parsed['parts'])) {
+        return false;
+    }
+
+    $lines = spam_clean_ip_list_lines($intercept_raw);
+    $samples = spam_clean_subnet_rule_samples($rule);
+
+    foreach ($lines as $line) {
+        if (strpos($line, '+') === false) {
+            continue;
+        }
+
+        $wild_parts = spam_clean_parse_wildcard_prefix($line);
+        if ($wild_parts) {
+            if (count($wild_parts) <= count($parsed['parts'])) {
+                $covers = true;
+                for ($i = 0; $i < count($wild_parts); $i++) {
+                    if ((int) $wild_parts[$i] !== (int) $parsed['parts'][$i]) {
+                        $covers = false;
+                        break;
+                    }
+                }
+                if ($covers) {
+                    return true;
+                }
+            }
+            continue;
+        }
+
+        $all_match = true;
+        foreach ($samples as $sample) {
+            if (!spam_clean_ip_matches_list($sample, $line)) {
+                $all_match = false;
+                break;
+            }
+        }
+        if ($all_match && $samples) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/* 기존 /24 전용 호출부 호환용 래퍼 */
+function spam_clean_subnet_conflicts_list($prefix, $raw_list)
+{
+    $rule = spam_clean_subnet_rule24($prefix);
+    return $rule === '' ? true : spam_clean_rule_conflicts_list($rule, $raw_list);
+}
+
+function spam_clean_subnet_covered_by_intercept($prefix, $intercept_raw)
+{
+    $rule = spam_clean_subnet_rule24($prefix);
+    return $rule === '' ? false : spam_clean_rule_covered_by_intercept($rule, $intercept_raw);
+}
+
+function spam_clean_collect_ipv4_ip_stats($write_table, $where_sql)
+{
+    $stats = array();
+    if (!spam_clean_table_exists($write_table)) {
+        return $stats;
+    }
+
+    $res = sql_query(
+        " select w.wr_ip, count(*) as cnt
+            from `{$write_table}` w
+           where {$where_sql}
+             and w.wr_ip <> ''
+           group by w.wr_ip ",
+        false
+    );
+
+    if (!$res) {
+        return $stats;
+    }
+
+    while ($row = sql_fetch_array($res)) {
+        $ip = isset($row['wr_ip']) ? trim($row['wr_ip']) : '';
+        if ($ip === '' || filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) === false) {
+            continue;
+        }
+
+        if (!spam_clean_is_public_ip($ip)) {
+            continue;
+        }
+
+        $stats[$ip] = isset($row['cnt']) ? (int) $row['cnt'] : 0;
+    }
+
+    return $stats;
+}
+
+function spam_clean_subnet_sort_rows($a, $b)
+{
+    if ((int) $a['spam_unique_count'] === (int) $b['spam_unique_count']) {
+        return strcmp($a['prefix'], $b['prefix']);
+    }
+    return ((int) $a['spam_unique_count'] > (int) $b['spam_unique_count']) ? -1 : 1;
+}
+
+function spam_clean_supernet_sort_rows($a, $b)
+{
+    if ((int) $a['spam_subnet_count'] === (int) $b['spam_subnet_count']) {
+        if ((int) $a['spam_unique_count'] === (int) $b['spam_unique_count']) {
+            return strcmp($a['prefix'], $b['prefix']);
+        }
+        return ((int) $a['spam_unique_count'] > (int) $b['spam_unique_count']) ? -1 : 1;
+    }
+    return ((int) $a['spam_subnet_count'] > (int) $b['spam_subnet_count']) ? -1 : 1;
+}
+
+/**
+ * 1차: 동일 공인 IPv4 /24에서 삭제 대상 일반 게시글 합계가 threshold개 이상이면 49.254.205.+ 형태 후보
+ * 2차: 같은 /16 안에 위 /24 후보가 supernet_threshold개 이상이면 49.254.+ 형태 상위 후보
+ */
+function spam_clean_analyze_subnets($write_table, $post_condition, $possible_raw, $intercept_raw, $current_ip, $threshold, $supernet_threshold = 12)
+{
+    $threshold = max(2, (int) $threshold);
+    $supernet_threshold = max(2, (int) $supernet_threshold);
+
+    $spam_stats = spam_clean_collect_ipv4_ip_stats($write_table, $post_condition);
+    $keep_stats = spam_clean_collect_ipv4_ip_stats(
+        $write_table,
+        " w.wr_is_comment = '0' and not ({$post_condition}) "
+    );
+
+    $groups = array();
+    $supergroups = array();
+
+    foreach ($spam_stats as $ip => $cnt) {
+        $prefix24 = spam_clean_ipv4_prefix24($ip);
+        $prefix16 = spam_clean_ipv4_prefix16($ip);
+        if ($prefix24 === '' || $prefix16 === '') {
+            continue;
+        }
+
+        if (!isset($groups[$prefix24])) {
+            $groups[$prefix24] = array(
+                'level' => 24,
+                'prefix' => $prefix24,
+                'parent16' => $prefix16,
+                'rule' => spam_clean_subnet_rule24($prefix24),
+                'spam_ips' => array(),
+                'spam_unique_count' => 0,
+                'spam_post_count' => 0,
+                'keep_ips' => array(),
+                'keep_unique_count' => 0,
+                'keep_post_count' => 0,
+                'current_conflict' => false,
+                'trusted_conflict' => false,
+                'already_covered' => false,
+                'safe' => false,
+                'reason' => '',
+            );
+        }
+        $groups[$prefix24]['spam_ips'][$ip] = $ip;
+        $groups[$prefix24]['spam_unique_count']++;
+        $groups[$prefix24]['spam_post_count'] += (int) $cnt;
+
+        if (!isset($supergroups[$prefix16])) {
+            $supergroups[$prefix16] = array(
+                'level' => 16,
+                'prefix' => $prefix16,
+                'parent16' => $prefix16,
+                'rule' => spam_clean_subnet_rule16($prefix16),
+                'spam_ips' => array(),
+                'spam_unique_count' => 0,
+                'spam_post_count' => 0,
+                'spam_subnets' => array(),
+                'spam_subnet_count' => 0,
+                'keep_ips' => array(),
+                'keep_unique_count' => 0,
+                'keep_post_count' => 0,
+                'current_conflict' => false,
+                'trusted_conflict' => false,
+                'already_covered' => false,
+                'safe' => false,
+                'reason' => '',
+            );
+        }
+        $supergroups[$prefix16]['spam_ips'][$ip] = $ip;
+        $supergroups[$prefix16]['spam_unique_count']++;
+        $supergroups[$prefix16]['spam_post_count'] += (int) $cnt;
+    }
+
+    foreach ($keep_stats as $ip => $cnt) {
+        $prefix24 = spam_clean_ipv4_prefix24($ip);
+        $prefix16 = spam_clean_ipv4_prefix16($ip);
+
+        if ($prefix24 !== '' && isset($groups[$prefix24])) {
+            $groups[$prefix24]['keep_ips'][$ip] = $ip;
+            $groups[$prefix24]['keep_unique_count']++;
+            $groups[$prefix24]['keep_post_count'] += (int) $cnt;
+        }
+
+        // /16 상위 대역은 해당 범위 전체의 정상글 충돌을 봐야 하므로, spam이 존재하는 /16이면 모두 집계합니다.
+        if ($prefix16 !== '' && isset($supergroups[$prefix16])) {
+            $supergroups[$prefix16]['keep_ips'][$ip] = $ip;
+            $supergroups[$prefix16]['keep_unique_count']++;
+            $supergroups[$prefix16]['keep_post_count'] += (int) $cnt;
+        }
+    }
+
+    $rows = array();
+    $super_rows = array();
+    $safe_rules = array();
+
+    // /24 후보 판정
+    foreach ($groups as $prefix24 => $group) {
+        if ((int) $group['spam_post_count'] < $threshold) {
+            continue;
+        }
+
+        $group['spam_ips'] = array_values($group['spam_ips']);
+        $group['keep_ips'] = array_values($group['keep_ips']);
+        sort($group['spam_ips'], SORT_STRING);
+        sort($group['keep_ips'], SORT_STRING);
+
+        $rule = $group['rule'];
+        $group['current_conflict'] = ($current_ip !== '' && spam_clean_ip_in_subnet_rule($current_ip, $rule));
+        $group['trusted_conflict'] = spam_clean_rule_conflicts_list($rule, $possible_raw);
+        $group['already_covered'] = spam_clean_rule_covered_by_intercept($rule, $intercept_raw);
+
+        $reasons = array();
+        if ((int) $group['keep_post_count'] > 0) {
+            $reasons[] = '유지되는 정상 게시글에서 같은 대역 사용';
+        }
+        if ($group['current_conflict']) {
+            $reasons[] = '현재 관리자 접속 IP와 같은 대역';
+        }
+        if ($group['trusted_conflict']) {
+            $reasons[] = '접근가능 IP와 충돌';
+        }
+        if ($group['already_covered']) {
+            $reasons[] = '이미 동일/상위 대역 차단됨';
+        }
+
+        $group['safe'] = empty($reasons);
+        $group['reason'] = $group['safe'] ? '대역 차단 검토 가능' : implode(' / ', $reasons);
+
+        if ($group['safe'] && $rule !== '') {
+            $safe_rules[$rule] = $rule;
+        }
+
+        // /16 후보의 "활성 /24 개수"는 실제 /24 추천 기준을 통과한 대역 수로 계산합니다.
+        $parent16 = $group['parent16'];
+        if (isset($supergroups[$parent16])) {
+            $supergroups[$parent16]['spam_subnets'][$rule] = $rule;
+        }
+
+        $rows[] = $group;
+    }
+
+    // /16 상위 후보 판정: /24 후보가 같은 앞 2옥텟에서 12개 이상일 때만 표시
+    foreach ($supergroups as $prefix16 => $group) {
+        $group['spam_subnet_count'] = count($group['spam_subnets']);
+        if ((int) $group['spam_subnet_count'] < $supernet_threshold) {
+            continue;
+        }
+
+        $group['spam_ips'] = array_values($group['spam_ips']);
+        $group['keep_ips'] = array_values($group['keep_ips']);
+        $group['spam_subnets'] = array_values($group['spam_subnets']);
+        sort($group['spam_ips'], SORT_STRING);
+        sort($group['keep_ips'], SORT_STRING);
+        sort($group['spam_subnets'], SORT_STRING);
+
+        $rule = $group['rule'];
+        $group['current_conflict'] = ($current_ip !== '' && spam_clean_ip_in_subnet_rule($current_ip, $rule));
+        $group['trusted_conflict'] = spam_clean_rule_conflicts_list($rule, $possible_raw);
+        $group['already_covered'] = spam_clean_rule_covered_by_intercept($rule, $intercept_raw);
+
+        $reasons = array();
+        if ((int) $group['keep_post_count'] > 0) {
+            $reasons[] = '유지되는 정상 게시글에서 같은 /16 대역 사용';
+        }
+        if ($group['current_conflict']) {
+            $reasons[] = '현재 관리자 접속 IP와 같은 /16 대역';
+        }
+        if ($group['trusted_conflict']) {
+            $reasons[] = '접근가능 IP와 충돌';
+        }
+        if ($group['already_covered']) {
+            $reasons[] = '이미 동일/상위 대역 차단됨';
+        }
+
+        $group['safe'] = empty($reasons);
+        $group['reason'] = $group['safe'] ? '상위 /16 대역 차단 검토 가능' : implode(' / ', $reasons);
+
+        if ($group['safe'] && $rule !== '') {
+            $safe_rules[$rule] = $rule;
+        }
+
+        $super_rows[] = $group;
+    }
+
+    usort($rows, 'spam_clean_subnet_sort_rows');
+    usort($super_rows, 'spam_clean_supernet_sort_rows');
+
+    return array(
+        'threshold' => $threshold,
+        'supernet_threshold' => $supernet_threshold,
+        'rows' => $rows,
+        'supernet_rows' => $super_rows,
+        'safe_rules' => array_values($safe_rules),
+        'safe_count' => count($safe_rules),
+    );
+}
+
+function spam_clean_parse_selected_subnets($values)
+{
+    $rules = array();
+
+    foreach ((array) $values as $value) {
+        $parsed = spam_clean_parse_subnet_rule($value);
+        if (empty($parsed['rule'])) {
+            return false;
+        }
+        $rules[$parsed['rule']] = $parsed;
+    }
+
+    if (!$rules) {
+        return array();
+    }
+
+    // 넓은 대역(/16)을 먼저 두고, 이미 그 안에 포함되는 /24는 자동 제거합니다.
+    uasort($rules, function ($a, $b) {
+        if ((int) $a['level'] === (int) $b['level']) {
+            return strcmp($a['rule'], $b['rule']);
+        }
+        return ((int) $a['level'] < (int) $b['level']) ? -1 : 1;
+    });
+
+    $result = array();
+    foreach ($rules as $parsed) {
+        $covered = false;
+        foreach ($result as $kept_rule) {
+            if (spam_clean_rule_covers_rule($kept_rule, $parsed['rule'])) {
+                $covered = true;
+                break;
+            }
+        }
+        if (!$covered) {
+            $result[] = $parsed['rule'];
+        }
+    }
+
+    return $result;
+}
+
+/**
+ * 선택한 /16·/24 대역 규칙과 나머지 개별 IP를 cf_intercept_ip에 함께 추가합니다.
+ * 상위 대역에 포함되는 하위 대역과 개별 IP는 중복 등록하지 않습니다.
+ */
+function spam_clean_append_intercept_entries($source_ips, $selected_subnets)
+{
+    global $g5;
+
+    $row = sql_fetch(
+        " select cf_possible_ip, cf_intercept_ip
+            from {$g5['config_table']}
+           limit 1 "
+    );
+
+    $possible_raw = isset($row['cf_possible_ip']) ? $row['cf_possible_ip'] : '';
+    $intercept_raw = isset($row['cf_intercept_ip']) ? $row['cf_intercept_ip'] : '';
+    $current_ip = isset($_SERVER['REMOTE_ADDR']) ? trim($_SERVER['REMOTE_ADDR']) : '';
+
+    $normalized_selected = spam_clean_parse_selected_subnets($selected_subnets);
+    if ($normalized_selected === false) {
+        $normalized_selected = array();
+    }
+
+    $valid_subnets = array();
+    $subnet_skipped = array();
+    $subnet_already = array();
+
+    foreach ($normalized_selected as $rule) {
+        $parsed = spam_clean_parse_subnet_rule($rule);
+        if (empty($parsed['rule'])) {
+            $subnet_skipped[] = $rule;
+            continue;
+        }
+
+        if (($current_ip !== '' && spam_clean_ip_in_subnet_rule($current_ip, $rule)) || spam_clean_rule_conflicts_list($rule, $possible_raw)) {
+            $subnet_skipped[] = $rule;
+            continue;
+        }
+
+        if (spam_clean_rule_covered_by_intercept($rule, $intercept_raw)) {
+            $subnet_already[] = $rule;
+            continue;
+        }
+
+        $valid_subnets[$rule] = $rule;
+    }
+
+    // 선택한 상위/하위 대역에 속한 IP는 개별 차단 후보에서 제외합니다.
+    $exact_ips = array();
+    foreach ((array) $source_ips as $ip) {
+        $covered = false;
+        foreach ($valid_subnets as $rule) {
+            if (spam_clean_ip_in_subnet_rule($ip, $rule)) {
+                $covered = true;
+                break;
+            }
+        }
+        if (!$covered) {
+            $exact_ips[] = $ip;
+        }
+    }
+
+    $plan = spam_clean_prepare_block_ips($exact_ips, $possible_raw, $intercept_raw, $current_ip);
+    $lines = spam_clean_ip_list_lines($intercept_raw);
+    $new_value = implode("\n", $lines);
+    $safe_max_bytes = 60000;
+    $current_bytes = strlen($new_value);
+
+    $added_subnets = array();
+    $added_exact = array();
+    $capacity_skipped = array();
+
+    // 넓은 규칙을 먼저 추가합니다. parse_selected_subnets에서 중복 하위 대역은 이미 제거됩니다.
+    foreach ($valid_subnets as $rule) {
+        $piece = ($new_value === '' ? '' : "\n") . $rule;
+        if (($current_bytes + strlen($piece)) > $safe_max_bytes) {
+            $capacity_skipped[] = $rule;
+            continue;
+        }
+        $new_value .= $piece;
+        $current_bytes += strlen($piece);
+        $added_subnets[] = $rule;
+    }
+
+    foreach ($plan['to_add'] as $ip) {
+        $piece = ($new_value === '' ? '' : "\n") . $ip;
+        if (($current_bytes + strlen($piece)) > $safe_max_bytes) {
+            $capacity_skipped[] = $ip;
+            continue;
+        }
+        $new_value .= $piece;
+        $current_bytes += strlen($piece);
+        $added_exact[] = $ip;
+    }
+
+    $added = array_merge($added_subnets, $added_exact);
+    $updated = true;
+
+    if ($added) {
+        $escaped = sql_real_escape_string($new_value);
+        $updated = sql_query(
+            " update {$g5['config_table']}
+                 set cf_intercept_ip = '{$escaped}'
+               limit 1 ",
+            false
+        ) ? true : false;
+    }
+
+    if (!$updated) {
+        $added = array();
+        $added_subnets = array();
+        $added_exact = array();
+    }
+
+    $plan['added'] = $added;
+    $plan['added_exact'] = $added_exact;
+    $plan['added_subnets'] = $added_subnets;
+    $plan['selected_subnets'] = array_values($valid_subnets);
+    $plan['subnet_skipped'] = $subnet_skipped;
+    $plan['subnet_already'] = $subnet_already;
+    $plan['capacity_skipped'] = $capacity_skipped;
+    $plan['updated'] = $updated;
+    $plan['bytes_after'] = strlen($new_value);
+
+    return $plan;
+}
+
+function spam_clean_make_backup_name($kind, $bo_table)
+{
+    $prefix = defined('G5_TABLE_PREFIX') ? G5_TABLE_PREFIX : 'g5_';
+    $safe_bo = preg_replace('/[^A-Za-z0-9_]/', '', $bo_table);
+    $safe_bo = substr($safe_bo, 0, 18);
+    $stamp = date('Ymd_His');
+    $rand = substr(md5(uniqid('', true)), 0, 5);
+
+    return $prefix . 'spam' . $kind . '_' . $safe_bo . '_' . $stamp . '_' . $rand;
+}
+
+function spam_clean_normalize_datetime($value)
+{
+    $value = trim((string) $value);
+    if ($value === '') {
+        return '';
+    }
+
+    $value = str_replace('T', ' ', $value);
+
+    if (preg_match('/^\\d{4}-\\d{2}-\\d{2}$/', $value)) {
+        $value .= ' 00:00:00';
+    } elseif (preg_match('/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}$/', $value)) {
+        $value .= ':00';
+    }
+
+    if (!preg_match('/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/', $value)) {
+        return '';
+    }
+
+    $ts = strtotime($value);
+    if ($ts === false) {
+        return '';
+    }
+
+    return date('Y-m-d H:i:s', $ts);
+}
+
+function spam_clean_parse_exclude_ids($raw)
+{
+    $raw = trim((string) $raw);
+    if ($raw === '') {
+        return array();
+    }
+
+    $parts = preg_split('/[\\s,]+/', $raw);
+    $ids = array();
+
+    foreach ($parts as $part) {
+        $part = trim($part);
+        if ($part === '') {
+            continue;
+        }
+
+        if (!ctype_digit($part) || (int) $part < 1) {
+            return false;
+        }
+
+        $ids[(int) $part] = (int) $part;
+    }
+
+    ksort($ids);
+    return array_values($ids);
+}
+
+function spam_clean_exclude_sql($exclude_ids, $alias)
+{
+    if (!$exclude_ids) {
+        return '';
+    }
+
+    $safe = array();
+    foreach ($exclude_ids as $id) {
+        $safe[] = (int) $id;
+    }
+
+    return " and {$alias}.wr_id not in (" . implode(',', $safe) . ") ";
+}
+
+function spam_clean_validate_exclude_ids($write_table, $exclude_ids)
+{
+    if (!$exclude_ids) {
+        return true;
+    }
+
+    $safe = array();
+    foreach ($exclude_ids as $id) {
+        $safe[] = (int) $id;
+    }
+
+    $cnt = spam_clean_get_count(
+        " select count(*) as cnt
+            from `{$write_table}`
+           where wr_is_comment = '0'
+             and wr_id in (" . implode(',', $safe) . ") "
+    );
+
+    return $cnt === count($safe);
+}
+
+/**
+ * 삭제 대상 '일반 게시글' 조건을 생성합니다.
+ * 댓글 조건이 아니라 반드시 부모 게시글 조건으로만 사용합니다.
+ */
+function spam_clean_build_post_condition($mode, $params, $alias)
+{
+    $alias = preg_replace('/[^A-Za-z0-9_]/', '', $alias);
+    if ($alias === '') {
+        $alias = 'w';
+    }
+
+    $condition = " {$alias}.wr_is_comment = '0' ";
+
+    if ($mode === 'from_id') {
+        $start_id = isset($params['start_id']) ? (int) $params['start_id'] : 0;
+        if ($start_id < 1) {
+            return '';
+        }
+        $condition .= " and {$alias}.wr_id >= '{$start_id}' ";
+
+    } elseif ($mode === 'range_id') {
+        $start_id = isset($params['start_id']) ? (int) $params['start_id'] : 0;
+        $end_id = isset($params['end_id']) ? (int) $params['end_id'] : 0;
+        if ($start_id < 1 || $end_id < 1 || $start_id > $end_id) {
+            return '';
+        }
+        $condition .= " and {$alias}.wr_id between '{$start_id}' and '{$end_id}' ";
+
+    } elseif ($mode === 'from_date') {
+        $start_date = isset($params['start_date']) ? spam_clean_normalize_datetime($params['start_date']) : '';
+        if ($start_date === '') {
+            return '';
+        }
+        $start_date_esc = sql_real_escape_string($start_date);
+        $condition .= " and {$alias}.wr_datetime >= '{$start_date_esc}' ";
+
+    } else {
+        return '';
+    }
+
+    $snapshot_max_wr_id = isset($params['snapshot_max_wr_id']) ? (int) $params['snapshot_max_wr_id'] : 0;
+    if ($snapshot_max_wr_id > 0) {
+        $condition .= " and {$alias}.wr_id <= '{$snapshot_max_wr_id}' ";
+    }
+
+    $exclude_ids = isset($params['exclude_ids']) && is_array($params['exclude_ids']) ? $params['exclude_ids'] : array();
+    $condition .= spam_clean_exclude_sql($exclude_ids, $alias);
+
+    return $condition;
+}
+
+function spam_clean_get_mode_label($mode, $params)
+{
+    if ($mode === 'from_id') {
+        return 'wr_id ' . (int) $params['start_id'] . '번부터';
+    }
+
+    if ($mode === 'range_id') {
+        return 'wr_id ' . (int) $params['start_id'] . ' ~ ' . (int) $params['end_id'] . ' 구간';
+    }
+
+    if ($mode === 'from_date') {
+        return spam_clean_normalize_datetime($params['start_date']) . ' 이후';
+    }
+
+    return '';
+}
+
+function spam_clean_refresh_notice($bo_notice, $write_table)
+{
+    $bo_notice = trim((string) $bo_notice);
+    if ($bo_notice === '') {
+        return '';
+    }
+
+    $parts = preg_split('/[\\s,]+/', $bo_notice);
+    $keep = array();
+
+    foreach ($parts as $part) {
+        $id = (int) trim($part);
+        if ($id < 1) {
+            continue;
+        }
+
+        $row = sql_fetch(
+            " select wr_id
+                from `{$write_table}`
+               where wr_id = '{$id}'
+                 and wr_is_comment = '0' "
+        );
+
+        if (!empty($row['wr_id'])) {
+            $keep[] = $id;
+        }
+    }
+
+    return implode(',', $keep);
+}
+
+
+/* =========================================================
+ * 백업 레지스트리 / 복원 함수 (v3)
+ * ========================================================= */
+function spam_clean_registry_table()
+{
+    $prefix = defined('G5_TABLE_PREFIX') ? G5_TABLE_PREFIX : 'g5_';
+    return $prefix . 'spam_cleanup_backup';
+}
+
+function spam_clean_ensure_registry()
+{
+    $table = spam_clean_registry_table();
+
+    $sql = " create table if not exists `{$table}` (
+                backup_id bigint unsigned not null auto_increment,
+                bo_table varchar(64) not null default '',
+                bo_subject varchar(255) not null default '',
+                created_at datetime not null,
+                source_version tinyint unsigned not null default '6',
+                delete_mode varchar(30) not null default '',
+                delete_label varchar(255) not null default '',
+                backup_write varchar(64) not null default '',
+                backup_file varchar(64) not null default '',
+                backup_new varchar(64) not null default '',
+                backup_scrap varchar(64) not null default '',
+                backup_good varchar(64) not null default '',
+                post_count int unsigned not null default '0',
+                comment_count int unsigned not null default '0',
+                file_count int unsigned not null default '0',
+                new_count int unsigned not null default '0',
+                scrap_count int unsigned not null default '0',
+                good_count int unsigned not null default '0',
+                blocked_ip_count int unsigned not null default '0',
+                blocked_ips mediumtext,
+                bo_notice_before text,
+                status varchar(20) not null default 'available',
+                restored_at datetime null default null,
+                restore_count int unsigned not null default '0',
+                primary key (backup_id),
+                key idx_bo_table (bo_table),
+                key idx_created_at (created_at),
+                key idx_status (status),
+                unique key uniq_backup_write (backup_write)
+            ) ";
+
+    if (!sql_query($sql, false)) {
+        alert('백업 관리용 레지스트리 테이블을 생성할 수 없습니다. DB 권한을 확인해주세요.');
+    }
+
+    // 이전 버전에서 생성된 레지스트리도 필요한 컬럼을 자동 추가합니다.
+    if (!sql_query(" select blocked_ip_count from `{$table}` limit 0 ", false)) {
+        sql_query(" alter table `{$table}` add `blocked_ip_count` int unsigned not null default '0' after `good_count` ", false);
+    }
+    if (!sql_query(" select blocked_ips from `{$table}` limit 0 ", false)) {
+        sql_query(" alter table `{$table}` add `blocked_ips` mediumtext after `blocked_ip_count` ", false);
+    }
+
+    return $table;
+}
+
+function spam_clean_table_exists($table)
+{
+    if (!preg_match('/^[A-Za-z0-9_]+$/', (string) $table)) {
+        return false;
+    }
+
+    $result = sql_query(" select 1 from `{$table}` limit 0 ", false);
+    return $result ? true : false;
+}
+
+
+/* =========================================================
+ * 대용량 배치 작업 (v7)
+ * - 게시글을 한 번에 수십만 건 복사/삭제하지 않고 작은 배치로 백업 후 즉시 삭제
+ * - 브라우저가 닫혀도 job_id로 재개 가능
+ * - 같은 게시판의 동시 작업 방지
+ * ========================================================= */
+function spam_clean_job_table()
+{
+    $prefix = defined('G5_TABLE_PREFIX') ? G5_TABLE_PREFIX : 'g5_';
+    return $prefix . 'spam_cleanup_job';
+}
+
+function spam_clean_job_ip_table()
+{
+    $prefix = defined('G5_TABLE_PREFIX') ? G5_TABLE_PREFIX : 'g5_';
+    return $prefix . 'spam_cleanup_job_ip';
+}
+
+function spam_clean_ensure_job_tables()
+{
+    $job = spam_clean_job_table();
+    $job_ip = spam_clean_job_ip_table();
+
+    $sql = " create table if not exists `{$job}` (
+                job_id bigint unsigned not null auto_increment,
+                backup_id bigint unsigned not null default '0',
+                bo_table varchar(64) not null default '',
+                bo_subject varchar(255) not null default '',
+                delete_mode varchar(30) not null default '',
+                start_id bigint unsigned not null default '0',
+                end_id bigint unsigned not null default '0',
+                start_date varchar(19) not null default '',
+                exclude_ids text,
+                snapshot_max_wr_id bigint unsigned not null default '0',
+                preview_delete_write int unsigned not null default '0',
+                cursor_wr_id bigint unsigned not null default '0',
+                processed_write int unsigned not null default '0',
+                processed_comment int unsigned not null default '0',
+                batch_size int unsigned not null default '200',
+                backup_write varchar(64) not null default '',
+                backup_file varchar(64) not null default '',
+                backup_new varchar(64) not null default '',
+                backup_scrap varchar(64) not null default '',
+                backup_good varchar(64) not null default '',
+                auto_block_ip tinyint unsigned not null default '0',
+                selected_subnets text,
+                job_key varchar(64) not null default '',
+                status varchar(20) not null default 'running',
+                error_message text,
+                created_at datetime not null,
+                updated_at datetime not null,
+                completed_at datetime null default null,
+                primary key (job_id),
+                key idx_bo_status (bo_table, status),
+                key idx_updated (updated_at)
+            ) ";
+    if (!sql_query($sql, false)) {
+        alert('대용량 정리 작업 테이블을 생성할 수 없습니다. DB 권한을 확인해주세요.');
+    }
+
+    $sql = " create table if not exists `{$job_ip}` (
+                job_id bigint unsigned not null,
+                ip varchar(45) not null default '',
+                primary key (job_id, ip),
+                key idx_ip (ip)
+            ) ";
+    if (!sql_query($sql, false)) {
+        alert('대용량 정리 IP 임시 테이블을 생성할 수 없습니다. DB 권한을 확인해주세요.');
+    }
+}
+
+function spam_clean_get_job($job_id)
+{
+    $table = spam_clean_job_table();
+    $job_id = (int) $job_id;
+    if ($job_id < 1) return array();
+    return sql_fetch(" select * from `{$table}` where job_id = '{$job_id}' ");
+}
+
+function spam_clean_job_batch_size($row_count)
+{
+    $row_count = (int) $row_count;
+    if ($row_count >= 300000) return 80;
+    if ($row_count >= 100000) return 120;
+    if ($row_count >= 30000) return 200;
+    if ($row_count >= 5000) return 300;
+    return 500;
+}
+
+function spam_clean_job_params($job)
+{
+    $exclude_ids = spam_clean_parse_exclude_ids(isset($job['exclude_ids']) ? $job['exclude_ids'] : '');
+    if ($exclude_ids === false) $exclude_ids = array();
+    return array(
+        'start_id' => isset($job['start_id']) ? (int) $job['start_id'] : 0,
+        'end_id' => isset($job['end_id']) ? (int) $job['end_id'] : 0,
+        'start_date' => isset($job['start_date']) ? $job['start_date'] : '',
+        'exclude_ids' => $exclude_ids,
+        'snapshot_max_wr_id' => isset($job['snapshot_max_wr_id']) ? (int) $job['snapshot_max_wr_id'] : 0,
+    );
+}
+
+function spam_clean_job_fail($job_id, $message)
+{
+    $table = spam_clean_job_table();
+    $job_id = (int) $job_id;
+    $message_esc = sql_real_escape_string((string) $message);
+    sql_query(
+        " update `{$table}`
+             set status = 'failed',
+                 error_message = '{$message_esc}',
+                 updated_at = '" . G5_TIME_YMDHIS . "'
+           where job_id = '{$job_id}' ",
+        false
+    );
+}
+
+function spam_clean_json_response($data)
+{
+    if (!headers_sent()) {
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-store, no-cache, must-revalidate');
+    }
+    echo json_encode($data);
+    exit;
+}
+
+function spam_clean_sql_id_list($ids)
+{
+    $safe = array();
+    foreach ((array) $ids as $id) {
+        $id = (int) $id;
+        if ($id > 0) $safe[$id] = $id;
+    }
+    return implode(',', array_values($safe));
+}
+
+function spam_clean_create_empty_backup_table($source_table, $backup_table)
+{
+    if ($source_table === '' || $backup_table === '') return false;
+    if (!spam_clean_table_exists($source_table)) return false;
+    return sql_query(" create table `{$backup_table}` like `{$source_table}` ", false) ? true : false;
+}
+
+function spam_clean_job_selected_subnets($job)
+{
+    $raw = isset($job['selected_subnets']) ? trim((string) $job['selected_subnets']) : '';
+    if ($raw === '') return array();
+    $values = explode("\n", str_replace("\r", '', $raw));
+    $parsed = spam_clean_parse_selected_subnets($values);
+    return $parsed === false ? array() : $parsed;
+}
+
+function spam_clean_finalize_job($job)
+{
+    global $g5;
+
+    $job_id = (int) $job['job_id'];
+    $backup_id = (int) $job['backup_id'];
+    $bo_table = $job['bo_table'];
+    $bo_esc = sql_real_escape_string($bo_table);
+    $write_table = spam_clean_get_write_table($bo_table);
+    $backup_write = $job['backup_write'];
+
+    if (!$write_table || !spam_clean_table_exists($write_table) || !spam_clean_table_exists($backup_write)) {
+        spam_clean_job_fail($job_id, '마무리 단계에서 게시판 또는 백업 테이블을 찾을 수 없습니다.');
+        return array('ok' => false, 'message' => '게시판 또는 백업 테이블을 찾을 수 없습니다.');
+    }
+
+    $backup_write_count = spam_clean_get_count(" select count(*) as cnt from `{$backup_write}` where wr_is_comment = '0' ");
+    $backup_comment_count = spam_clean_get_count(" select count(*) as cnt from `{$backup_write}` where wr_is_comment = '1' ");
+    $backup_total_rows = $backup_write_count + $backup_comment_count;
+
+    // 안전 검증: 미리보기에서 확인한 부모 게시글 수만큼 정확히 백업되어 있어야 완료 처리합니다.
+    if ($backup_write_count !== (int) $job['preview_delete_write']) {
+        $msg = '백업된 게시글 수(' . $backup_write_count . ')와 미리보기 수(' . (int) $job['preview_delete_write'] . ')가 다릅니다. 자동 마무리를 중단했습니다.';
+        spam_clean_job_fail($job_id, $msg);
+        return array('ok' => false, 'message' => $msg);
+    }
+
+    $file_backup_count = ($job['backup_file'] !== '' && spam_clean_table_exists($job['backup_file']))
+        ? spam_clean_get_count(" select count(*) as cnt from `{$job['backup_file']}` ") : 0;
+    $new_backup_count = ($job['backup_new'] !== '' && spam_clean_table_exists($job['backup_new']))
+        ? spam_clean_get_count(" select count(*) as cnt from `{$job['backup_new']}` ") : 0;
+    $scrap_backup_count = ($job['backup_scrap'] !== '' && spam_clean_table_exists($job['backup_scrap']))
+        ? spam_clean_get_count(" select count(*) as cnt from `{$job['backup_scrap']}` ") : 0;
+    $good_backup_count = ($job['backup_good'] !== '' && spam_clean_table_exists($job['backup_good']))
+        ? spam_clean_get_count(" select count(*) as cnt from `{$job['backup_good']}` ") : 0;
+
+    $source_ips_for_block = array();
+    if (!empty($job['auto_block_ip'])) {
+        $job_ip = spam_clean_job_ip_table();
+        $ires = sql_query(" select ip from `{$job_ip}` where job_id = '{$job_id}' order by ip ", false);
+        if ($ires) {
+            while ($r = sql_fetch_array($ires)) {
+                if (!empty($r['ip'])) $source_ips_for_block[] = $r['ip'];
+            }
+        }
+    }
+
+    $selected_subnets = spam_clean_job_selected_subnets($job);
+    $ip_block_result = array(
+        'source_count' => 0, 'public_count' => 0, 'to_add' => array(),
+        'already_blocked' => array(), 'trusted' => array(), 'current' => array(),
+        'invalid_private' => array(), 'added' => array(), 'added_exact' => array(),
+        'added_subnets' => array(), 'subnet_skipped' => array(), 'subnet_already' => array(),
+        'capacity_skipped' => array(), 'updated' => true, 'bytes_after' => 0
+    );
+
+    if (!empty($job['auto_block_ip']) || !empty($selected_subnets)) {
+        $ip_block_result = spam_clean_append_intercept_entries($source_ips_for_block, $selected_subnets);
+    }
+
+    $blocked_raw = !empty($ip_block_result['added']) ? implode("\n", $ip_block_result['added']) : '';
+    $registry = spam_clean_registry_table();
+    $blocked_esc = sql_real_escape_string($blocked_raw);
+    sql_query(
+        " update `{$registry}`
+             set post_count = '{$backup_write_count}',
+                 comment_count = '{$backup_comment_count}',
+                 file_count = '{$file_backup_count}',
+                 new_count = '{$new_backup_count}',
+                 scrap_count = '{$scrap_backup_count}',
+                 good_count = '{$good_backup_count}',
+                 blocked_ip_count = '" . count($ip_block_result['added']) . "',
+                 blocked_ips = '{$blocked_esc}',
+                 status = 'available'
+           where backup_id = '{$backup_id}' ",
+        false
+    );
+
+    $write_count = spam_clean_get_count(" select count(*) as cnt from `{$write_table}` where wr_is_comment = '0' ");
+    $comment_count = spam_clean_get_count(" select count(*) as cnt from `{$write_table}` where wr_is_comment = '1' ");
+    $board = spam_clean_get_board($bo_table);
+    $new_notice = spam_clean_refresh_notice(isset($board['bo_notice']) ? $board['bo_notice'] : '', $write_table);
+    $notice_esc = sql_real_escape_string($new_notice);
+    sql_query(
+        " update {$g5['board_table']}
+             set bo_notice = '{$notice_esc}',
+                 bo_count_write = '{$write_count}',
+                 bo_count_comment = '{$comment_count}'
+           where bo_table = '{$bo_esc}' ",
+        false
+    );
+
+    if (function_exists('delete_cache_latest')) delete_cache_latest($bo_table);
+
+    $job_table = spam_clean_job_table();
+    sql_query(
+        " update `{$job_table}`
+             set status = 'done',
+                 processed_write = '{$backup_write_count}',
+                 processed_comment = '{$backup_comment_count}',
+                 updated_at = '" . G5_TIME_YMDHIS . "',
+                 completed_at = '" . G5_TIME_YMDHIS . "'
+           where job_id = '{$job_id}' ",
+        false
+    );
+
+    $job_ip = spam_clean_job_ip_table();
+    sql_query(" delete from `{$job_ip}` where job_id = '{$job_id}' ", false);
+
+    set_session('ss_spam_cleanup_result', array(
+        'bo_table' => $bo_table,
+        'bo_subject' => isset($job['bo_subject']) ? $job['bo_subject'] : '',
+        'delete_mode_label' => spam_clean_get_mode_label($job['delete_mode'], spam_clean_job_params($job)),
+        'deleted_write' => $backup_write_count,
+        'deleted_comment' => $backup_comment_count,
+        'deleted_total' => $backup_total_rows,
+        'write_count' => $write_count,
+        'comment_count' => $comment_count,
+        'backup_id' => $backup_id,
+        'backup_write' => $backup_write,
+        'backup_file' => $job['backup_file'],
+        'backup_new' => $job['backup_new'],
+        'backup_scrap' => $job['backup_scrap'],
+        'backup_good' => $job['backup_good'],
+        'file_backup_count' => $file_backup_count,
+        'new_backup_count' => $new_backup_count,
+        'scrap_backup_count' => $scrap_backup_count,
+        'good_backup_count' => $good_backup_count,
+        'exclude_ids' => spam_clean_parse_exclude_ids(isset($job['exclude_ids']) ? $job['exclude_ids'] : ''),
+        'auto_block_ip' => (!empty($job['auto_block_ip']) || !empty($selected_subnets)) ? 1 : 0,
+        'individual_ip_requested' => !empty($job['auto_block_ip']) ? 1 : 0,
+        'selected_subnet_count' => count($selected_subnets),
+        'blocked_ip_count' => count($ip_block_result['added']),
+        'blocked_exact_count' => count($ip_block_result['added_exact']),
+        'blocked_subnet_count' => count($ip_block_result['added_subnets']),
+        'blocked_ips' => $ip_block_result['added'],
+        'blocked_subnets' => $ip_block_result['added_subnets'],
+        'already_blocked_ip_count' => count($ip_block_result['already_blocked']) + count($ip_block_result['subnet_already']),
+        'trusted_ip_count' => count($ip_block_result['trusted']) + count($ip_block_result['current']) + count($ip_block_result['subnet_skipped']),
+        'invalid_private_ip_count' => count($ip_block_result['invalid_private']),
+        'capacity_skipped_ip_count' => count($ip_block_result['capacity_skipped']),
+        'ip_block_updated' => $ip_block_result['updated'] ? 1 : 0,
+    ));
+
+    return array('ok' => true, 'done' => true, 'redirect' => './spam_cleanup.php?done=1');
+}
+
+function spam_clean_run_job_batch($job)
+{
+    global $g5;
+
+    $job_id = (int) $job['job_id'];
+    if ($job_id < 1) return array('ok' => false, 'message' => '작업 ID가 올바르지 않습니다.');
+    if ($job['status'] === 'done') return array('ok' => true, 'done' => true, 'redirect' => './spam_cleanup.php?done=1');
+    if ($job['status'] === 'failed') return array('ok' => false, 'message' => $job['error_message']);
+    if ($job['status'] !== 'running') return array('ok' => false, 'message' => '현재 실행 가능한 작업 상태가 아닙니다: ' . $job['status']);
+
+    $lock_name = 'spam_cleanup_job_' . $job_id;
+    $lock_esc = sql_real_escape_string($lock_name);
+    $lock = sql_fetch(" select get_lock('{$lock_esc}', 0) as got ");
+    if (empty($lock['got'])) {
+        return array('ok' => true, 'busy' => true, 'message' => '다른 배치 요청이 처리 중입니다.');
+    }
+
+    $result = array();
+    $release = true;
+
+    $bo_table = $job['bo_table'];
+    $write_table = spam_clean_get_write_table($bo_table);
+    $backup_write = $job['backup_write'];
+    if (!$write_table || !spam_clean_table_exists($write_table) || !spam_clean_table_exists($backup_write)) {
+        $msg = '원본 게시판 또는 게시글 백업 테이블을 찾을 수 없습니다.';
+        spam_clean_job_fail($job_id, $msg);
+        sql_query(" select release_lock('{$lock_esc}') ", false);
+        return array('ok' => false, 'message' => $msg);
+    }
+
+    $params = spam_clean_job_params($job);
+    $post_condition = spam_clean_build_post_condition($job['delete_mode'], $params, 'w');
+    if ($post_condition === '') {
+        $msg = '저장된 삭제 조건이 올바르지 않습니다.';
+        spam_clean_job_fail($job_id, $msg);
+        sql_query(" select release_lock('{$lock_esc}') ", false);
+        return array('ok' => false, 'message' => $msg);
+    }
+
+    $cursor = (int) $job['cursor_wr_id'];
+    $batch_size = max(20, min(1000, (int) $job['batch_size']));
+    $ids = array();
+    $ips = array();
+
+    $res = sql_query(
+        " select w.wr_id, w.wr_ip
+            from `{$write_table}` w
+           where {$post_condition}
+             and w.wr_id > '{$cursor}'
+           order by w.wr_id asc
+           limit {$batch_size} ",
+        false
+    );
+
+    if (!$res) {
+        $msg = '다음 삭제 배치를 조회하지 못했습니다.';
+        spam_clean_job_fail($job_id, $msg);
+        sql_query(" select release_lock('{$lock_esc}') ", false);
+        return array('ok' => false, 'message' => $msg);
+    }
+
+    while ($row = sql_fetch_array($res)) {
+        $id = isset($row['wr_id']) ? (int) $row['wr_id'] : 0;
+        if ($id > 0) {
+            $ids[] = $id;
+            $ip = isset($row['wr_ip']) ? trim($row['wr_ip']) : '';
+            if ($ip !== '') $ips[$ip] = $ip;
+        }
+    }
+
+    if (!$ids) {
+        $final = spam_clean_finalize_job($job);
+        sql_query(" select release_lock('{$lock_esc}') ", false);
+        return $final;
+    }
+
+    $id_sql = spam_clean_sql_id_list($ids);
+    $max_id = max($ids);
+    $bo_esc = sql_real_escape_string($bo_table);
+
+    // 1. 게시글 + 댓글 백업. 모든 관련 백업이 성공한 뒤에만 원본을 삭제합니다.
+    if (!sql_query(
+        " insert ignore into `{$backup_write}`
+          select w.* from `{$write_table}` w
+           where w.wr_is_comment = '0' and w.wr_id in ({$id_sql}) ",
+        false
+    )) {
+        $msg = '게시글 배치 백업에 실패했습니다.';
+        spam_clean_job_fail($job_id, $msg);
+        sql_query(" select release_lock('{$lock_esc}') ", false);
+        return array('ok' => false, 'message' => $msg);
+    }
+
+    if (!sql_query(
+        " insert ignore into `{$backup_write}`
+          select c.* from `{$write_table}` c
+           where c.wr_is_comment = '1' and c.wr_parent in ({$id_sql}) ",
+        false
+    )) {
+        $msg = '댓글 배치 백업에 실패했습니다.';
+        spam_clean_job_fail($job_id, $msg);
+        sql_query(" select release_lock('{$lock_esc}') ", false);
+        return array('ok' => false, 'message' => $msg);
+    }
+
+    $batch_comment_count = spam_clean_get_count(
+        " select count(*) as cnt from `{$write_table}` c
+           where c.wr_is_comment = '1' and c.wr_parent in ({$id_sql}) "
+    );
+
+    if ($job['backup_file'] !== '' && spam_clean_table_exists($job['backup_file']) && !empty($g5['board_file_table'])) {
+        if (!sql_query(
+            " insert ignore into `{$job['backup_file']}`
+              select f.* from {$g5['board_file_table']} f
+               where f.bo_table = '{$bo_esc}' and f.wr_id in ({$id_sql}) ",
+            false
+        )) {
+            $msg = '첨부파일 메타데이터 배치 백업에 실패했습니다.';
+            spam_clean_job_fail($job_id, $msg);
+            sql_query(" select release_lock('{$lock_esc}') ", false);
+            return array('ok' => false, 'message' => $msg);
+        }
+    }
+
+    if ($job['backup_new'] !== '' && spam_clean_table_exists($job['backup_new']) && !empty($g5['board_new_table'])) {
+        if (!sql_query(
+            " insert ignore into `{$job['backup_new']}`
+              select n.* from {$g5['board_new_table']} n
+               where n.bo_table = '{$bo_esc}' and n.wr_parent in ({$id_sql}) ",
+            false
+        )) {
+            $msg = '새글 인덱스 배치 백업에 실패했습니다.';
+            spam_clean_job_fail($job_id, $msg);
+            sql_query(" select release_lock('{$lock_esc}') ", false);
+            return array('ok' => false, 'message' => $msg);
+        }
+    }
+
+    if ($job['backup_scrap'] !== '' && spam_clean_table_exists($job['backup_scrap']) && !empty($g5['scrap_table'])) {
+        if (!sql_query(
+            " insert ignore into `{$job['backup_scrap']}`
+              select s.* from {$g5['scrap_table']} s
+               where s.bo_table = '{$bo_esc}' and s.wr_id in ({$id_sql}) ",
+            false
+        )) {
+            $msg = '스크랩 배치 백업에 실패했습니다.';
+            spam_clean_job_fail($job_id, $msg);
+            sql_query(" select release_lock('{$lock_esc}') ", false);
+            return array('ok' => false, 'message' => $msg);
+        }
+    }
+
+    if ($job['backup_good'] !== '' && spam_clean_table_exists($job['backup_good']) && !empty($g5['board_good_table'])) {
+        if (!sql_query(
+            " insert ignore into `{$job['backup_good']}`
+              select gd.* from {$g5['board_good_table']} gd
+               where gd.bo_table = '{$bo_esc}' and gd.wr_id in ({$id_sql}) ",
+            false
+        )) {
+            $msg = '추천/비추천 배치 백업에 실패했습니다.';
+            spam_clean_job_fail($job_id, $msg);
+            sql_query(" select release_lock('{$lock_esc}') ", false);
+            return array('ok' => false, 'message' => $msg);
+        }
+    }
+
+    // 개별 IP 차단용 후보는 별도 작은 테이블에 한 번의 INSERT SELECT로 누적합니다.
+    if (!empty($job['auto_block_ip'])) {
+        $job_ip = spam_clean_job_ip_table();
+        if (!sql_query(
+            " insert ignore into `{$job_ip}` (job_id, ip)
+              select '{$job_id}', w.wr_ip
+                from `{$write_table}` w
+               where w.wr_is_comment = '0'
+                 and w.wr_id in ({$id_sql})
+                 and w.wr_ip <> ''
+               group by w.wr_ip ",
+            false
+        )) {
+            $msg = 'IP 차단 후보 누적에 실패했습니다.';
+            spam_clean_job_fail($job_id, $msg);
+            sql_query(" select release_lock('{$lock_esc}') ", false);
+            return array('ok' => false, 'message' => $msg);
+        }
+    }
+
+    // 2. 관련 메타데이터 삭제. 하나라도 실패하면 게시글 원본은 삭제하지 않습니다.
+    if (!empty($g5['board_new_table']) && !sql_query(
+        " delete from {$g5['board_new_table']} where bo_table = '{$bo_esc}' and wr_parent in ({$id_sql}) ", false
+    )) {
+        $msg = '새글 인덱스 배치 삭제에 실패했습니다.';
+        spam_clean_job_fail($job_id, $msg);
+        sql_query(" select release_lock('{$lock_esc}') ", false);
+        return array('ok' => false, 'message' => $msg);
+    }
+
+    if (!empty($g5['scrap_table']) && !sql_query(
+        " delete from {$g5['scrap_table']} where bo_table = '{$bo_esc}' and wr_id in ({$id_sql}) ", false
+    )) {
+        $msg = '스크랩 배치 삭제에 실패했습니다.';
+        spam_clean_job_fail($job_id, $msg);
+        sql_query(" select release_lock('{$lock_esc}') ", false);
+        return array('ok' => false, 'message' => $msg);
+    }
+
+    if (!empty($g5['board_good_table']) && !sql_query(
+        " delete from {$g5['board_good_table']} where bo_table = '{$bo_esc}' and wr_id in ({$id_sql}) ", false
+    )) {
+        $msg = '추천/비추천 배치 삭제에 실패했습니다.';
+        spam_clean_job_fail($job_id, $msg);
+        sql_query(" select release_lock('{$lock_esc}') ", false);
+        return array('ok' => false, 'message' => $msg);
+    }
+
+    if (!empty($g5['board_file_table']) && !sql_query(
+        " delete from {$g5['board_file_table']} where bo_table = '{$bo_esc}' and wr_id in ({$id_sql}) ", false
+    )) {
+        $msg = '첨부파일 메타데이터 배치 삭제에 실패했습니다.';
+        spam_clean_job_fail($job_id, $msg);
+        sql_query(" select release_lock('{$lock_esc}') ", false);
+        return array('ok' => false, 'message' => $msg);
+    }
+
+    // 3. 댓글 → 부모글 순서로 삭제합니다.
+    if (!sql_query(
+        " delete from `{$write_table}` where wr_is_comment = '1' and wr_parent in ({$id_sql}) ", false
+    )) {
+        $msg = '댓글 배치 삭제에 실패했습니다.';
+        spam_clean_job_fail($job_id, $msg);
+        sql_query(" select release_lock('{$lock_esc}') ", false);
+        return array('ok' => false, 'message' => $msg);
+    }
+
+    if (!sql_query(
+        " delete from `{$write_table}` where wr_is_comment = '0' and wr_id in ({$id_sql}) ", false
+    )) {
+        $msg = '게시글 배치 삭제에 실패했습니다.';
+        spam_clean_job_fail($job_id, $msg);
+        sql_query(" select release_lock('{$lock_esc}') ", false);
+        return array('ok' => false, 'message' => $msg);
+    }
+
+    $job_table = spam_clean_job_table();
+    $processed_write = (int) $job['processed_write'] + count($ids);
+    $processed_comment = (int) $job['processed_comment'] + (int) $batch_comment_count;
+    sql_query(
+        " update `{$job_table}`
+             set cursor_wr_id = '{$max_id}',
+                 processed_write = '{$processed_write}',
+                 processed_comment = '{$processed_comment}',
+                 updated_at = '" . G5_TIME_YMDHIS . "'
+           where job_id = '{$job_id}' ",
+        false
+    );
+
+    sql_query(" select release_lock('{$lock_esc}') ", false);
+
+    $total = max(1, (int) $job['preview_delete_write']);
+    $percent = min(99.9, round(($processed_write / $total) * 100, 1));
+    return array(
+        'ok' => true,
+        'done' => false,
+        'processed_write' => $processed_write,
+        'processed_comment' => $processed_comment,
+        'total_write' => (int) $job['preview_delete_write'],
+        'percent' => $percent,
+        'batch' => count($ids),
+        'cursor' => $max_id,
+    );
+}
+
+function spam_clean_create_backup_from_query($source_table, $backup_table, $select_sql)
+{
+    if (!spam_clean_table_exists($source_table)) {
+        return false;
+    }
+
+    if (!sql_query(" create table `{$backup_table}` like `{$source_table}` ", false)) {
+        return false;
+    }
+
+    if (!sql_query(" insert into `{$backup_table}` {$select_sql} ", false)) {
+        sql_query(" drop table `{$backup_table}` ", false);
+        return false;
+    }
+
+    return true;
+}
+
+function spam_clean_insert_registry($data)
+{
+    $table = spam_clean_registry_table();
+
+    $fields = array(
+        'bo_table','bo_subject','created_at','source_version','delete_mode','delete_label',
+        'backup_write','backup_file','backup_new','backup_scrap','backup_good',
+        'post_count','comment_count','file_count','new_count','scrap_count','good_count',
+        'blocked_ip_count','blocked_ips','bo_notice_before','status'
+    );
+
+    $values = array();
+    foreach ($fields as $field) {
+        $value = isset($data[$field]) ? $data[$field] : '';
+        if (in_array($field, array('source_version','post_count','comment_count','file_count','new_count','scrap_count','good_count','blocked_ip_count'), true)) {
+            $values[] = "'" . (int) $value . "'";
+        } else {
+            $values[] = "'" . sql_real_escape_string((string) $value) . "'";
+        }
+    }
+
+    $sql = " insert into `{$table}` (`" . implode('`,`', $fields) . "`)
+             values (" . implode(',', $values) . ") ";
+
+    if (!sql_query($sql, false)) {
+        return 0;
+    }
+
+    return function_exists('sql_insert_id') ? (int) sql_insert_id() : 0;
+}
+
+function spam_clean_get_backup($backup_id)
+{
+    $table = spam_clean_registry_table();
+    $backup_id = (int) $backup_id;
+    if ($backup_id < 1) {
+        return array();
+    }
+
+    return sql_fetch(" select * from `{$table}` where backup_id = '{$backup_id}' ");
+}
+
+function spam_clean_get_backup_list($limit)
+{
+    $table = spam_clean_registry_table();
+    $limit = max(1, min(100, (int) $limit));
+    $rows = array();
+    $res = sql_query(" select * from `{$table}` order by backup_id desc limit {$limit} ");
+    while ($row = sql_fetch_array($res)) {
+        $rows[] = $row;
+    }
+    return $rows;
+}
+
+function spam_clean_merge_notice($current_notice, $backup_notice, $write_table)
+{
+    $all = array();
+    foreach (array($current_notice, $backup_notice) as $notice_string) {
+        $parts = preg_split('/[\\s,]+/', trim((string) $notice_string));
+        foreach ($parts as $part) {
+            $id = (int) $part;
+            if ($id > 0) {
+                $all[$id] = $id;
+            }
+        }
+    }
+
+    $keep = array();
+    foreach ($all as $id) {
+        $row = sql_fetch(
+            " select wr_id from `{$write_table}`
+               where wr_id = '{$id}' and wr_is_comment = '0' "
+        );
+        if (!empty($row['wr_id'])) {
+            $keep[] = $id;
+        }
+    }
+
+    sort($keep, SORT_NUMERIC);
+    return implode(',', $keep);
+}
+
+function spam_clean_count_write_conflicts($write_table, $backup_write)
+{
+    return spam_clean_get_count(
+        " select count(*) as cnt
+            from `{$backup_write}` b
+            inner join `{$write_table}` w on w.wr_id = b.wr_id "
+    );
+}
+
+function spam_clean_get_conflict_rows($write_table, $backup_write, $limit)
+{
+    $rows = array();
+    $limit = max(1, min(20, (int) $limit));
+    $res = sql_query(
+        " select b.wr_id, b.wr_subject, b.wr_name, b.wr_datetime
+            from `{$backup_write}` b
+            inner join `{$write_table}` w on w.wr_id = b.wr_id
+           order by b.wr_id asc
+           limit {$limit} "
+    );
+    while ($row = sql_fetch_array($res)) {
+        $rows[] = $row;
+    }
+    return $rows;
+}
+
+function spam_clean_restore_aux_table($target_table, $backup_table)
+{
+    if ($backup_table === '' || !spam_clean_table_exists($backup_table) || !spam_clean_table_exists($target_table)) {
+        return 0;
+    }
+
+    $before = spam_clean_get_count(" select count(*) as cnt from `{$target_table}` ");
+    sql_query(" insert ignore into `{$target_table}` select * from `{$backup_table}` ", false);
+    $after = spam_clean_get_count(" select count(*) as cnt from `{$target_table}` ");
+    return max(0, $after - $before);
+}
+
+/**
+ * v2에서 생성된 g5_spamw_* 백업을 가능한 범위에서 자동 등록합니다.
+ * v2는 board_new/scrap/good 및 기존 공지목록을 백업하지 않았으므로 완전 복원이 아니라는 경고를 UI에 표시합니다.
+ */
+function spam_clean_import_legacy_backups()
+{
+    global $g5;
+
+    $registry = spam_clean_registry_table();
+    $prefix = defined('G5_TABLE_PREFIX') ? G5_TABLE_PREFIX : 'g5_';
+    $like = sql_real_escape_string($prefix . 'spamw\\_%');
+    $res = sql_query(" show tables like '{$like}' ", false);
+    if (!$res) {
+        return;
+    }
+
+    $boards = array();
+    $bres = sql_query(" select bo_table, bo_subject from {$g5['board_table']} ");
+    while ($b = sql_fetch_array($bres)) {
+        $safe = substr(preg_replace('/[^A-Za-z0-9_]/', '', $b['bo_table']), 0, 18);
+        if (!isset($boards[$safe])) {
+            $boards[$safe] = array();
+        }
+        $boards[$safe][] = $b;
+    }
+
+    while ($row = sql_fetch_array($res)) {
+        $table_name = reset($row);
+        if (!$table_name || !preg_match('/^' . preg_quote($prefix, '/') . 'spamw_(.+)_(\\d{8})_(\\d{6})_([a-f0-9]{5})$/i', $table_name, $m)) {
+            continue;
+        }
+
+        $exists = spam_clean_get_count(
+            " select count(*) as cnt from `{$registry}`
+               where backup_write = '" . sql_real_escape_string($table_name) . "' "
+        );
+        if ($exists > 0) {
+            continue;
+        }
+
+        $safe_bo = $m[1];
+        if (empty($boards[$safe_bo]) || count($boards[$safe_bo]) !== 1) {
+            continue;
+        }
+
+        $board = $boards[$safe_bo][0];
+        $created = substr($m[2],0,4) . '-' . substr($m[2],4,2) . '-' . substr($m[2],6,2)
+                 . ' ' . substr($m[3],0,2) . ':' . substr($m[3],2,2) . ':' . substr($m[3],4,2);
+
+        $post_count = spam_clean_get_count(" select count(*) as cnt from `{$table_name}` where wr_is_comment = '0' ");
+        $comment_count = spam_clean_get_count(" select count(*) as cnt from `{$table_name}` where wr_is_comment = '1' ");
+
+        $backup_file = '';
+        $file_count = 0;
+        $file_like = sql_real_escape_string($prefix . 'spamf_' . $safe_bo . '_' . $m[2] . '_' . $m[3] . '_%');
+        $fres = sql_query(" show tables like '{$file_like}' ", false);
+        if ($fres) {
+            $fr = sql_fetch_array($fres);
+            $candidate = $fr ? reset($fr) : '';
+            if ($candidate && spam_clean_table_exists($candidate)) {
+                $backup_file = $candidate;
+                $file_count = spam_clean_get_count(" select count(*) as cnt from `{$candidate}` ");
+            }
+        }
+
+        spam_clean_insert_registry(array(
+            'bo_table' => $board['bo_table'],
+            'bo_subject' => $board['bo_subject'],
+            'created_at' => $created,
+            'source_version' => 2,
+            'delete_mode' => 'legacy',
+            'delete_label' => 'v2 기존 백업 자동 등록',
+            'backup_write' => $table_name,
+            'backup_file' => $backup_file,
+            'backup_new' => '',
+            'backup_scrap' => '',
+            'backup_good' => '',
+            'post_count' => $post_count,
+            'comment_count' => $comment_count,
+            'file_count' => $file_count,
+            'new_count' => 0,
+            'scrap_count' => 0,
+            'good_count' => 0,
+            'blocked_ip_count' => 0,
+            'blocked_ips' => '',
+            'bo_notice_before' => '',
+            'status' => 'available',
+        ));
+    }
+}
+
+spam_clean_ensure_registry();
+spam_clean_ensure_job_tables();
+spam_clean_import_legacy_backups();
+
+/* =========================================================
+ * 복원 실행
+ * ========================================================= */
+$action_mode = isset($_POST['action_mode']) ? trim($_POST['action_mode']) : '';
+
+if ($action_mode === 'restore') {
+    check_admin_token();
+
+    $backup_id = isset($_POST['backup_id']) ? (int) $_POST['backup_id'] : 0;
+    $confirm_text = isset($_POST['confirm_text']) ? trim($_POST['confirm_text']) : '';
+    $remove_blocked_ips = !empty($_POST['remove_blocked_ips']);
+
+    if ($confirm_text !== '복원실행') {
+        alert('확인 문구가 올바르지 않습니다.');
+    }
+
+    $backup = spam_clean_get_backup($backup_id);
+    if (empty($backup['backup_id'])) {
+        alert('백업 기록을 찾을 수 없습니다.');
+    }
+
+    if ($backup['status'] !== 'available') {
+        if ($backup['status'] === 'restored') {
+            alert('이미 복원 완료 처리된 백업입니다. 중복 복원을 막기 위해 실행하지 않습니다.');
+        }
+        alert('아직 완료되지 않은 백업이거나 복원할 수 없는 상태입니다. 상태: ' . $backup['status']);
+    }
+
+    $board = spam_clean_get_board($backup['bo_table']);
+    if (empty($board['bo_table'])) {
+        alert('복원 대상 게시판이 현재 존재하지 않습니다.');
+    }
+
+    $write_table = spam_clean_get_write_table($backup['bo_table']);
+    $backup_write = $backup['backup_write'];
+
+    if (!$write_table || !spam_clean_table_exists($write_table) || !spam_clean_table_exists($backup_write)) {
+        alert('게시판 또는 게시글 백업 테이블을 찾을 수 없습니다.');
+    }
+
+    $conflicts = spam_clean_count_write_conflicts($write_table, $backup_write);
+    if ($conflicts > 0) {
+        alert(
+            "복원할 wr_id와 현재 게시판의 wr_id가 {$conflicts}건 충돌합니다.\n" .
+            "데이터 덮어쓰기를 막기 위해 복원을 중단했습니다.\n\n" .
+            "복원 미리보기에서 충돌 게시글을 확인해주세요."
+        );
+    }
+
+    $expected_rows = spam_clean_get_count(" select count(*) as cnt from `{$backup_write}` ");
+    if ($expected_rows < 1) {
+        alert('백업 테이블에 복원할 데이터가 없습니다.');
+    }
+
+    // 1) 실제 게시글/댓글 복원 - wr_id를 그대로 복원합니다.
+    if (!sql_query(" insert into `{$write_table}` select * from `{$backup_write}` ", false)) {
+        alert('게시글/댓글 복원에 실패했습니다. 관련 테이블 복원은 실행하지 않았습니다.');
+    }
+
+    $restored_write = spam_clean_get_count(
+        " select count(*) as cnt
+            from `{$write_table}` w
+            inner join `{$backup_write}` b on b.wr_id = w.wr_id
+           where b.wr_is_comment = '0' "
+    );
+    $restored_comment = spam_clean_get_count(
+        " select count(*) as cnt
+            from `{$write_table}` w
+            inner join `{$backup_write}` b on b.wr_id = w.wr_id
+           where b.wr_is_comment = '1' "
+    );
+
+    // 2) 관련 메타데이터 복원. 중복 행은 INSERT IGNORE로 건너뜁니다.
+    $restored_file = 0;
+    $restored_new = 0;
+    $restored_scrap = 0;
+    $restored_good = 0;
+
+    if (!empty($g5['board_file_table'])) {
+        $restored_file = spam_clean_restore_aux_table($g5['board_file_table'], $backup['backup_file']);
+    }
+    if (!empty($g5['board_new_table'])) {
+        $restored_new = spam_clean_restore_aux_table($g5['board_new_table'], $backup['backup_new']);
+    }
+    if (!empty($g5['scrap_table'])) {
+        $restored_scrap = spam_clean_restore_aux_table($g5['scrap_table'], $backup['backup_scrap']);
+    }
+    if (!empty($g5['board_good_table'])) {
+        $restored_good = spam_clean_restore_aux_table($g5['board_good_table'], $backup['backup_good']);
+    }
+
+    // 3) 게시판 카운트와 공지글 목록 재계산/병합
+    $write_count = spam_clean_get_count(" select count(*) as cnt from `{$write_table}` where wr_is_comment = '0' ");
+    $comment_count = spam_clean_get_count(" select count(*) as cnt from `{$write_table}` where wr_is_comment = '1' ");
+
+    $merged_notice = spam_clean_merge_notice(
+        isset($board['bo_notice']) ? $board['bo_notice'] : '',
+        isset($backup['bo_notice_before']) ? $backup['bo_notice_before'] : '',
+        $write_table
+    );
+    $bo_esc = sql_real_escape_string($backup['bo_table']);
+    $notice_esc = sql_real_escape_string($merged_notice);
+
+    sql_query(
+        " update {$g5['board_table']}
+             set bo_notice = '{$notice_esc}',
+                 bo_count_write = '{$write_count}',
+                 bo_count_comment = '{$comment_count}'
+           where bo_table = '{$bo_esc}' "
+    );
+
+    if (function_exists('delete_cache_latest')) {
+        delete_cache_latest($backup['bo_table']);
+    }
+
+    // 백업에 기록된 정확한 차단 문자열(IP 또는 대역 규칙)만, 사용자가 선택한 경우에 한해 해제합니다.
+    $unblock_result = array('removed' => array(), 'updated' => true);
+    if ($remove_blocked_ips && !empty($backup['blocked_ips'])) {
+        $stored_blocked_ips = spam_clean_ip_list_lines($backup['blocked_ips']);
+        $unblock_result = spam_clean_remove_exact_intercept_ips($stored_blocked_ips);
+    }
+
+    $registry = spam_clean_registry_table();
+    sql_query(
+        " update `{$registry}`
+             set status = 'restored',
+                 restored_at = '" . G5_TIME_YMDHIS . "',
+                 restore_count = restore_count + 1
+           where backup_id = '" . (int) $backup_id . "' "
+    );
+
+    set_session('ss_spam_restore_result', array(
+        'backup_id' => $backup_id,
+        'bo_table' => $backup['bo_table'],
+        'bo_subject' => $backup['bo_subject'],
+        'restored_write' => $restored_write,
+        'restored_comment' => $restored_comment,
+        'restored_file' => $restored_file,
+        'restored_new' => $restored_new,
+        'restored_scrap' => $restored_scrap,
+        'restored_good' => $restored_good,
+        'source_version' => (int) $backup['source_version'],
+        'unblocked_ip_count' => count($unblock_result['removed']),
+        'unblock_requested' => $remove_blocked_ips ? 1 : 0,
+        'unblock_updated' => $unblock_result['updated'] ? 1 : 0,
+    ));
+
+    goto_url('./spam_cleanup.php?restore_done=1');
+}
+
+/* =========================================================
+ * 삭제 실행
+ * ========================================================= */
+
+if ($action_mode === 'batch') {
+    $job_id = isset($_POST['job_id']) ? (int) $_POST['job_id'] : 0;
+    $job_key = isset($_POST['job_key']) ? trim((string) $_POST['job_key']) : '';
+    $job = spam_clean_get_job($job_id);
+
+    if (empty($job['job_id'])) {
+        spam_clean_json_response(array('ok' => false, 'message' => '정리 작업을 찾을 수 없습니다.'));
+    }
+
+    $session_key = get_session('ss_spam_cleanup_job_key_' . $job_id);
+    if ($job_key === '' || $session_key === '' || $job_key !== $session_key || $job_key !== $job['job_key']) {
+        spam_clean_json_response(array('ok' => false, 'message' => '작업 인증값이 올바르지 않습니다. 작업 화면을 새로고침해주세요.'));
+    }
+
+    $batch_result = spam_clean_run_job_batch($job);
+    spam_clean_json_response($batch_result);
+}
+
+if ($action_mode === 'delete') {
+    check_admin_token();
+
+    $bo_table = isset($_POST['bo_table']) ? trim($_POST['bo_table']) : '';
+    $delete_mode = isset($_POST['delete_mode']) ? trim($_POST['delete_mode']) : '';
+    $start_id = isset($_POST['start_id']) ? (int) $_POST['start_id'] : 0;
+    $end_id = isset($_POST['end_id']) ? (int) $_POST['end_id'] : 0;
+    $start_date_raw = isset($_POST['start_date']) ? trim($_POST['start_date']) : '';
+    $exclude_raw = isset($_POST['exclude_ids']) ? trim($_POST['exclude_ids']) : '';
+    $snapshot_max_wr_id = isset($_POST['snapshot_max_wr_id']) ? (int) $_POST['snapshot_max_wr_id'] : 0;
+    $preview_delete_write = isset($_POST['preview_delete_write']) ? (int) $_POST['preview_delete_write'] : -1;
+    $confirm_text = isset($_POST['confirm_text']) ? trim($_POST['confirm_text']) : '';
+    $auto_block_ip = !empty($_POST['auto_block_ip']);
+
+    // v7.1: 대역 선택값은 삭제 조건과 분리된 "선택 기능"입니다.
+    // packed 1개 변수로 받고, 구버전 JSON도 호환합니다.
+    // 일부 호스팅/브라우저에서 +, 공백, 이스케이프가 변형돼도 정규화하고,
+    // 끝내 해석할 수 없는 항목은 삭제 자체를 막지 않고 차단 대상에서만 제외합니다.
+    $selected_subnet_values = array();
+    if (isset($_POST['block_subnets_packed'])) {
+        $packed = trim((string) $_POST['block_subnets_packed']);
+        if ($packed !== '') {
+            $selected_subnet_values = explode('|', $packed);
+        }
+    } elseif (isset($_POST['block_subnets_json'])) {
+        $subnet_json = trim((string) $_POST['block_subnets_json']);
+        if ($subnet_json !== '') {
+            $decoded_subnets = json_decode($subnet_json, true);
+            if (!is_array($decoded_subnets)) {
+                $decoded_subnets = json_decode(stripslashes($subnet_json), true);
+            }
+            if (is_array($decoded_subnets)) {
+                $selected_subnet_values = $decoded_subnets;
+            }
+        }
+    } elseif (isset($_POST['block_subnets'])) {
+        $selected_subnet_values = (array) $_POST['block_subnets'];
+    }
+
+    $normalized_subnet_values = array();
+    foreach ((array) $selected_subnet_values as $raw_rule) {
+        if (is_array($raw_rule) || is_object($raw_rule)) {
+            continue;
+        }
+
+        // rawurldecode는 %2B만 +로 복원하고, 정상적인 +를 공백으로 바꾸지 않습니다.
+        $rule = rawurldecode((string) $raw_rule);
+        $rule = html_entity_decode($rule, ENT_QUOTES, 'UTF-8');
+        $rule = str_replace(array('＋', '\\+'), '+', $rule);
+        $rule = preg_replace('/\s+/u', '', $rule);
+
+        // 어떤 환경에서 +가 공백으로 변환된 뒤 trim된 경우 "49.254."처럼 남을 수 있어 복구합니다.
+        if (preg_match('/^\d{1,3}\.\d{1,3}\.$/', $rule) ||
+            preg_match('/^\d{1,3}\.\d{1,3}\.\d{1,3}\.$/', $rule)) {
+            $rule .= '+';
+        }
+
+        $parsed_rule = spam_clean_parse_subnet_rule($rule);
+        if (!empty($parsed_rule['rule'])) {
+            $normalized_subnet_values[$parsed_rule['rule']] = $parsed_rule['rule'];
+        }
+    }
+
+    $selected_subnets = spam_clean_parse_selected_subnets(array_values($normalized_subnet_values));
+    if ($selected_subnets === false) {
+        // 선택 대역 해석 실패가 54만 건 삭제 작업 자체를 막지 않도록 안전하게 차단만 생략합니다.
+        $selected_subnets = array();
+    }
+
+    if ($confirm_text !== '정리실행') {
+        alert('확인 문구가 올바르지 않습니다.');
+    }
+
+    $board = spam_clean_get_board($bo_table);
+    if (empty($board['bo_table'])) {
+        alert('존재하지 않는 게시판입니다.');
+    }
+
+    $write_table = spam_clean_get_write_table($bo_table);
+    if (!$write_table || !spam_clean_table_works($write_table)) {
+        alert('게시글 테이블을 찾을 수 없습니다.');
+    }
+
+    $exclude_ids = spam_clean_parse_exclude_ids($exclude_raw);
+    if ($exclude_ids === false) {
+        alert('삭제 제외 wr_id에는 숫자만 입력할 수 있습니다. 예: 125, 430, 918');
+    }
+    if (!spam_clean_validate_exclude_ids($write_table, $exclude_ids)) {
+        alert('삭제 제외 wr_id 중 존재하지 않거나 댓글 wr_id인 값이 있습니다. 미리보기부터 다시 진행해주세요.');
+    }
+
+    $params = array(
+        'start_id' => $start_id,
+        'end_id' => $end_id,
+        'start_date' => $start_date_raw,
+        'exclude_ids' => $exclude_ids,
+        'snapshot_max_wr_id' => $snapshot_max_wr_id,
+    );
+    $post_condition = spam_clean_build_post_condition($delete_mode, $params, 'w');
+    if ($post_condition === '') alert('삭제 기준이 올바르지 않습니다.');
+
+    $current_delete_write = spam_clean_get_count(
+        " select count(*) as cnt from `{$write_table}` w where {$post_condition} "
+    );
+    if ($preview_delete_write < 0 || $current_delete_write !== $preview_delete_write) {
+        alert("미리보기 이후 삭제 대상 게시글 수가 변경되었습니다.\n안전을 위해 작업을 시작하지 않습니다.\n\n삭제 대상 미리보기를 다시 실행해주세요.");
+    }
+    if ($current_delete_write < 1) alert('삭제할 게시글이 없습니다.');
+
+    // 같은 게시판에서 동시에 두 개의 대량 정리 작업이 실행되지 않도록 막습니다.
+    $job_table = spam_clean_job_table();
+    $bo_esc = sql_real_escape_string($bo_table);
+    $existing_job = sql_fetch(
+        " select job_id, status from `{$job_table}`
+           where bo_table = '{$bo_esc}' and status = 'running'
+           order by job_id desc limit 1 "
+    );
+    if (!empty($existing_job['job_id'])) {
+        alert('이 게시판에는 이미 진행 중인 정리 작업 #' . (int) $existing_job['job_id'] . '이 있습니다. 기존 작업을 먼저 재개해주세요.', './spam_cleanup.php?job_id=' . (int) $existing_job['job_id']);
+    }
+
+    // 선택한 대역은 실행 시작 직전에 다시 안전성 검증합니다.
+    if ($selected_subnets) {
+        $config_now = sql_fetch(
+            " select cf_possible_ip, cf_intercept_ip from {$g5['config_table']} limit 1 "
+        );
+        $current_ip_now = isset($_SERVER['REMOTE_ADDR']) ? trim($_SERVER['REMOTE_ADDR']) : '';
+        $subnet_analysis_now = spam_clean_analyze_subnets(
+            $write_table,
+            $post_condition,
+            isset($config_now['cf_possible_ip']) ? $config_now['cf_possible_ip'] : '',
+            isset($config_now['cf_intercept_ip']) ? $config_now['cf_intercept_ip'] : '',
+            $current_ip_now,
+            5
+        );
+        $safe_subnet_map = array();
+        foreach ($subnet_analysis_now['safe_rules'] as $safe_rule) $safe_subnet_map[$safe_rule] = true;
+        foreach ($selected_subnets as $selected_rule) {
+            if (!isset($safe_subnet_map[$selected_rule])) {
+                alert("선택한 대역 차단 규칙 중 현재 안전 조건을 통과하지 못한 항목이 있습니다.\n미리보기부터 다시 진행해주세요.");
+            }
+        }
+    }
+
+    // 빈 백업 테이블만 먼저 만들어두고 실제 데이터는 배치마다 '백업 → 검증 → 삭제' 순서로 이동합니다.
+    $backup_write = spam_clean_make_backup_name('w', $bo_table);
+    if (!spam_clean_create_empty_backup_table($write_table, $backup_write)) {
+        alert('게시글 백업 테이블 생성에 실패했습니다. 삭제 작업은 시작하지 않았습니다.');
+    }
+
+    $backup_file = '';
+    $backup_new = '';
+    $backup_scrap = '';
+    $backup_good = '';
+    $created_backups = array($backup_write);
+
+    if (!empty($g5['board_file_table']) && spam_clean_table_exists($g5['board_file_table'])) {
+        $backup_file = spam_clean_make_backup_name('f', $bo_table);
+        if (!spam_clean_create_empty_backup_table($g5['board_file_table'], $backup_file)) {
+            sql_query(" drop table `{$backup_write}` ", false);
+            alert('첨부파일 백업 테이블 생성에 실패했습니다. 삭제 작업은 시작하지 않았습니다.');
+        }
+        $created_backups[] = $backup_file;
+    }
+    if (!empty($g5['board_new_table']) && spam_clean_table_exists($g5['board_new_table'])) {
+        $backup_new = spam_clean_make_backup_name('n', $bo_table);
+        if (!spam_clean_create_empty_backup_table($g5['board_new_table'], $backup_new)) {
+            foreach ($created_backups as $t) sql_query(" drop table `{$t}` ", false);
+            alert('새글 인덱스 백업 테이블 생성에 실패했습니다. 삭제 작업은 시작하지 않았습니다.');
+        }
+        $created_backups[] = $backup_new;
+    }
+    if (!empty($g5['scrap_table']) && spam_clean_table_exists($g5['scrap_table'])) {
+        $backup_scrap = spam_clean_make_backup_name('s', $bo_table);
+        if (!spam_clean_create_empty_backup_table($g5['scrap_table'], $backup_scrap)) {
+            foreach ($created_backups as $t) sql_query(" drop table `{$t}` ", false);
+            alert('스크랩 백업 테이블 생성에 실패했습니다. 삭제 작업은 시작하지 않았습니다.');
+        }
+        $created_backups[] = $backup_scrap;
+    }
+    if (!empty($g5['board_good_table']) && spam_clean_table_exists($g5['board_good_table'])) {
+        $backup_good = spam_clean_make_backup_name('g', $bo_table);
+        if (!spam_clean_create_empty_backup_table($g5['board_good_table'], $backup_good)) {
+            foreach ($created_backups as $t) sql_query(" drop table `{$t}` ", false);
+            alert('추천/비추천 백업 테이블 생성에 실패했습니다. 삭제 작업은 시작하지 않았습니다.');
+        }
+        $created_backups[] = $backup_good;
+    }
+
+    $backup_id = spam_clean_insert_registry(array(
+        'bo_table' => $bo_table,
+        'bo_subject' => isset($board['bo_subject']) ? $board['bo_subject'] : '',
+        'created_at' => G5_TIME_YMDHIS,
+        'source_version' => 7,
+        'delete_mode' => $delete_mode,
+        'delete_label' => spam_clean_get_mode_label($delete_mode, $params),
+        'backup_write' => $backup_write,
+        'backup_file' => $backup_file,
+        'backup_new' => $backup_new,
+        'backup_scrap' => $backup_scrap,
+        'backup_good' => $backup_good,
+        'post_count' => 0,
+        'comment_count' => 0,
+        'file_count' => 0,
+        'new_count' => 0,
+        'scrap_count' => 0,
+        'good_count' => 0,
+        'blocked_ip_count' => 0,
+        'blocked_ips' => '',
+        'bo_notice_before' => isset($board['bo_notice']) ? $board['bo_notice'] : '',
+        'status' => 'building',
+    ));
+    if ($backup_id < 1) {
+        foreach ($created_backups as $t) sql_query(" drop table `{$t}` ", false);
+        alert('백업 레지스트리 생성에 실패했습니다. 삭제 작업은 시작하지 않았습니다.');
+    }
+
+    $job_key = md5(uniqid('', true) . '|' . $bo_table . '|' . G5_TIME_YMDHIS . '|' . mt_rand());
+    $selected_subnets_raw = implode("\n", $selected_subnets);
+    $selected_subnets_esc = sql_real_escape_string($selected_subnets_raw);
+    $exclude_esc = sql_real_escape_string($exclude_raw);
+    $start_date_esc = sql_real_escape_string($start_date_raw);
+    $bo_subject_esc = sql_real_escape_string(isset($board['bo_subject']) ? $board['bo_subject'] : '');
+    $job_key_esc = sql_real_escape_string($job_key);
+    $batch_size = spam_clean_job_batch_size($current_delete_write);
+
+    $ok = sql_query(
+        " insert into `{$job_table}`
+          (backup_id, bo_table, bo_subject, delete_mode, start_id, end_id, start_date, exclude_ids,
+           snapshot_max_wr_id, preview_delete_write, cursor_wr_id, processed_write, processed_comment,
+           batch_size, backup_write, backup_file, backup_new, backup_scrap, backup_good,
+           auto_block_ip, selected_subnets, job_key, status, created_at, updated_at)
+          values
+          ('{$backup_id}', '{$bo_esc}', '{$bo_subject_esc}', '" . sql_real_escape_string($delete_mode) . "',
+           '{$start_id}', '{$end_id}', '{$start_date_esc}', '{$exclude_esc}',
+           '{$snapshot_max_wr_id}', '{$current_delete_write}', '0', '0', '0',
+           '{$batch_size}', '" . sql_real_escape_string($backup_write) . "', '" . sql_real_escape_string($backup_file) . "',
+           '" . sql_real_escape_string($backup_new) . "', '" . sql_real_escape_string($backup_scrap) . "', '" . sql_real_escape_string($backup_good) . "',
+           '" . ($auto_block_ip ? 1 : 0) . "', '{$selected_subnets_esc}', '{$job_key_esc}', 'running',
+           '" . G5_TIME_YMDHIS . "', '" . G5_TIME_YMDHIS . "') ",
+        false
+    );
+
+    $job_id = $ok && function_exists('sql_insert_id') ? (int) sql_insert_id() : 0;
+    if ($job_id < 1) {
+        $registry = spam_clean_registry_table();
+        sql_query(" delete from `{$registry}` where backup_id = '{$backup_id}' and status = 'building' ", false);
+        foreach ($created_backups as $t) sql_query(" drop table `{$t}` ", false);
+        alert('대용량 정리 작업 생성에 실패했습니다. 삭제 작업은 시작하지 않았습니다.');
+    }
+
+    set_session('ss_spam_cleanup_job_key_' . $job_id, $job_key);
+    goto_url('./spam_cleanup.php?job_id=' . $job_id);
+}
+
+
+/* =========================================================
+ * 화면/미리보기 데이터
+ * ========================================================= */
+$done = isset($_GET['done']) ? (int) $_GET['done'] : 0;
+$result_message = array();
+
+if ($done) {
+    $result_message = get_session('ss_spam_cleanup_result');
+    set_session('ss_spam_cleanup_result', '');
+}
+
+$restore_done = isset($_GET['restore_done']) ? (int) $_GET['restore_done'] : 0;
+$restore_result = array();
+if ($restore_done) {
+    $restore_result = get_session('ss_spam_restore_result');
+    set_session('ss_spam_restore_result', '');
+}
+
+$active_job_id = isset($_GET['job_id']) ? (int) $_GET['job_id'] : 0;
+$active_job = array();
+$active_job_key = '';
+if ($active_job_id > 0) {
+    $active_job = spam_clean_get_job($active_job_id);
+    if (empty($active_job['job_id'])) {
+        alert('정리 작업을 찾을 수 없습니다.');
+    }
+    // 최고관리자가 작업 화면을 다시 열면 중단된 브라우저 세션에서도 재개할 수 있도록 인증키를 세션에 복구합니다.
+    $active_job_key = isset($active_job['job_key']) ? $active_job['job_key'] : '';
+    set_session('ss_spam_cleanup_job_key_' . $active_job_id, $active_job_key);
+}
+
+$restore_preview_id = isset($_GET['restore_preview']) ? (int) $_GET['restore_preview'] : 0;
+$restore_preview = array();
+$restore_conflict_rows = array();
+
+if ($restore_preview_id > 0) {
+    $restore_backup = spam_clean_get_backup($restore_preview_id);
+    if (empty($restore_backup['backup_id'])) {
+        alert('선택한 백업 기록을 찾을 수 없습니다.');
+    }
+
+    $restore_board = spam_clean_get_board($restore_backup['bo_table']);
+    $restore_write_table = spam_clean_get_write_table($restore_backup['bo_table']);
+
+    $restore_preview['backup'] = $restore_backup;
+    $restore_preview['board_exists'] = !empty($restore_board['bo_table']);
+    $restore_preview['write_table_exists'] = $restore_write_table && spam_clean_table_exists($restore_write_table);
+    $restore_preview['backup_write_exists'] = spam_clean_table_exists($restore_backup['backup_write']);
+    $restore_preview['backup_file_exists'] = $restore_backup['backup_file'] !== '' && spam_clean_table_exists($restore_backup['backup_file']);
+    $restore_preview['backup_new_exists'] = $restore_backup['backup_new'] !== '' && spam_clean_table_exists($restore_backup['backup_new']);
+    $restore_preview['backup_scrap_exists'] = $restore_backup['backup_scrap'] !== '' && spam_clean_table_exists($restore_backup['backup_scrap']);
+    $restore_preview['backup_good_exists'] = $restore_backup['backup_good'] !== '' && spam_clean_table_exists($restore_backup['backup_good']);
+    $restore_preview['conflicts'] = 0;
+
+    if ($restore_preview['write_table_exists'] && $restore_preview['backup_write_exists']) {
+        $restore_preview['conflicts'] = spam_clean_count_write_conflicts($restore_write_table, $restore_backup['backup_write']);
+        if ($restore_preview['conflicts'] > 0) {
+            $restore_conflict_rows = spam_clean_get_conflict_rows($restore_write_table, $restore_backup['backup_write'], 10);
+        }
+    }
+
+    $restore_preview['can_restore'] = (
+        $restore_backup['status'] === 'available'
+        && $restore_preview['board_exists']
+        && $restore_preview['write_table_exists']
+        && $restore_preview['backup_write_exists']
+        && (int) $restore_preview['conflicts'] === 0
+    );
+}
+
+$backup_list = spam_clean_get_backup_list(30);
+
+$bo_table = isset($_GET['bo_table']) ? trim($_GET['bo_table']) : '';
+$delete_mode = isset($_GET['delete_mode']) ? trim($_GET['delete_mode']) : 'from_id';
+$start_id = isset($_GET['start_id']) ? (int) $_GET['start_id'] : 0;
+$end_id = isset($_GET['end_id']) ? (int) $_GET['end_id'] : 0;
+$start_date_raw = isset($_GET['start_date']) ? trim($_GET['start_date']) : '';
+$exclude_raw = isset($_GET['exclude_ids']) ? trim($_GET['exclude_ids']) : '';
+$do_preview = isset($_GET['preview']) ? (int) $_GET['preview'] : 0;
+
+$preview = array();
+$preview_rows = array();
+$excluded_rows = array();
+
+if ($do_preview && $bo_table !== '') {
+    $board = spam_clean_get_board($bo_table);
+
+    if (empty($board['bo_table'])) {
+        alert('존재하지 않는 게시판입니다.');
+    }
+
+    $write_table = spam_clean_get_write_table($bo_table);
+    if (!$write_table || !spam_clean_table_works($write_table)) {
+        alert('게시글 테이블을 찾을 수 없습니다.');
+    }
+
+    $exclude_ids = spam_clean_parse_exclude_ids($exclude_raw);
+    if ($exclude_ids === false) {
+        alert('삭제 제외 wr_id에는 숫자만 입력해주세요. 예: 125, 430, 918');
+    }
+
+    if (!spam_clean_validate_exclude_ids($write_table, $exclude_ids)) {
+        alert('삭제 제외 wr_id 중 존재하지 않거나 댓글 wr_id인 값이 있습니다. 일반 게시글의 wr_id만 입력해주세요.');
+    }
+
+    // 미리보기 시점의 현재 최대 일반 게시글 wr_id를 스냅샷으로 고정
+    $max_row = sql_fetch(
+        " select max(wr_id) as max_wr_id
+            from `{$write_table}`
+           where wr_is_comment = '0' "
+    );
+    $snapshot_max_wr_id = isset($max_row['max_wr_id']) ? (int) $max_row['max_wr_id'] : 0;
+
+    $params = array(
+        'start_id' => $start_id,
+        'end_id' => $end_id,
+        'start_date' => $start_date_raw,
+        'exclude_ids' => $exclude_ids,
+        'snapshot_max_wr_id' => $snapshot_max_wr_id,
+    );
+
+    $post_condition_w = spam_clean_build_post_condition($delete_mode, $params, 'w');
+    $post_condition_p = spam_clean_build_post_condition($delete_mode, $params, 'p');
+
+    if ($post_condition_w === '' || $post_condition_p === '') {
+        alert('삭제 기준을 정확히 입력해주세요.');
+    }
+
+    $preview['board'] = $board;
+    $preview['snapshot_max_wr_id'] = $snapshot_max_wr_id;
+    $preview['mode_label'] = spam_clean_get_mode_label($delete_mode, $params);
+    $preview['exclude_ids'] = $exclude_ids;
+
+    $preview['total_write'] = spam_clean_get_count(
+        " select count(*) as cnt from `{$write_table}` where wr_is_comment = '0' "
+    );
+
+    $preview['total_comment'] = spam_clean_get_count(
+        " select count(*) as cnt from `{$write_table}` where wr_is_comment = '1' "
+    );
+
+    $preview['delete_write'] = spam_clean_get_count(
+        " select count(*) as cnt
+            from `{$write_table}` w
+           where {$post_condition_w} "
+    );
+
+    $preview['delete_comment'] = spam_clean_get_count(
+        " select count(*) as cnt
+            from `{$write_table}` c
+            inner join `{$write_table}` p
+                    on p.wr_id = c.wr_parent
+                   and p.wr_is_comment = '0'
+           where c.wr_is_comment = '1'
+             and {$post_condition_p} "
+    );
+
+    $preview['delete_total'] = $preview['delete_write'] + $preview['delete_comment'];
+    $preview['keep_write'] = $preview['total_write'] - $preview['delete_write'];
+    $preview['keep_comment'] = $preview['total_comment'] - $preview['delete_comment'];
+
+    $preview['member_write'] = spam_clean_get_count(
+        " select count(*) as cnt
+            from `{$write_table}` w
+           where {$post_condition_w}
+             and w.mb_id <> '' "
+    );
+
+    $preview['member_comment'] = spam_clean_get_count(
+        " select count(*) as cnt
+            from `{$write_table}` c
+            inner join `{$write_table}` p
+                    on p.wr_id = c.wr_parent
+                   and p.wr_is_comment = '0'
+           where c.wr_is_comment = '1'
+             and {$post_condition_p}
+             and c.mb_id <> '' "
+    );
+    $preview['member_rows'] = $preview['member_write'] + $preview['member_comment'];
+
+    $preview['first'] = sql_fetch(
+        " select w.wr_id, w.wr_subject, w.wr_name, w.mb_id, w.wr_ip, w.wr_datetime
+            from `{$write_table}` w
+           where {$post_condition_w}
+           order by w.wr_id asc
+           limit 1 "
+    );
+
+    $preview['last'] = sql_fetch(
+        " select w.wr_id, w.wr_subject, w.wr_name, w.mb_id, w.wr_ip, w.wr_datetime
+            from `{$write_table}` w
+           where {$post_condition_w}
+           order by w.wr_id desc
+           limit 1 "
+    );
+
+    $res = sql_query(
+        " select w.wr_id, w.wr_subject, w.wr_name, w.mb_id, w.wr_ip, w.wr_datetime
+            from `{$write_table}` w
+           where {$post_condition_w}
+           order by w.wr_id desc
+           limit 10 "
+    );
+
+    while ($row = sql_fetch_array($res)) {
+        $preview_rows[] = $row;
+    }
+
+    // 삭제 대상 일반 게시글의 wr_ip를 기준으로 자동 차단 후보를 계산합니다.
+    $source_ips_preview = spam_clean_collect_post_ips($write_table, $post_condition_w);
+    $current_ip_preview = isset($_SERVER['REMOTE_ADDR']) ? trim($_SERVER['REMOTE_ADDR']) : '';
+    $preview['ip_block'] = spam_clean_prepare_block_ips(
+        $source_ips_preview,
+        isset($config['cf_possible_ip']) ? $config['cf_possible_ip'] : '',
+        isset($config['cf_intercept_ip']) ? $config['cf_intercept_ip'] : '',
+        $current_ip_preview
+    );
+    $preview['ip_block_sample'] = array_slice($preview['ip_block']['to_add'], 0, 10);
+
+    // /24는 삭제 대상 일반 게시글 합계 5개 이상(동일 IP의 여러 글도 합산), /16은 같은 앞 2옥텟 아래 /24 후보가 12개 이상이면 검토 후보로 분석합니다.
+    $preview['subnet_analysis'] = spam_clean_analyze_subnets(
+        $write_table,
+        $post_condition_w,
+        isset($config['cf_possible_ip']) ? $config['cf_possible_ip'] : '',
+        isset($config['cf_intercept_ip']) ? $config['cf_intercept_ip'] : '',
+        $current_ip_preview,
+        5
+    );
+
+    if ($exclude_ids) {
+        $res_ex = sql_query(
+            " select wr_id, wr_subject, wr_name, wr_datetime
+                from `{$write_table}`
+               where wr_is_comment = '0'
+                 and wr_id in (" . implode(',', $exclude_ids) . ")
+               order by wr_id asc "
+        );
+
+        while ($row = sql_fetch_array($res_ex)) {
+            $excluded_rows[] = $row;
+        }
+    }
+}
+
+$board_list = array();
+$board_result = sql_query(
+    " select bo_table, bo_subject, gr_id, bo_count_write, bo_count_comment
+        from {$g5['board_table']}
+       order by gr_id asc, bo_subject asc "
+);
+
+while ($row = sql_fetch_array($board_result)) {
+    $board_list[] = $row;
+}
+
+require_once './admin.head.php';
+?>
+
+<style>
+.spam-clean-wrap{max-width:1150px}
+.spam-clean-box{margin:18px 0;padding:22px;border:1px solid #d9dfe7;background:#fff;border-radius:8px}
+.spam-clean-warn{border-color:#f0c8c8;background:#fff8f8}
+.spam-clean-info{border-color:#bdd4f3;background:#f7fbff}
+.spam-clean-ok{border-color:#bcdcc6;background:#f4fff7}
+.spam-clean-title{font-size:18px;font-weight:700;margin:0 0 14px}
+.spam-clean-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
+.spam-clean-stat{padding:16px;border:1px solid #e2e6eb;border-radius:6px;background:#fafbfc}
+.spam-clean-stat strong{display:block;font-size:22px;margin-top:5px}
+.spam-clean-danger{color:#d22!important;font-weight:700}
+.spam-clean-safe{color:#176f37!important;font-weight:700}
+.spam-clean-help{color:#666;line-height:1.75}
+.spam-clean-confirm{padding:18px;margin-top:18px;border:1px solid #e1b3b3;background:#fff8f8;border-radius:7px}
+.spam-clean-confirm input[type=text]{width:180px}
+.spam-clean-table{width:100%;border-collapse:collapse}
+.spam-clean-table th,.spam-clean-table td{padding:10px;border:1px solid #ddd;text-align:left}
+.spam-clean-table th{background:#f5f6f7}
+.spam-clean-mode{display:flex;gap:18px;flex-wrap:wrap;padding:10px 0}
+.spam-clean-mode label{font-weight:600}
+.spam-clean-mode-fields{margin-top:10px;padding:14px;background:#f8f9fb;border:1px solid #e4e7eb;border-radius:6px}
+.spam-clean-field{display:none}
+.spam-clean-field.is-active{display:block}
+.spam-clean-edge{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.spam-clean-edge>div{padding:15px;border:1px solid #e1e5ea;border-radius:6px;background:#fafbfc}
+.spam-clean-badge{display:inline-block;padding:3px 7px;margin-left:5px;border-radius:4px;background:#eef3fa;color:#315f9f;font-size:12px}
+.spam-clean-excluded{margin-top:14px;padding:14px;border:1px solid #bcdcc6;background:#f7fff9;border-radius:6px}
+.spam-clean-code{font-family:Consolas,Monaco,monospace;background:#f1f3f5;padding:2px 5px;border-radius:3px}
+.spam-restore-status{display:inline-block;padding:3px 8px;border-radius:12px;font-size:12px;font-weight:700}
+.spam-restore-available{background:#e9f8ee;color:#18753a}
+.spam-restore-restored{background:#eef1f5;color:#657080}
+.spam-restore-v2{background:#fff3dc;color:#9a6500}
+.spam-restore-actions{white-space:nowrap}
+.spam-restore-detail{margin:12px 0;padding:14px;border:1px solid #d8e2ee;background:#fbfdff;border-radius:6px}
+.spam-job-progress{height:22px;background:#e9edf2;border-radius:11px;overflow:hidden;margin:12px 0}
+.spam-job-progress>div{height:100%;width:0;background:#3b82f6;transition:width .2s ease}
+.spam-job-meta{display:flex;gap:18px;flex-wrap:wrap;margin:8px 0;color:#555}
+.spam-job-message{margin-top:10px;font-weight:600}
+@media (max-width:800px){
+    .spam-clean-grid{grid-template-columns:1fr 1fr}
+    .spam-clean-edge{grid-template-columns:1fr}
+}
+</style>
+
+<div class="spam-clean-wrap">
+
+    <?php if (!empty($active_job['job_id'])) { ?>
+        <?php
+        $job_total = max(1, (int) $active_job['preview_delete_write']);
+        $job_processed = min($job_total, (int) $active_job['processed_write']);
+        $job_percent = round(($job_processed / $job_total) * 100, 1);
+        ?>
+        <div class="spam-clean-box <?php echo $active_job['status'] === 'failed' ? 'spam-clean-warn' : 'spam-clean-info'; ?>" id="spamJobPanel"
+             data-job-id="<?php echo (int) $active_job['job_id']; ?>"
+             data-job-key="<?php echo spam_clean_h($active_job_key); ?>"
+             data-status="<?php echo spam_clean_h($active_job['status']); ?>">
+            <h2 class="spam-clean-title">대용량 정리 작업 #<?php echo (int) $active_job['job_id']; ?></h2>
+            <p>
+                <strong><?php echo spam_clean_h($active_job['bo_subject']); ?></strong>
+                (<?php echo spam_clean_h($active_job['bo_table']); ?>) —
+                <strong><?php echo number_format((int) $active_job['preview_delete_write']); ?>개</strong> 게시글을
+                <strong><?php echo number_format((int) $active_job['batch_size']); ?>개 단위</strong>로 백업 후 삭제합니다.
+            </p>
+            <div class="spam-job-progress"><div id="spamJobBar" style="width:<?php echo $job_percent; ?>%"></div></div>
+            <div class="spam-job-meta">
+                <span>진행: <strong id="spamJobProcessed"><?php echo number_format($job_processed); ?></strong> / <?php echo number_format($job_total); ?></span>
+                <span>진행률: <strong id="spamJobPercent"><?php echo $job_percent; ?>%</strong></span>
+                <span>백업 ID: <strong>#<?php echo (int) $active_job['backup_id']; ?></strong></span>
+                <span>상태: <strong id="spamJobStatus"><?php echo spam_clean_h($active_job['status']); ?></strong></span>
+            </div>
+            <div id="spamJobMessage" class="spam-job-message">
+                <?php if ($active_job['status'] === 'running') { ?>
+                    작업 중입니다. 페이지를 닫아도 이미 완료된 배치는 유지되며, 같은 URL을 다시 열면 이어서 처리합니다.
+                <?php } elseif ($active_job['status'] === 'failed') { ?>
+                    오류: <?php echo spam_clean_h($active_job['error_message']); ?>
+                <?php } elseif ($active_job['status'] === 'done') { ?>
+                    작업이 완료되었습니다.
+                <?php } ?>
+            </div>
+            <?php if ($active_job['status'] === 'running') { ?>
+                <p style="margin-top:12px">
+                    <button type="button" class="btn btn_02" id="spamJobPause">브라우저 자동 진행 잠시 멈춤</button>
+                    <span class="spam-clean-help">서버 작업을 취소하는 버튼이 아니라 다음 배치 요청만 멈춥니다.</span>
+                </p>
+            <?php } ?>
+        </div>
+    <?php } ?>
+
+
+    <?php if (!empty($result_message)) { ?>
+        <div class="spam-clean-box spam-clean-ok">
+            <h2 class="spam-clean-title">정리 완료</h2>
+            <p>
+                <strong><?php echo spam_clean_h($result_message['bo_subject']); ?></strong>
+                (<?php echo spam_clean_h($result_message['bo_table']); ?>) 게시판에서
+                <strong><?php echo spam_clean_h($result_message['delete_mode_label']); ?></strong> 조건을 정리했습니다.
+            </p>
+
+            <div class="spam-clean-grid">
+                <div class="spam-clean-stat">삭제 게시글<strong><?php echo number_format((int) $result_message['deleted_write']); ?></strong></div>
+                <div class="spam-clean-stat">삭제 댓글<strong><?php echo number_format((int) $result_message['deleted_comment']); ?></strong></div>
+                <div class="spam-clean-stat">남은 게시글<strong><?php echo number_format((int) $result_message['write_count']); ?></strong></div>
+                <div class="spam-clean-stat">남은 댓글<strong><?php echo number_format((int) $result_message['comment_count']); ?></strong></div>
+            </div>
+
+            <?php if (!empty($result_message['auto_block_ip'])) { ?>
+                <div class="spam-clean-box spam-clean-info">
+                    <strong>작성 IP / 대역 차단 결과</strong><br>
+                    새로 추가된 개별 IP: <strong><?php echo number_format((int) $result_message['blocked_exact_count']); ?>개</strong>
+                    / 새로 추가된 /24 대역: <strong><?php echo number_format((int) $result_message['blocked_subnet_count']); ?>개</strong>
+                    / 총 차단 항목: <strong><?php echo number_format((int) $result_message['blocked_ip_count']); ?>개</strong>
+                    / 이미 차단됨: <?php echo number_format((int) $result_message['already_blocked_ip_count']); ?>개
+                    / 보호·제외: <?php echo number_format((int) $result_message['trusted_ip_count'] + (int) $result_message['invalid_private_ip_count']); ?>개
+                    <?php if ((int) $result_message['capacity_skipped_ip_count'] > 0) { ?>
+                        / 용량 제한으로 미추가: <strong class="spam-clean-danger"><?php echo number_format((int) $result_message['capacity_skipped_ip_count']); ?>개</strong>
+                    <?php } ?>
+                    <?php if (empty($result_message['ip_block_updated'])) { ?>
+                        <br><strong class="spam-clean-danger">접근차단 IP DB 업데이트에 실패했습니다. 게시글 삭제/백업은 완료되었습니다.</strong>
+                    <?php } ?>
+                </div>
+            <?php } ?>
+
+            <?php if (!empty($result_message['exclude_ids'])) { ?>
+                <p class="spam-clean-help">
+                    삭제 제외 정상글 wr_id:
+                    <strong><?php echo spam_clean_h(implode(', ', $result_message['exclude_ids'])); ?></strong>
+                </p>
+            <?php } ?>
+
+            <p class="spam-clean-help">
+                백업 번호: <strong>#<?php echo (int) $result_message['backup_id']; ?></strong>
+                <a href="./spam_cleanup.php?restore_preview=<?php echo (int) $result_message['backup_id']; ?>#spamRestorePreview">복원 미리보기</a><br>
+                게시글/댓글 백업 테이블:
+                <strong><?php echo spam_clean_h($result_message['backup_write']); ?></strong><br>
+                <?php if (!empty($result_message['backup_file'])) { ?>
+                    첨부파일 메타데이터 백업 테이블:
+                    <strong><?php echo spam_clean_h($result_message['backup_file']); ?></strong>
+                    (<?php echo number_format((int) $result_message['file_backup_count']); ?>건)<br>
+                <?php } ?>
+                실제 첨부파일은 서버에서 삭제하지 않았습니다.
+            </p>
+        </div>
+    <?php } ?>
+
+
+    <?php if (!empty($restore_result)) { ?>
+        <div class="spam-clean-box spam-clean-ok">
+            <h2 class="spam-clean-title">백업 복원 완료</h2>
+            <p>
+                <strong><?php echo spam_clean_h($restore_result['bo_subject']); ?></strong>
+                (<?php echo spam_clean_h($restore_result['bo_table']); ?>) 게시판에
+                백업 #<?php echo (int) $restore_result['backup_id']; ?>을 복원했습니다.
+            </p>
+            <div class="spam-clean-grid">
+                <div class="spam-clean-stat">복원 게시글<strong><?php echo number_format((int) $restore_result['restored_write']); ?></strong></div>
+                <div class="spam-clean-stat">복원 댓글<strong><?php echo number_format((int) $restore_result['restored_comment']); ?></strong></div>
+                <div class="spam-clean-stat">첨부 메타데이터<strong><?php echo number_format((int) $restore_result['restored_file']); ?></strong></div>
+                <div class="spam-clean-stat">새글 인덱스<strong><?php echo number_format((int) $restore_result['restored_new']); ?></strong></div>
+            </div>
+            <?php if (!empty($restore_result['unblock_requested'])) { ?>
+                <p class="spam-clean-help">
+                    이 백업에서 자동 추가했던 접근차단 항목 중
+                    <strong><?php echo number_format((int) $restore_result['unblocked_ip_count']); ?>개</strong>를 해제했습니다.
+                    <?php if (empty($restore_result['unblock_updated'])) { ?>
+                        <strong class="spam-clean-danger">IP 차단 해제 DB 업데이트는 실패했습니다.</strong>
+                    <?php } ?>
+                </p>
+            <?php } ?>
+            <?php if ((int) $restore_result['source_version'] < 3) { ?>
+                <p class="spam-clean-help">
+                    이 백업은 v2에서 생성되어 게시글/댓글 및 당시 백업된 첨부파일 메타데이터만 복원되었습니다.
+                    v2에서 백업하지 않았던 새글 인덱스·스크랩·추천/비추천·기존 공지설정은 원본 그대로 복구할 수 없습니다.
+                </p>
+            <?php } ?>
+        </div>
+    <?php } ?>
+
+    <div class="spam-clean-box" id="spamRestore">
+        <h2 class="spam-clean-title">백업 복원</h2>
+        <p class="spam-clean-help">
+            스팸 정리 시 만들어진 백업을 다시 게시판으로 되돌릴 수 있습니다.
+            <strong>복원 전에 wr_id 충돌 여부를 자동 검사</strong>하며, 충돌이 있으면 덮어쓰지 않고 복원을 중단합니다.<br>
+            v3부터는 게시글/댓글뿐 아니라 첨부파일 메타데이터, 새글 인덱스, 스크랩, 추천/비추천 정보도 함께 백업하며, v4부터는 자동 추가한 접근차단 항목을 복원 이력에 기록하고, v5부터는 /24 대역 규칙, v6부터는 /16 상위 대역 규칙을 지원하고, v7부터는 대량 선택 단일값 전송과 배치 백업/삭제·중단 후 재개를 지원합니다.<br>
+            복원 후에도 백업 테이블은 자동 삭제하지 않으므로 필요하면 다시 확인할 수 있습니다.
+        </p>
+
+        <?php if ($backup_list) { ?>
+            <div class="tbl_head01 tbl_wrap">
+                <table class="spam-clean-table">
+                    <thead>
+                    <tr>
+                        <th>백업</th>
+                        <th>게시판</th>
+                        <th>생성일</th>
+                        <th>백업 내용</th>
+                        <th>버전</th>
+                        <th>상태</th>
+                        <th>작업</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($backup_list as $bk) { ?>
+                        <tr>
+                            <td>#<?php echo (int) $bk['backup_id']; ?></td>
+                            <td>
+                                <?php echo spam_clean_h($bk['bo_subject']); ?><br>
+                                <span class="spam-clean-help"><?php echo spam_clean_h($bk['bo_table']); ?></span>
+                            </td>
+                            <td><?php echo spam_clean_h($bk['created_at']); ?></td>
+                            <td>
+                                게시글 <?php echo number_format((int) $bk['post_count']); ?> / 댓글 <?php echo number_format((int) $bk['comment_count']); ?><br>
+                                <?php if (!empty($bk['blocked_ip_count'])) { ?>
+                                    <span class="spam-clean-help">자동 차단 항목 <?php echo number_format((int) $bk['blocked_ip_count']); ?>개</span><br>
+                                <?php } ?>
+                                <span class="spam-clean-help"><?php echo spam_clean_h($bk['delete_label']); ?></span>
+                            </td>
+                            <td>
+                                v<?php echo (int) $bk['source_version']; ?>
+                                <?php if ((int) $bk['source_version'] < 3) { ?><span class="spam-restore-status spam-restore-v2">부분 백업</span><?php } ?>
+                            </td>
+                            <td>
+                                <?php if ($bk['status'] === 'restored') { ?>
+                                    <span class="spam-restore-status spam-restore-restored">복원 완료</span>
+                                <?php } elseif ($bk['status'] === 'available') { ?>
+                                    <span class="spam-restore-status spam-restore-available">복원 가능</span>
+                                <?php } else { ?>
+                                    <span class="spam-restore-status spam-restore-v2">작업 중/불완전</span>
+                                <?php } ?>
+                            </td>
+                            <td class="spam-restore-actions">
+                                <?php if ($bk['status'] === 'available' || $bk['status'] === 'restored') { ?>
+                                    <a href="./spam_cleanup.php?restore_preview=<?php echo (int) $bk['backup_id']; ?>#spamRestorePreview" class="btn btn_02">복원 미리보기</a>
+                                <?php } else { ?>
+                                    <span class="spam-clean-help">정리 작업 완료 후 복원 가능</span>
+                                <?php } ?>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php } else { ?>
+            <p class="spam-clean-help">아직 등록된 백업이 없습니다. 스팸 정리를 한 번 실행하면 여기에 백업 이력이 표시됩니다.</p>
+        <?php } ?>
+    </div>
+
+    <?php if (!empty($restore_preview)) { ?>
+        <div class="spam-clean-box spam-clean-info" id="spamRestorePreview">
+            <h2 class="spam-clean-title">복원 미리보기 - 백업 #<?php echo (int) $restore_preview['backup']['backup_id']; ?></h2>
+
+            <div class="spam-restore-detail">
+                게시판: <strong><?php echo spam_clean_h($restore_preview['backup']['bo_subject']); ?></strong>
+                <span class="spam-clean-badge"><?php echo spam_clean_h($restore_preview['backup']['bo_table']); ?></span><br>
+                백업 생성일: <strong><?php echo spam_clean_h($restore_preview['backup']['created_at']); ?></strong><br>
+                정리 기준: <strong><?php echo spam_clean_h($restore_preview['backup']['delete_label']); ?></strong><br>
+                백업 버전: <strong>v<?php echo (int) $restore_preview['backup']['source_version']; ?></strong>
+            </div>
+
+            <div class="spam-clean-grid">
+                <div class="spam-clean-stat">복원 게시글<strong><?php echo number_format((int) $restore_preview['backup']['post_count']); ?></strong></div>
+                <div class="spam-clean-stat">복원 댓글<strong><?php echo number_format((int) $restore_preview['backup']['comment_count']); ?></strong></div>
+                <div class="spam-clean-stat">첨부 메타데이터<strong><?php echo number_format((int) $restore_preview['backup']['file_count']); ?></strong></div>
+                <div class="spam-clean-stat">wr_id 충돌<strong class="<?php echo ((int) $restore_preview['conflicts'] > 0) ? 'spam-clean-danger' : 'spam-clean-safe'; ?>"><?php echo number_format((int) $restore_preview['conflicts']); ?></strong></div>
+            </div>
+
+            <?php if (!empty($restore_preview['backup']['blocked_ip_count'])) { ?>
+                <div class="spam-clean-box spam-clean-info">
+                    이 정리 작업에서 그누보드 <strong>접근차단 IP</strong>에 자동 추가한 정확한 IP가
+                    <strong><?php echo number_format((int) $restore_preview['backup']['blocked_ip_count']); ?>개</strong> 기록되어 있습니다.<br>
+                    게시글을 복원하면서 이 IP들도 다시 허용하고 싶다면 아래 복원 실행 영역의 <strong>자동 차단 항목도 함께 해제</strong>를 선택하세요.
+                </div>
+            <?php } ?>
+
+            <?php if ((int) $restore_preview['backup']['source_version'] < 3) { ?>
+                <div class="spam-clean-box spam-clean-warn">
+                    <strong>v2 기존 백업입니다.</strong><br>
+                    게시글/댓글과 당시 존재하는 첨부파일 메타데이터는 복원할 수 있지만,
+                    v2에서 백업하지 않았던 새글 인덱스·스크랩·추천/비추천 및 삭제 전 공지설정은 완전 복구할 수 없습니다.
+                </div>
+            <?php } ?>
+
+            <?php if (!$restore_preview['board_exists'] || !$restore_preview['write_table_exists'] || !$restore_preview['backup_write_exists']) { ?>
+                <div class="spam-clean-box spam-clean-warn">
+                    <strong class="spam-clean-danger">복원 불가:</strong>
+                    게시판 또는 백업 테이블을 찾을 수 없습니다.
+                </div>
+            <?php } ?>
+
+            <?php if ((int) $restore_preview['conflicts'] > 0) { ?>
+                <div class="spam-clean-box spam-clean-warn">
+                    <strong class="spam-clean-danger">복원 중단 조건:</strong>
+                    현재 게시판에 백업과 동일한 wr_id가 <?php echo number_format((int) $restore_preview['conflicts']); ?>건 존재합니다.
+                    기존 데이터를 덮어쓰지 않기 위해 자동 복원할 수 없습니다.
+                    <?php if ($restore_conflict_rows) { ?>
+                        <ul>
+                            <?php foreach ($restore_conflict_rows as $cr) { ?>
+                                <li>#<?php echo (int) $cr['wr_id']; ?> <?php echo spam_clean_h($cr['wr_subject']); ?> (<?php echo spam_clean_h($cr['wr_datetime']); ?>)</li>
+                            <?php } ?>
+                        </ul>
+                    <?php } ?>
+                </div>
+            <?php } ?>
+
+            <?php if ($restore_preview['backup']['status'] === 'restored') { ?>
+                <div class="spam-clean-box spam-clean-warn">
+                    이 백업은 이미 <strong><?php echo spam_clean_h($restore_preview['backup']['restored_at']); ?></strong>에 복원 완료 처리되었습니다.
+                    중복 복원은 차단됩니다.
+                </div>
+            <?php } ?>
+
+            <?php if ($restore_preview['can_restore']) { ?>
+                <div class="spam-clean-confirm">
+                    <h3>복원 실행</h3>
+                    <p>
+                        백업의 원래 <strong>wr_id를 그대로 사용</strong>해 게시글과 댓글을 복원합니다.
+                        v3 이상 백업이면 함께 백업된 관련 메타데이터도 복원하고 게시판 글/댓글 수와 캐시를 다시 맞춥니다.<br>
+                        아래 칸에 <strong>복원실행</strong>을 입력하세요.
+                    </p>
+                    <form method="post" action="./spam_cleanup.php" onsubmit="return confirm('선택한 백업을 실제 게시판으로 복원합니다.\nwr_id 충돌 검사를 다시 수행한 뒤 실행됩니다.\n\n계속하시겠습니까?');">
+                        <input type="hidden" name="action_mode" value="restore">
+                        <input type="hidden" name="backup_id" value="<?php echo (int) $restore_preview['backup']['backup_id']; ?>">
+                        <input type="hidden" name="token" value="<?php echo spam_clean_h(get_admin_token()); ?>">
+                        <?php if (!empty($restore_preview['backup']['blocked_ip_count'])) { ?>
+                            <p style="margin:12px 0">
+                                <label>
+                                    <input type="checkbox" name="remove_blocked_ips" value="1">
+                                    <strong>자동 차단 항목도 함께 해제</strong>
+                                </label><br>
+                                <span class="spam-clean-help">
+                                    이 백업이 생성될 때 도구가 새로 추가했던 정확한 IP 또는 대역 차단 문자열만 제거합니다.
+                                    이후에도 차단을 유지해야 하는 IP라면 체크하지 마세요.
+                                </span>
+                            </p>
+                        <?php } ?>
+                        <label for="restore_confirm_text">
+                            확인 문구
+                            <input type="text" name="confirm_text" id="restore_confirm_text" required autocomplete="off" class="frm_input" placeholder="복원실행">
+                        </label>
+                        <button type="submit" class="btn_submit btn">백업 복원 실행</button>
+                    </form>
+                </div>
+            <?php } ?>
+        </div>
+    <?php } ?>
+
+    <div class="spam-clean-box spam-clean-warn">
+        <h2 class="spam-clean-title">사용 전 확인</h2>
+        <p class="spam-clean-help">
+            이 도구는 <strong>삭제 기준에 해당하는 일반 게시글을 먼저 확정한 뒤, 그 게시글에 달린 댓글만 함께 삭제</strong>합니다.<br>
+            따라서 오래된 정상 게시글에 최근 댓글이 달려 있어 댓글의 wr_id가 높더라도, 정상 부모글이 삭제 대상이 아니면 댓글은 유지됩니다.<br>
+            실행 직전에 삭제 대상 게시글/댓글과 관련 메타데이터를 별도 DB 테이블로 자동 백업하고, 백업 이력을 복원 목록에 등록합니다.<br>
+            v7에서는 삭제 대상 일반 게시글의 개별 IP 차단과 함께 /24 반복 대역을 분석하고, 같은 /16 아래 /24 후보가 12개 이상이면 49.254.+ 같은 상위 대역도 사람이 검토 후 선택할 수 있습니다. 실제 정리는 소량 배치로 백업 후 삭제하여 대용량 게시판에서도 한 번의 초대형 INSERT/DELETE를 만들지 않습니다.
+        </p>
+    </div>
+
+    <div class="spam-clean-box">
+        <h2 class="spam-clean-title">1. 삭제 기준 설정</h2>
+
+        <form method="get" action="./spam_cleanup.php" id="spamPreviewForm">
+            <input type="hidden" name="preview" value="1">
+
+            <div class="tbl_frm01 tbl_wrap">
+                <table>
+                    <tbody>
+                    <tr>
+                        <th scope="row"><label for="bo_table">게시판</label></th>
+                        <td>
+                            <select name="bo_table" id="bo_table" required>
+                                <option value="">게시판 선택</option>
+                                <?php foreach ($board_list as $b) { ?>
+                                    <option value="<?php echo spam_clean_h($b['bo_table']); ?>" <?php echo ($bo_table === $b['bo_table']) ? 'selected' : ''; ?>>
+                                        <?php echo spam_clean_h($b['bo_subject']); ?>
+                                        [<?php echo spam_clean_h($b['bo_table']); ?>]
+                                        - 글 <?php echo number_format((int) $b['bo_count_write']); ?>개
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">삭제 방법</th>
+                        <td>
+                            <div class="spam-clean-mode">
+                                <label><input type="radio" name="delete_mode" value="from_id" <?php echo ($delete_mode === 'from_id') ? 'checked' : ''; ?>> 특정 wr_id부터</label>
+                                <label><input type="radio" name="delete_mode" value="range_id" <?php echo ($delete_mode === 'range_id') ? 'checked' : ''; ?>> wr_id 구간</label>
+                                <label><input type="radio" name="delete_mode" value="from_date" <?php echo ($delete_mode === 'from_date') ? 'checked' : ''; ?>> 특정 날짜 이후</label>
+                            </div>
+
+                            <div class="spam-clean-mode-fields">
+                                <div class="spam-clean-field" data-mode="from_id">
+                                    <label for="start_id_from">스팸이 시작되는 게시글 wr_id</label><br>
+                                    <input type="number" name="start_id" id="start_id_from" min="1" value="<?php echo $start_id > 0 ? $start_id : ''; ?>" class="frm_input">
+                                    <span class="frm_info">예: 121을 입력하면 121번 일반 게시글부터 미리보기 시점까지 삭제 대상으로 잡습니다.</span>
+                                </div>
+
+                                <div class="spam-clean-field" data-mode="range_id">
+                                    <label>삭제할 게시글 wr_id 구간</label><br>
+                                    <input type="number" name="range_start_id" min="1" value="<?php echo $start_id > 0 ? $start_id : ''; ?>" class="frm_input" placeholder="시작 wr_id">
+                                    ~
+                                    <input type="number" name="range_end_id" min="1" value="<?php echo $end_id > 0 ? $end_id : ''; ?>" class="frm_input" placeholder="종료 wr_id">
+                                    <span class="frm_info">예: 121 ~ 28641 사이의 일반 게시글만 삭제 대상으로 잡습니다.</span>
+                                </div>
+
+                                <div class="spam-clean-field" data-mode="from_date">
+                                    <label for="start_date">스팸이 시작된 날짜/시간</label><br>
+                                    <input type="datetime-local" name="start_date" id="start_date" value="<?php echo spam_clean_h(str_replace(' ', 'T', substr($start_date_raw, 0, 16))); ?>" class="frm_input">
+                                    <span class="frm_info">해당 시각 이후 작성된 일반 게시글을 대상으로 잡습니다.</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row"><label for="exclude_ids">삭제 제외 정상글</label></th>
+                        <td>
+                            <textarea name="exclude_ids" id="exclude_ids" rows="3" style="width:100%;max-width:650px" class="frm_input" placeholder="예: 548, 1921, 8271"><?php echo spam_clean_h($exclude_raw); ?></textarea>
+                            <span class="frm_info">
+                                삭제 범위 안에 정상글이 섞여 있다면 그 일반 게시글의 wr_id를 쉼표/공백으로 입력합니다.<br>
+                                해당 정상글과 그 글에 달린 댓글은 모두 보존됩니다.
+                            </span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <input type="hidden" name="end_id" id="end_id_hidden" value="<?php echo $end_id > 0 ? $end_id : ''; ?>">
+
+            <div class="btn_confirm01 btn_confirm">
+                <button type="submit" class="btn_submit btn">삭제 대상 미리보기</button>
+            </div>
+        </form>
+    </div>
+
+    <?php if (!empty($preview)) { ?>
+        <div class="spam-clean-box spam-clean-info">
+            <h2 class="spam-clean-title">2. 삭제 대상 확인</h2>
+
+            <p>
+                게시판: <strong><?php echo spam_clean_h($preview['board']['bo_subject']); ?></strong>
+                <span class="spam-clean-badge"><?php echo spam_clean_h($bo_table); ?></span><br>
+                삭제 기준: <strong><?php echo spam_clean_h($preview['mode_label']); ?></strong><br>
+                미리보기 스냅샷 최대 wr_id: <strong><?php echo number_format((int) $preview['snapshot_max_wr_id']); ?></strong>
+            </p>
+
+            <div class="spam-clean-grid">
+                <div class="spam-clean-stat">유지 게시글<strong class="spam-clean-safe"><?php echo number_format((int) $preview['keep_write']); ?></strong></div>
+                <div class="spam-clean-stat">삭제 게시글<strong class="spam-clean-danger"><?php echo number_format((int) $preview['delete_write']); ?></strong></div>
+                <div class="spam-clean-stat">유지 댓글<strong class="spam-clean-safe"><?php echo number_format((int) $preview['keep_comment']); ?></strong></div>
+                <div class="spam-clean-stat">삭제 댓글<strong class="spam-clean-danger"><?php echo number_format((int) $preview['delete_comment']); ?></strong></div>
+            </div>
+
+            <?php if ((int) $preview['delete_write'] > 0) { ?>
+                <div class="spam-clean-edge">
+                    <div>
+                        <strong>첫 삭제 대상</strong><br>
+                        #<?php echo (int) $preview['first']['wr_id']; ?>
+                        <?php echo spam_clean_h($preview['first']['wr_subject']); ?><br>
+                        <span class="spam-clean-help">
+                            <?php echo spam_clean_h($preview['first']['wr_name']); ?> /
+                            <?php echo spam_clean_h($preview['first']['wr_datetime']); ?> / IP <?php echo spam_clean_h($preview['first']['wr_ip']); ?>
+                        </span>
+                    </div>
+                    <div>
+                        <strong>마지막 삭제 대상</strong><br>
+                        #<?php echo (int) $preview['last']['wr_id']; ?>
+                        <?php echo spam_clean_h($preview['last']['wr_subject']); ?><br>
+                        <span class="spam-clean-help">
+                            <?php echo spam_clean_h($preview['last']['wr_name']); ?> /
+                            <?php echo spam_clean_h($preview['last']['wr_datetime']); ?> / IP <?php echo spam_clean_h($preview['last']['wr_ip']); ?>
+                        </span>
+                    </div>
+                </div>
+            <?php } ?>
+
+            <?php if ($excluded_rows) { ?>
+                <div class="spam-clean-excluded">
+                    <strong>삭제에서 제외되는 정상글 <?php echo count($excluded_rows); ?>개</strong>
+                    <ul>
+                        <?php foreach ($excluded_rows as $row) { ?>
+                            <li>
+                                #<?php echo (int) $row['wr_id']; ?>
+                                <?php echo spam_clean_h($row['wr_subject']); ?>
+                                <span class="spam-clean-help">(<?php echo spam_clean_h($row['wr_datetime']); ?>)</span>
+                            </li>
+                        <?php } ?>
+                    </ul>
+                </div>
+            <?php } ?>
+
+            <?php if (!empty($preview['ip_block'])) { ?>
+                <div class="spam-clean-box spam-clean-info">
+                    <h3 style="margin-top:0">작성 IP 자동 차단 미리보기</h3>
+                    <p class="spam-clean-help">
+                        삭제 대상 <strong>일반 게시글</strong>의 <span class="spam-clean-code">wr_ip</span>만 수집합니다.
+                        현재 관리자 접속 IP, 환경설정의 접근가능 IP, 사설·예약 IP, 이미 차단된 IP는 자동 제외합니다.
+                    </p>
+                    <div class="spam-clean-grid">
+                        <div class="spam-clean-stat">고유 작성 IP<strong><?php echo number_format((int) $preview['ip_block']['source_count']); ?></strong></div>
+                        <div class="spam-clean-stat">새 차단 후보<strong class="spam-clean-danger"><?php echo number_format(count($preview['ip_block']['to_add'])); ?></strong></div>
+                        <div class="spam-clean-stat">이미 차단됨<strong><?php echo number_format(count($preview['ip_block']['already_blocked'])); ?></strong></div>
+                        <div class="spam-clean-stat">보호·제외 IP<strong><?php echo number_format(count($preview['ip_block']['trusted']) + count($preview['ip_block']['current']) + count($preview['ip_block']['invalid_private'])); ?></strong></div>
+                    </div>
+                    <?php if (!empty($preview['ip_block_sample'])) { ?>
+                        <p class="spam-clean-help">
+                            차단 후보 예시: <span class="spam-clean-code"><?php echo spam_clean_h(implode(', ', $preview['ip_block_sample'])); ?></span>
+                            <?php if (count($preview['ip_block']['to_add']) > count($preview['ip_block_sample'])) { ?> 외 <?php echo number_format(count($preview['ip_block']['to_add']) - count($preview['ip_block_sample'])); ?>개<?php } ?>
+                        </p>
+                    <?php } ?>
+                    <p class="spam-clean-help">
+                        <strong>주의:</strong> 모바일망·회사망·VPN처럼 하나의 공인 IP를 여러 사람이 공유하는 환경에서는 정상 방문자까지 차단될 수 있습니다.
+                        또한 스팸봇이 IP를 계속 바꾸면 IP 차단만으로 완전히 막히지는 않습니다.
+                    </p>
+                </div>
+            <?php } ?>
+
+
+            <?php if (!empty($preview['subnet_analysis']['supernet_rows'])) { ?>
+                <div class="spam-clean-box spam-clean-warn">
+                    <h3 style="margin-top:0">상위 IP 대역 분석 (/16)</h3>
+                    <p class="spam-clean-help">
+                        같은 앞 2옥텟 아래에서 /24 후보가 <strong><?php echo (int) $preview['subnet_analysis']['supernet_threshold']; ?>개 이상</strong> 발견되면
+                        <span class="spam-clean-code">49.254.+</span> 같은 상위 대역 후보를 표시합니다.<br>
+                        /16은 최대 65,536개 IPv4 주소 범위를 포괄하므로 <strong>유지 정상글, 현재 관리자 IP, 접근가능 IP와 충돌이 없는 경우에만</strong> 검토 가능으로 표시합니다.
+                    </p>
+                    <div class="tbl_head01 tbl_wrap">
+                        <table class="spam-clean-table">
+                            <thead>
+                            <tr>
+                                <th>상위 대역</th>
+                                <th>반복 /24</th>
+                                <th>스팸 고유 IP</th>
+                                <th>스팸 글</th>
+                                <th>유지 정상글</th>
+                                <th>판정</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($preview['subnet_analysis']['supernet_rows'] as $subnet) { ?>
+                                <tr>
+                                    <td><strong class="spam-clean-code"><?php echo spam_clean_h($subnet['rule']); ?></strong></td>
+                                    <td>
+                                        <strong><?php echo number_format((int) $subnet['spam_subnet_count']); ?></strong>개
+                                        <br><span class="spam-clean-help"><?php echo spam_clean_h(implode(', ', array_slice($subnet['spam_subnets'], 0, 6))); ?><?php if (count($subnet['spam_subnets']) > 6) { ?> 외 <?php echo number_format(count($subnet['spam_subnets']) - 6); ?>개<?php } ?></span>
+                                    </td>
+                                    <td><?php echo number_format((int) $subnet['spam_unique_count']); ?>개</td>
+                                    <td><?php echo number_format((int) $subnet['spam_post_count']); ?>개</td>
+                                    <td>
+                                        <?php if ((int) $subnet['keep_post_count'] > 0) { ?>
+                                            <strong class="spam-clean-danger"><?php echo number_format((int) $subnet['keep_post_count']); ?>개</strong>
+                                        <?php } else { ?>
+                                            <strong class="spam-clean-safe">0개</strong>
+                                        <?php } ?>
+                                    </td>
+                                    <td>
+                                        <?php if (!empty($subnet['safe'])) { ?>
+                                            <strong class="spam-clean-safe">상위 대역 검토 가능</strong><br>
+                                            <span class="spam-clean-help">선택 시 하위 /24와 개별 IP는 중복 추가하지 않음</span>
+                                        <?php } else { ?>
+                                            <strong class="spam-clean-danger">/16 차단 비추천</strong><br>
+                                            <span class="spam-clean-help"><?php echo spam_clean_h($subnet['reason']); ?></span>
+                                        <?php } ?>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="spam-clean-help">
+                        <strong>주의:</strong> <span class="spam-clean-code">49.254.+</span>는 <span class="spam-clean-code">49.254.0.0 ~ 49.254.255.255</span> 범위입니다.
+                        반드시 실제 스팸 패턴을 확인한 뒤 선택하세요.
+                    </p>
+                </div>
+            <?php } ?>
+
+            <?php if (!empty($preview['subnet_analysis']['rows'])) { ?>
+                <div class="spam-clean-box spam-clean-info">
+                    <h3 style="margin-top:0">세부 반복 IP 대역 분석 (/24)</h3>
+                    <p class="spam-clean-help">
+                        같은 공인 IPv4 앞 3옥텟(/24)에서 삭제 대상 일반 게시글이 합계 <strong><?php echo (int) $preview['subnet_analysis']['threshold']; ?>개 이상</strong> 발견된 경우만 표시합니다. 동일 IP가 작성한 여러 글도 합산하며 댓글은 제외합니다.
+                        위에서 안전한 /16 상위 대역이 발견된 경우, 최종 실행에서는 상위 대역을 선택하면 그 안의 /24와 개별 IP를 중복 등록하지 않습니다.
+                    </p>
+                    <div class="tbl_head01 tbl_wrap">
+                        <table class="spam-clean-table">
+                            <thead>
+                            <tr>
+                                <th>대역</th>
+                                <th>스팸 고유 IP</th>
+                                <th>스팸 글</th>
+                                <th>유지 정상글</th>
+                                <th>판정</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($preview['subnet_analysis']['rows'] as $subnet) { ?>
+                                <tr>
+                                    <td><span class="spam-clean-code"><?php echo spam_clean_h($subnet['rule']); ?></span></td>
+                                    <td>
+                                        <strong><?php echo number_format((int) $subnet['spam_unique_count']); ?></strong>개
+                                        <br><span class="spam-clean-help"><?php echo spam_clean_h(implode(', ', array_slice($subnet['spam_ips'], 0, 5))); ?><?php if (count($subnet['spam_ips']) > 5) { ?> 외 <?php echo number_format(count($subnet['spam_ips']) - 5); ?>개<?php } ?></span>
+                                    </td>
+                                    <td><?php echo number_format((int) $subnet['spam_post_count']); ?>개</td>
+                                    <td>
+                                        <?php if ((int) $subnet['keep_post_count'] > 0) { ?>
+                                            <strong class="spam-clean-danger"><?php echo number_format((int) $subnet['keep_post_count']); ?>개</strong>
+                                        <?php } else { ?>
+                                            <strong class="spam-clean-safe">0개</strong>
+                                        <?php } ?>
+                                    </td>
+                                    <td>
+                                        <?php if (!empty($subnet['safe'])) { ?>
+                                            <strong class="spam-clean-safe">검토 가능</strong><br>
+                                            <span class="spam-clean-help">정상글/관리자/접근허용 IP 충돌 없음</span>
+                                        <?php } else { ?>
+                                            <strong class="spam-clean-danger">대역 차단 비추천</strong><br>
+                                            <span class="spam-clean-help"><?php echo spam_clean_h($subnet['reason']); ?></span>
+                                        <?php } ?>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="spam-clean-help">
+                        <strong>주의:</strong> <span class="spam-clean-code">116.48.41.+</span>는 116.48.41.0~255 수준의 차단입니다.
+                        통신사 NAT, 회사망, VPN 등에서는 정상 이용자가 같은 대역을 사용할 수 있으므로 최종 선택은 반드시 사람이 판단하세요.
+                    </p>
+                </div>
+            <?php } ?>
+
+            <?php if ((int) $preview['member_rows'] > 0) { ?>
+                <div class="spam-clean-box spam-clean-warn">
+                    <strong class="spam-clean-danger">주의:</strong>
+                    삭제 대상 게시글/댓글 중 회원 ID가 기록된 행이
+                    <strong><?php echo number_format((int) $preview['member_rows']); ?>건</strong> 있습니다.
+                    v7도 회원 포인트 내역은 조정하지 않습니다.
+                </div>
+            <?php } ?>
+
+            <h3>삭제 예정 게시글 샘플 (최근 wr_id 기준 10개)</h3>
+            <div class="tbl_head01 tbl_wrap">
+                <table class="spam-clean-table">
+                    <thead>
+                    <tr>
+                        <th>wr_id</th>
+                        <th>제목</th>
+                        <th>작성자</th>
+                        <th>회원ID</th>
+                        <th>IP</th>
+                        <th>작성일</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php if ($preview_rows) { ?>
+                        <?php foreach ($preview_rows as $row) { ?>
+                            <tr>
+                                <td><?php echo (int) $row['wr_id']; ?></td>
+                                <td><?php echo spam_clean_h($row['wr_subject']); ?></td>
+                                <td><?php echo spam_clean_h($row['wr_name']); ?></td>
+                                <td><?php echo spam_clean_h($row['mb_id']); ?></td>
+                                <td><?php echo spam_clean_h($row['wr_ip']); ?></td>
+                                <td><?php echo spam_clean_h($row['wr_datetime']); ?></td>
+                            </tr>
+                        <?php } ?>
+                    <?php } else { ?>
+                        <tr><td colspan="6">삭제 대상 게시글이 없습니다.</td></tr>
+                    <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <?php if ((int) $preview['delete_write'] > 0) { ?>
+                <div class="spam-clean-confirm">
+                    <h3>3. 최종 실행</h3>
+                    <p>
+                        <strong class="spam-clean-danger">
+                            게시글 <?php echo number_format((int) $preview['delete_write']); ?>개 +
+                            해당 게시글의 댓글 <?php echo number_format((int) $preview['delete_comment']); ?>개
+                        </strong>가 삭제됩니다.<br>
+                        삭제 전 DB 백업 테이블을 자동 생성합니다. 아래 칸에 <strong>정리실행</strong>을 입력하세요.
+                    </p>
+
+                    <form method="post" action="./spam_cleanup.php" id="spamDeleteForm">
+                        <input type="hidden" name="action_mode" value="delete">
+                        <input type="hidden" name="bo_table" value="<?php echo spam_clean_h($bo_table); ?>">
+                        <input type="hidden" name="delete_mode" value="<?php echo spam_clean_h($delete_mode); ?>">
+                        <input type="hidden" name="start_id" value="<?php echo (int) $start_id; ?>">
+                        <input type="hidden" name="end_id" value="<?php echo (int) $end_id; ?>">
+                        <input type="hidden" name="start_date" value="<?php echo spam_clean_h($start_date_raw); ?>">
+                        <input type="hidden" name="exclude_ids" value="<?php echo spam_clean_h($exclude_raw); ?>">
+                        <input type="hidden" name="snapshot_max_wr_id" value="<?php echo (int) $preview['snapshot_max_wr_id']; ?>">
+                        <input type="hidden" name="preview_delete_write" value="<?php echo (int) $preview['delete_write']; ?>">
+                        <input type="hidden" name="token" value="<?php echo spam_clean_h(get_admin_token()); ?>">
+                        <!-- max_input_vars 방지: 수천 개 체크박스를 직접 POST하지 않고 구분자 문자열 1개로 전송 -->
+                        <input type="hidden" name="block_subnets_packed" id="block_subnets_packed" value="">
+
+                        <?php
+                        $has_exact_candidates = !empty($preview['ip_block']) && count($preview['ip_block']['to_add']) > 0;
+                        $safe_subnets = array();
+
+                        // /16 상위 대역을 먼저 표시합니다.
+                        if (!empty($preview['subnet_analysis']['supernet_rows'])) {
+                            foreach ($preview['subnet_analysis']['supernet_rows'] as $subnet) {
+                                if (!empty($subnet['safe'])) {
+                                    $safe_subnets[] = $subnet;
+                                }
+                            }
+                        }
+                        if (!empty($preview['subnet_analysis']['rows'])) {
+                            foreach ($preview['subnet_analysis']['rows'] as $subnet) {
+                                if (!empty($subnet['safe'])) {
+                                    $safe_subnets[] = $subnet;
+                                }
+                            }
+                        }
+                        ?>
+
+                        <?php if ($has_exact_candidates || !empty($safe_subnets)) { ?>
+                            <div style="margin:12px 0;padding:14px;border:1px solid #f0c88a;background:#fffaf0;border-radius:6px">
+                                <strong>접근차단 적용 항목 검토</strong>
+
+                                <?php if ($has_exact_candidates) { ?>
+                                    <p style="margin:10px 0">
+                                        <label>
+                                            <input type="checkbox" name="auto_block_ip" value="1">
+                                            <strong>삭제 대상의 개별 공인 IP도 차단</strong>
+                                            (현재 후보 <?php echo number_format(count($preview['ip_block']['to_add'])); ?>개)
+                                        </label><br>
+                                        <span class="spam-clean-help">
+                                            선택한 /16·/24 대역 안의 IP는 개별 항목으로 중복 등록하지 않습니다.
+                                        </span>
+                                    </p>
+                                <?php } ?>
+
+                                <?php if (!empty($safe_subnets)) { ?>
+                                    <div style="margin-top:14px;padding-top:12px;border-top:1px solid #ead9b9">
+                                        <strong>대역 차단 후보 — 검토 후 직접 선택</strong>
+                                        <p class="spam-clean-help" style="margin:6px 0 10px">
+                                            <strong>/16 상위 후보가 있는 경우 /24 여러 개 대신 상위 대역 하나를 선택할 수 있습니다.</strong><br>
+                                            아래의 “최적 전체 선택”은 안전한 /16이 있는 그룹에서는 /16만 선택하고, 나머지 그룹만 /24를 선택합니다.
+                                        </p>
+
+                                        <label style="display:inline-flex;align-items:center;gap:6px;margin:0 0 8px;padding:7px 10px;background:#f7f2e8;border:1px solid #dfcfae;border-radius:5px;font-weight:bold;cursor:pointer">
+                                            <input type="checkbox" id="block_subnets_all">
+                                            최적 전체 선택
+                                            <span class="spam-clean-help">(검토 가능 <?php echo number_format(count($safe_subnets)); ?>개)</span>
+                                        </label>
+                                        <span id="block_subnets_selected_count" class="spam-clean-help" style="margin-left:8px">선택 0개</span>
+
+                                        <?php foreach ($safe_subnets as $subnet) { ?>
+                                            <?php
+                                            $subnet_level = isset($subnet['level']) ? (int) $subnet['level'] : 24;
+                                            $parent16 = isset($subnet['parent16']) ? $subnet['parent16'] : '';
+                                            $is_supernet = ($subnet_level === 16);
+                                            ?>
+                                            <label style="display:block;margin:8px 0;padding:9px;background:<?php echo $is_supernet ? '#fff2d6' : '#fff'; ?>;border:1px solid <?php echo $is_supernet ? '#e7b95f' : '#e4d6bc'; ?>;border-radius:5px">
+                                                <input
+                                                    type="checkbox"
+                                                    class="spam-clean-subnet-checkbox"
+                                                    value="<?php echo spam_clean_h($subnet['rule']); ?>"
+                                                    data-level="<?php echo $subnet_level; ?>"
+                                                    data-group16="<?php echo spam_clean_h($parent16); ?>"
+                                                >
+                                                <?php if ($is_supernet) { ?>
+                                                    <strong style="display:inline-block;margin-right:5px;color:#b45f00">[상위 /16 추천]</strong>
+                                                <?php } ?>
+                                                <strong class="spam-clean-code"><?php echo spam_clean_h($subnet['rule']); ?></strong>
+                                                <?php if ($is_supernet) { ?>
+                                                    — 반복 /24 <?php echo number_format((int) $subnet['spam_subnet_count']); ?>개 /
+                                                <?php } else { ?>
+                                                    — 서로 다른 스팸 IP <?php echo number_format((int) $subnet['spam_unique_count']); ?>개 /
+                                                <?php } ?>
+                                                스팸 글 <?php echo number_format((int) $subnet['spam_post_count']); ?>개 /
+                                                유지 정상글 0개
+                                            </label>
+                                        <?php } ?>
+                                    </div>
+                                <?php } ?>
+
+                                <span class="spam-clean-help">
+                                    선택한 항목은 그누보드 환경설정의 <span class="spam-clean-code">cf_intercept_ip</span>에 추가되며,
+                                    상위 규칙에 포함되는 하위 대역/개별 IP는 이번 작업에서 중복 추가하지 않습니다.
+                                    백업 복원 시 이번 작업에서 실제 추가한 항목만 선택적으로 해제할 수 있습니다.
+                                </span>
+                            </div>
+                        <?php } ?>
+
+                        <label for="confirm_text">
+                            확인 문구
+                            <input type="text" name="confirm_text" id="confirm_text" required autocomplete="off" class="frm_input" placeholder="정리실행">
+                        </label>
+
+                        <button type="submit" class="btn_submit btn">백업 후 스팸 정리 실행</button>
+                    </form>
+                </div>
+            <?php } ?>
+        </div>
+    <?php } ?>
+
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    var form = document.getElementById('spamPreviewForm');
+    if (!form) return;
+
+    var radios = form.querySelectorAll('input[name="delete_mode"]');
+    var fields = form.querySelectorAll('.spam-clean-field');
+    var fromInput = document.getElementById('start_id_from');
+    var rangeStart = form.querySelector('input[name="range_start_id"]');
+    var rangeEnd = form.querySelector('input[name="range_end_id"]');
+    var hiddenEnd = document.getElementById('end_id_hidden');
+    var dateInput = document.getElementById('start_date');
+
+    function currentMode() {
+        for (var i = 0; i < radios.length; i++) {
+            if (radios[i].checked) return radios[i].value;
+        }
+        return 'from_id';
+    }
+
+    function syncMode() {
+        var mode = currentMode();
+
+        for (var i = 0; i < fields.length; i++) {
+            if (fields[i].getAttribute('data-mode') === mode) {
+                fields[i].classList.add('is-active');
+            } else {
+                fields[i].classList.remove('is-active');
+            }
+        }
+
+        if (fromInput) fromInput.required = (mode === 'from_id');
+        if (rangeStart) rangeStart.required = (mode === 'range_id');
+        if (rangeEnd) rangeEnd.required = (mode === 'range_id');
+        if (dateInput) dateInput.required = (mode === 'from_date');
+    }
+
+    for (var i = 0; i < radios.length; i++) {
+        radios[i].addEventListener('change', syncMode);
+    }
+
+    form.addEventListener('submit', function (e) {
+        var mode = currentMode();
+
+        if (mode === 'range_id') {
+            if (!rangeStart || !rangeEnd || !rangeStart.value || !rangeEnd.value) {
+                e.preventDefault();
+                alert('삭제할 wr_id 시작값과 종료값을 모두 입력해주세요.');
+                return;
+            }
+
+            if (parseInt(rangeStart.value, 10) > parseInt(rangeEnd.value, 10)) {
+                e.preventDefault();
+                alert('wr_id 시작값은 종료값보다 클 수 없습니다.');
+                return;
+            }
+
+            // 서버는 공통 start_id/end_id를 읽으므로 제출 직전에 값 동기화
+            if (fromInput) fromInput.value = rangeStart.value;
+            if (hiddenEnd) hiddenEnd.value = rangeEnd.value;
+        } else {
+            if (hiddenEnd) hiddenEnd.value = '';
+        }
+    });
+
+    syncMode();
+})();
+
+// /16·/24 대역 차단 후보 선택 + max_input_vars 방지 packed 전송
+(function () {
+    'use strict';
+
+    var deleteForm = document.getElementById('spamDeleteForm');
+    if (!deleteForm) return;
+
+    var selectAll = document.getElementById('block_subnets_all');
+    var subnetCheckboxes = document.querySelectorAll('.spam-clean-subnet-checkbox');
+    var selectedCount = document.getElementById('block_subnets_selected_count');
+    var packedInput = document.getElementById('block_subnets_packed');
+
+    function getLevel(el) {
+        return parseInt(el.getAttribute('data-level') || '24', 10);
+    }
+
+    function getGroup16(el) {
+        return el.getAttribute('data-group16') || '';
+    }
+
+    function getBroadGroups() {
+        var groups = {};
+        for (var i = 0; i < subnetCheckboxes.length; i++) {
+            if (getLevel(subnetCheckboxes[i]) === 16) {
+                groups[getGroup16(subnetCheckboxes[i])] = true;
+            }
+        }
+        return groups;
+    }
+
+    // 같은 /16 그룹에 안전한 상위 후보가 있으면 /16 하나만 선택하고,
+    // 상위 후보가 없는 그룹만 /24 후보를 선택합니다.
+    function isSmartTarget(el, broadGroups) {
+        var level = getLevel(el);
+        var group = getGroup16(el);
+        if (level === 16) return true;
+        return !broadGroups[group];
+    }
+
+    function syncSubnetSelectionState() {
+        var checkedCount = 0;
+        var broadGroups = getBroadGroups();
+        var smartAll = subnetCheckboxes.length > 0;
+
+        for (var i = 0; i < subnetCheckboxes.length; i++) {
+            var el = subnetCheckboxes[i];
+            if (el.checked) checkedCount++;
+            if (el.checked !== isSmartTarget(el, broadGroups)) {
+                smartAll = false;
+            }
+        }
+
+        if (selectAll) {
+            selectAll.checked = smartAll;
+            selectAll.indeterminate = checkedCount > 0 && !smartAll;
+        }
+
+        if (selectedCount) {
+            selectedCount.textContent = '선택 ' + checkedCount.toLocaleString() + '개';
+        }
+    }
+
+    function applyHierarchy(changed) {
+        if (!changed || !changed.checked) return;
+
+        var level = getLevel(changed);
+        var group = getGroup16(changed);
+        if (!group) return;
+
+        for (var i = 0; i < subnetCheckboxes.length; i++) {
+            var other = subnetCheckboxes[i];
+            if (other === changed || getGroup16(other) !== group) continue;
+
+            if (level === 16 && getLevel(other) === 24) {
+                other.checked = false;
+            }
+            if (level === 24 && getLevel(other) === 16) {
+                other.checked = false;
+            }
+        }
+    }
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            var broadGroups = getBroadGroups();
+            for (var i = 0; i < subnetCheckboxes.length; i++) {
+                subnetCheckboxes[i].checked = selectAll.checked
+                    ? isSmartTarget(subnetCheckboxes[i], broadGroups)
+                    : false;
+            }
+            syncSubnetSelectionState();
+        });
+    }
+
+    for (var i = 0; i < subnetCheckboxes.length; i++) {
+        subnetCheckboxes[i].addEventListener('change', function () {
+            applyHierarchy(this);
+            syncSubnetSelectionState();
+        });
+    }
+
+    deleteForm.addEventListener('submit', function (e) {
+        var selected = [];
+        for (var i = 0; i < subnetCheckboxes.length; i++) {
+            if (subnetCheckboxes[i].checked) {
+                selected.push(subnetCheckboxes[i].value);
+            }
+        }
+
+        // 체크박스에는 name을 두지 않고, 서버로는 packed 1개 값만 전송합니다.
+        if (packedInput) {
+            packedInput.value = selected.join('|');
+        }
+
+        if (!confirm('미리보기에서 확인한 게시글과 해당 댓글을 정리합니다.\n자동 백업 후 실행됩니다.\n\n계속하시겠습니까?')) {
+            e.preventDefault();
+        }
+    });
+
+    syncSubnetSelectionState();
+})();
+
+// v7 대용량 배치 작업: 한 요청에 소량만 백업/삭제하고 다음 요청을 이어서 실행합니다.
+(function () {
+    'use strict';
+
+    var panel = document.getElementById('spamJobPanel');
+    if (!panel) return;
+    if (panel.getAttribute('data-status') !== 'running') return;
+
+    var jobId = panel.getAttribute('data-job-id');
+    var jobKey = panel.getAttribute('data-job-key');
+    var bar = document.getElementById('spamJobBar');
+    var processedEl = document.getElementById('spamJobProcessed');
+    var percentEl = document.getElementById('spamJobPercent');
+    var statusEl = document.getElementById('spamJobStatus');
+    var messageEl = document.getElementById('spamJobMessage');
+    var pauseBtn = document.getElementById('spamJobPause');
+    var paused = false;
+    var retryCount = 0;
+
+    function setMessage(text) {
+        if (messageEl) messageEl.textContent = text;
+    }
+
+    function schedule(ms) {
+        if (!paused) window.setTimeout(runBatch, ms || 250);
+    }
+
+    function runBatch() {
+        if (paused) return;
+
+        var body = 'action_mode=batch&job_id=' + encodeURIComponent(jobId) + '&job_key=' + encodeURIComponent(jobKey);
+        fetch('./spam_cleanup.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+            body: body,
+            cache: 'no-store'
+        })
+        .then(function (res) { return res.text(); })
+        .then(function (text) {
+            var data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                throw new Error('서버 응답을 JSON으로 읽지 못했습니다. 잠시 후 다시 시도합니다.');
+            }
+
+            if (!data.ok) {
+                paused = true;
+                if (statusEl) statusEl.textContent = 'failed';
+                setMessage('작업 중단: ' + (data.message || '알 수 없는 오류'));
+                if (pauseBtn) pauseBtn.textContent = '자동 진행 재개';
+                return;
+            }
+
+            retryCount = 0;
+            if (data.busy) {
+                setMessage('이전 배치가 아직 처리 중입니다. 잠시 기다리는 중...');
+                schedule(1200);
+                return;
+            }
+
+            if (data.done) {
+                if (bar) bar.style.width = '100%';
+                if (percentEl) percentEl.textContent = '100%';
+                if (statusEl) statusEl.textContent = 'done';
+                setMessage('정리 완료. 결과 화면으로 이동합니다.');
+                window.location.href = data.redirect || './spam_cleanup.php?done=1';
+                return;
+            }
+
+            var percent = typeof data.percent !== 'undefined' ? data.percent : 0;
+            if (bar) bar.style.width = percent + '%';
+            if (processedEl) processedEl.textContent = Number(data.processed_write || 0).toLocaleString();
+            if (percentEl) percentEl.textContent = percent + '%';
+            if (statusEl) statusEl.textContent = 'running';
+            setMessage('배치 ' + Number(data.batch || 0).toLocaleString() + '개 처리 완료 — 다음 배치 진행 중...');
+            schedule(200);
+        })
+        .catch(function (err) {
+            retryCount++;
+            setMessage('일시적인 통신/서버 응답 오류: ' + err.message + ' (재시도 ' + retryCount + '/5)');
+            if (retryCount >= 5) {
+                paused = true;
+                if (pauseBtn) pauseBtn.textContent = '자동 진행 재개';
+                setMessage('자동 재시도를 멈췄습니다. DB 작업이 끝난 뒤 “자동 진행 재개”를 눌러 이어서 실행하세요.');
+                return;
+            }
+            schedule(3000 * retryCount);
+        });
+    }
+
+    if (pauseBtn) {
+        pauseBtn.addEventListener('click', function () {
+            paused = !paused;
+            if (paused) {
+                pauseBtn.textContent = '자동 진행 재개';
+                setMessage('브라우저의 다음 배치 요청을 잠시 멈췄습니다. 현재 실행 중인 배치가 있다면 그 배치만 마무리됩니다.');
+            } else {
+                retryCount = 0;
+                pauseBtn.textContent = '브라우저 자동 진행 잠시 멈춤';
+                setMessage('자동 진행을 재개합니다.');
+                runBatch();
+            }
+        });
+    }
+
+    schedule(400);
+})();
+</script>
+
+<?php
+require_once './admin.tail.php';

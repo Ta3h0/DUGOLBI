@@ -1,5 +1,5 @@
 <?php
-// Step 1: authenticated board metadata lookup only. No writes or uploads.
+// Authenticated board/post list lookup only. No writes or uploads.
 require_once __DIR__ . '/auth.php';
 dugolbiAdminRequireLogin(true);
 header('Content-Type: application/json; charset=UTF-8');
@@ -17,6 +17,21 @@ function dugolbiBoardFailure(string $code, string $message, int $status = 503): 
     http_response_code($status);
     echo json_encode(['ok' => false, 'code' => $code, 'message' => $message], JSON_UNESCAPED_UNICODE);
     exit;
+}
+
+$action = $_GET['action'] ?? 'boards';
+if (!is_string($action) || !in_array($action, ['boards', 'posts'], true)) {
+    dugolbiBoardFailure('INVALID_REQUEST', '지원하지 않는 조회 요청입니다.', 400);
+}
+if ($action === 'posts') {
+    $requestedBoard = $_GET['board'] ?? '';
+    $requestedQuery = $_GET['q'] ?? '';
+    $requestedPage = $_GET['page'] ?? '1';
+    if (!is_string($requestedBoard) || !preg_match('/\A[A-Za-z0-9_]{1,20}\z/', $requestedBoard)
+        || !is_string($requestedQuery) || strlen($requestedQuery) > 300
+        || !is_string($requestedPage) || !preg_match('/\A[1-9][0-9]{0,8}\z/', $requestedPage)) {
+        dugolbiBoardFailure('INVALID_REQUEST', '게시판, 검색어 또는 페이지 값을 확인해주세요.', 400);
+    }
 }
 
 $boardPath = dirname(__DIR__) . '/board';
@@ -76,6 +91,10 @@ try {
     dugolbiBoardFailure('DB_CONNECTION_FAILED', 'DB에 연결하지 못했습니다. 기존 그누보드 접속 상태와 서버 DB 설정을 확인해주세요.');
 }
 try {
+    if ($action === 'posts') {
+        require __DIR__ . '/posts-query.php';
+        exit;
+    }
     $result = $db->query("SELECT b.bo_table, b.bo_subject, b.gr_id,
         COALESCE(g.gr_subject, '') AS group_name,
         b.bo_count_write, b.bo_count_comment,

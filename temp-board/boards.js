@@ -3,7 +3,7 @@
     const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     let destroy = () => {};
     window.dugolbiBoards = {
-        unmount() { destroy(); destroy = () => {}; },
+        unmount() { destroy(); destroy = () => {}; window.dugolbiBoardPosts?.unmount(); },
         mount(root) {
             this.unmount();
             const controller = new AbortController();
@@ -27,7 +27,7 @@
                     <td data-label="그룹">${escape(item.groupName || '그룹 미지정')}</td>
                     <td data-label="게시글 / 댓글">게시글 ${Number(item.postCount).toLocaleString('ko-KR')}개<small class="admin-cell-sub">댓글 ${Number(item.commentCount).toLocaleString('ko-KR')}개</small></td>
                     <td data-label="권한 레벨">목록 ${Number(item.listLevel)} · 읽기 ${Number(item.readLevel)} · 쓰기 ${Number(item.writeLevel)}</td>
-                    <td data-label="확인"><a class="admin-button" href="/board/bbs/board.php?bo_table=${encodeURIComponent(item.id)}" target="_blank" rel="noopener noreferrer">게시판 보기 ↗</a></td></tr>`).join('')}</tbody></table></div>` : `<div class="admin-empty"><h2>${query || group ? '조건에 맞는 게시판이 없습니다.' : '등록된 게시판이 없습니다.'}</h2><p>${query || group ? '검색어나 그룹을 변경해주세요.' : 'DB 연결은 정상이며 게시판 목록이 비어 있습니다.'}</p></div>`;
+                    <td data-label="확인"><button class="admin-button" type="button" data-board-posts="${escape(item.id)}">게시글 목록</button></td></tr>`).join('')}</tbody></table></div>` : `<div class="admin-empty"><h2>${query || group ? '조건에 맞는 게시판이 없습니다.' : '등록된 게시판이 없습니다.'}</h2><p>${query || group ? '검색어나 그룹을 변경해주세요.' : 'DB 연결은 정상이며 게시판 목록이 비어 있습니다.'}</p></div>`;
                 const start = Math.max(1, Math.min(page - 2, pages - 4));
                 find('[data-board-pagination]').innerHTML = pages > 1 ? `<span>검색 결과 ${items.length}개</span><div><button data-board-page="${page - 1}" aria-label="이전 페이지" ${page === 1 ? 'disabled' : ''}>‹</button>${Array.from({ length: Math.min(5, pages) }, (_, i) => start + i).map(i => `<button data-board-page="${i}" ${i === page ? 'class="is-active" aria-current="page"' : ''} aria-label="${i}페이지">${i}</button>`).join('')}<button data-board-page="${page + 1}" aria-label="다음 페이지" ${page === pages ? 'disabled' : ''}>›</button></div>` : items.length ? `<span>${items.length}개 표시</span>` : '';
             };
@@ -62,6 +62,12 @@
                 } finally { clearTimeout(timeout); loading = false; if (active) button.disabled = false; }
             };
             root.addEventListener('click', event => {
+                const posts = event.target.closest('[data-board-posts]');
+                if (posts) {
+                    const selected = boards.find(item => item.id === posts.dataset.boardPosts);
+                    if (selected) { this.unmount(); window.dugolbiBoardPosts.mount(root, selected, () => this.mount(root)); }
+                    return;
+                }
                 if (event.target.closest('[data-board-refresh]')) {
                     // A timed-out request's signal cannot be reused; remount for a fresh request.
                     this.mount(root); return;
