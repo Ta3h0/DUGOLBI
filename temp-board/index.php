@@ -15,6 +15,7 @@ dugolbiAdminRequireLogin();
     <script src="../js/modify.js" defer></script>
     <script src="seed.php" defer></script>
     <script src="board-settings.js?v=<?= filemtime(__DIR__ . '/board-settings.js') ?>" defer></script>
+    <script src="board-lifecycle.js?v=<?= filemtime(__DIR__ . '/board-lifecycle.js') ?>" defer></script>
     <script src="boards.js?v=<?= filemtime(__DIR__ . '/boards.js') ?>" defer></script>
     <script src="post-editor.js?v=<?= filemtime(__DIR__ . '/post-editor.js') ?>" defer></script>
     <script src="posts.js?v=<?= filemtime(__DIR__ . '/posts.js') ?>" defer></script>

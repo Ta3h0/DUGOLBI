@@ -3,14 +3,14 @@
     const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     let destroy = () => {};
     window.dugolbiBoards = {
-        unmount() { destroy(); destroy = () => {}; window.dugolbiBoardPosts?.unmount(); window.dugolbiBoardSettings?.dispose(); },
+        unmount() { destroy(); destroy = () => {}; window.dugolbiBoardPosts?.unmount(); window.dugolbiBoardSettings?.dispose(); window.dugolbiBoardLifecycle?.dispose(); },
         mount(root) {
             this.unmount();
             const controller = new AbortController();
             const requestController = new AbortController();
             let active = true, loading = false, boards = [], query = '', group = '', page = 1;
             destroy = () => { active = false; controller.abort(); requestController.abort(); };
-            root.innerHTML = `<div class="admin-page-heading"><div><h1>게시판 관리</h1><p>운영 그누보드에 등록된 게시판을 확인하세요.</p></div><div class="admin-heading-actions"><button type="button" class="admin-button" data-board-refresh>다시 불러오기</button></div></div>
+            root.innerHTML = `<div class="admin-page-heading"><div><h1>게시판 관리</h1><p>운영 그누보드에 등록된 게시판을 확인하세요.</p></div><div class="admin-heading-actions"><button type="button" class="admin-button" data-board-refresh>다시 불러오기</button><button type="button" class="admin-button admin-primary" data-board-create disabled>게시판 추가</button></div></div>
                 <p class="admin-board-note">게시글과 게시판 설정을 관리할 수 있습니다. 저장한 변경 내용은 운영 게시판에 반영됩니다.</p><p class="admin-board-note" data-board-operation-status role="status" hidden></p>
                 <section class="admin-panel admin-list-panel"><div data-board-status role="status" aria-live="polite" aria-atomic="true"></div>
                 <div class="admin-list-toolbar" data-board-toolbar hidden><div class="admin-list-summary">게시판 <strong data-board-count>0</strong>개</div><div class="admin-list-controls"><label class="admin-search"><input type="search" data-board-search placeholder="게시판 이름, ID 검색" aria-label="게시판 검색"></label><select data-board-group aria-label="게시판 그룹 필터"><option value="">모든 그룹</option></select></div></div>
@@ -27,7 +27,7 @@
                     <td data-label="그룹">${escape(item.groupName || '그룹 미지정')}</td>
                     <td data-label="게시글 / 댓글">게시글 ${Number(item.postCount).toLocaleString('ko-KR')}개<small class="admin-cell-sub">댓글 ${Number(item.commentCount).toLocaleString('ko-KR')}개</small></td>
                     <td data-label="권한 레벨">목록 ${Number(item.listLevel)} · 읽기 ${Number(item.readLevel)} · 쓰기 ${Number(item.writeLevel)}</td>
-                    <td data-label="확인"><div class="admin-board-actions"><button class="admin-button" type="button" data-board-posts="${escape(item.id)}">게시글 목록</button><button class="admin-button" type="button" data-board-settings="${escape(item.id)}">설정</button></div></td></tr>`).join('')}</tbody></table></div>` : `<div class="admin-empty"><h2>${query || group ? '조건에 맞는 게시판이 없습니다.' : '등록된 게시판이 없습니다.'}</h2><p>${query || group ? '검색어나 그룹을 변경해주세요.' : 'DB 연결은 정상이며 게시판 목록이 비어 있습니다.'}</p></div>`;
+                    <td data-label="확인"><div class="admin-board-actions"><button class="admin-button" type="button" data-board-posts="${escape(item.id)}">게시글 목록</button><button class="admin-button" type="button" data-board-settings="${escape(item.id)}">설정</button><button class="admin-delete-button" type="button" data-board-remove="${escape(item.id)}">삭제</button></div></td></tr>`).join('')}</tbody></table></div>` : `<div class="admin-empty"><h2>${query || group ? '조건에 맞는 게시판이 없습니다.' : '등록된 게시판이 없습니다.'}</h2><p>${query || group ? '검색어나 그룹을 변경해주세요.' : 'DB 연결은 정상이며 게시판 목록이 비어 있습니다.'}</p></div>`;
                 const start = Math.max(1, Math.min(page - 2, pages - 4));
                 find('[data-board-pagination]').innerHTML = pages > 1 ? `<span>검색 결과 ${items.length}개</span><div><button data-board-page="${page - 1}" aria-label="이전 페이지" ${page === 1 ? 'disabled' : ''}>‹</button>${Array.from({ length: Math.min(5, pages) }, (_, i) => start + i).map(i => `<button data-board-page="${i}" ${i === page ? 'class="is-active" aria-current="page"' : ''} aria-label="${i}페이지">${i}</button>`).join('')}<button data-board-page="${page + 1}" aria-label="다음 페이지" ${page === pages ? 'disabled' : ''}>›</button></div>` : items.length ? `<span>${items.length}개 표시</span>` : '';
             };
@@ -35,6 +35,7 @@
                 if (loading) return;
                 loading = true;
                 const button = find('[data-board-refresh]'); button.disabled = true;
+                find('[data-board-create]').disabled = true;
                 find('[data-board-toolbar]').hidden = true;
                 find('[data-board-list]').innerHTML = '';
                 find('[data-board-pagination]').innerHTML = '';
@@ -54,6 +55,7 @@
                     find('[data-board-group]').innerHTML = '<option value="">모든 그룹</option>' + groups.map(([id, name]) => `<option value="${escape(id)}" ${group === id ? 'selected' : ''}>${escape(name)}</option>`).join('');
                     find('[data-board-status]').innerHTML = '<p class="admin-board-note">DB 연결 정상 · 실제 게시판 목록</p>';
                     find('[data-board-toolbar]').hidden = false;
+                    find('[data-board-create]').disabled = false;
                     const resume = window.dugolbiBoardPosts.takeRefreshContext();
                     const resumeBoard = resume && boards.find(item => item.id === resume.board);
                     if (resumeBoard) { this.unmount(); window.dugolbiBoardPosts.mount(root, resumeBoard, () => this.mount(root), resume); return; }
@@ -65,6 +67,17 @@
                 } finally { clearTimeout(timeout); loading = false; if (active) button.disabled = false; }
             };
             root.addEventListener('click', event => {
+                const afterLifecycle = result => {
+                    if (!active) return;
+                    find('[data-board-operation-status]').textContent = result.message;
+                    find('[data-board-operation-status]').hidden = false;
+                    if (event.target.closest('[data-board-create]')) { query = result.board.id; group = ''; page = 1; find('[data-board-search]').value = query; }
+                    else if (query === result.board.id) { query = ''; page = 1; find('[data-board-search]').value = ''; }
+                    load(true);
+                };
+                if (event.target.closest('[data-board-create]')) { if (!loading) window.dugolbiBoardLifecycle.create(afterLifecycle); return; }
+                const remove = event.target.closest('[data-board-remove]');
+                if (remove) { const selected = boards.find(item => item.id === remove.dataset.boardRemove); if (selected) window.dugolbiBoardLifecycle.remove(selected, afterLifecycle); return; }
                 const settings = event.target.closest('[data-board-settings]');
                 if (settings) {
                     const selected = boards.find(item => item.id === settings.dataset.boardSettings);

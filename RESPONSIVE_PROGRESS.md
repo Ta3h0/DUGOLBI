@@ -610,3 +610,13 @@
 - [x] 격리 PHP fixture 서버 34개 + Edge 1440/375px UI 16개 검사 통과. MB 표시/변환 변경 후 UI/인증 21개 추가 확인(중복 포함). PHP/JS 구문 및 diff 공백 확인. 실제 운영 DB/MySQL 엔진 저장 테스트는 아님.
 - 생성: temp-board/board-settings.php, temp-board/board-settings.js. 수정: temp-board/boards.js, temp-board/index.php, css/common.css, temp-board/README.md, 이 문서. 신규 이미지 자산 없음.
 - Current: 기존 게시판 설정 편집/서버 연결 코드 완료. Next: temp-board 및 css/common.css 운영 업로드 → 설정 저장/재열기/목록 반영 확인. 게시판 추가·삭제 후속 단계. 운영 배포/Git commit/push 미수행.
+
+## 게시판 추가·삭제 — 2026-10-14
+
+- [x] 상단 게시판 추가/행별 삭제. 이름·ID·그룹·기준 설정 선택, 기존 설정만 복사 또는 기본 스킨 생성. 게시글/첨부 복사 없이 빈 게시판, 마지막 게시판 삭제 후에도 기본 게시판 재추가 가능.
+- [x] 삭제 범위/홈페이지 연결 영향 및 ID 직접 입력. 기존 독립 로그인·최고관리자 매핑, CSRF/일회 토큰, 중복/변경/부분 실패 검사. 공개 그누보드 로그인 쿠키 미생성.
+- [x] 설치된 native 글 테이블 구조/기본 SQL 생성 및 native 전체 게시판 삭제 코드 호출. 다른 게시판·파일 보존, 폴더 canonical 범위/권한 및 symlink/junction 검사, 제거 재조회.
+- [x] 완료 후 서버 목록/개수 갱신. PC·노트북·모바일 편집창/바텀시트, 잘못된 ID/취소/중복/불명 결과/저장 중 잠금.
+- [x] 격리 fixture 서버 48개 + Edge 1440/1100/375px UI 51개 검사 통과. 실제 native client key/삭제 및 junction 보존 추가 확인, 0개 게시판에서 기본 게시판 재생성 모바일 확인. 운영 DB/MySQL 엔진 변경 테스트는 아님.
+- 생성: temp-board/board-action.php, temp-board/board-lifecycle.js. 수정: temp-board/boards.js, temp-board/index.php, css/common.css, temp-board/README.md, 이 문서. 기존 그누보드/사업 데이터 변경 및 이미지 자산 추가 없음.
+- Current: 추가·삭제 연결 코드 및 로컬 검증 완료. Next: temp-board와 css/common.css 업로드 → 테스트 게시판 1개 추가·빈 목록 확인·ID 입력 삭제 확인. 운영 배포/Git commit/push 미수행.
