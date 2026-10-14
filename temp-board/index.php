@@ -15,6 +15,7 @@ dugolbiAdminRequireLogin();
     <script src="../js/modify.js" defer></script>
     <script src="seed.php" defer></script>
     <script src="boards.js?v=<?= filemtime(__DIR__ . '/boards.js') ?>" defer></script>
+    <script src="post-editor.js?v=<?= filemtime(__DIR__ . '/post-editor.js') ?>" defer></script>
     <script src="posts.js?v=<?= filemtime(__DIR__ . '/posts.js') ?>" defer></script>
     <script src="admin.js" defer></script>
 </head>
@@ -35,7 +36,7 @@ dugolbiAdminRequireLogin();
             <div class="admin-topbar-right"><span id="admin-today"></span><form action="logout.php" method="post"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars(dugolbiAdminToken(), ENT_QUOTES, 'UTF-8') ?>"><button class="admin-button admin-logout-button" type="submit">로그아웃</button></form></div>
         </header>
         <main id="admin-content" class="admin-content" tabindex="-1">
-            <div class="admin-demo-notice"><span class="admin-notice-dot" aria-hidden="true"></span><p><strong>게시판은 서버 조회 전용입니다.</strong> 교육·일정 등 나머지 변경 내용은 이 브라우저에만 저장되며 운영 홈페이지에는 반영되지 않습니다.</p></div>
+            <div class="admin-demo-notice"><span class="admin-notice-dot" aria-hidden="true"></span><p><strong>게시판 변경은 운영 서버에 반영됩니다.</strong> 교육·일정 등 나머지 변경 내용은 이 브라우저에만 저장되며 운영 홈페이지에는 반영되지 않습니다.</p></div>
             <div id="admin-source-status" class="admin-source-status" hidden></div>
             <div id="admin-view"></div>
         </main>

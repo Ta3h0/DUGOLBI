@@ -12830,6 +12830,12 @@ body.legal-modal-open {
 :where(body.temp-admin) .admin-upload-label { margin-top: 9px; position: relative; overflow: clip; }
 :where(body.temp-admin) .admin-upload-label input { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; }
 :where(body.temp-admin) .admin-image-field small { color: var(--admin-muted); font-size: 10px; margin-left: 9px; }
+:where(body.temp-admin) .admin-post-editor .admin-field > .admin-check { display: flex; align-items: center; gap: 9px; }
+:where(body.temp-admin) .admin-post-attachment { padding: 16px; border: 1px solid var(--admin-line); border-radius: 6px; }
+:where(body.temp-admin) .admin-post-attachment .admin-image-field { margin-bottom: 16px; }
+:where(body.temp-admin) .admin-post-attachment .admin-check { margin: 10px 0 0; }
+:where(body.temp-admin) .admin-post-attachment [data-post-file-name] { display: block; margin: 8px 0 0; overflow-wrap: anywhere; }
+:where(body.temp-admin) .admin-post-attachment .admin-upload-label:focus-within { outline: 2px solid var(--main-color); outline-offset: 2px; }
 :where(body.temp-admin) .admin-check { display: flex; align-items: center; gap: 9px; padding: 10px 0; font-size: 12px; }
 :where(body.temp-admin) .admin-check input { accent-color: var(--main-color); width: 16px; height: 16px; }
 :where(body.temp-admin) .admin-editor-foot { padding: 17px 28px; border-top: 1px solid var(--admin-line); display: flex; justify-content: space-between; align-items: center; background: #fbfcfe; gap: 10px; flex: 0 0 auto; }

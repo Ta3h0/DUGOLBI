@@ -557,3 +557,18 @@
 - 생성: temp-board/posts.js, temp-board/posts-query.php.
 - 수정: temp-board/boards-api.php, temp-board/boards.js, temp-board/index.php, temp-board/README.md, RESPONSIVE_PROGRESS.md. CSS/이미지/홈페이지 데이터/그누보드 원본 수정 없음. 운영 배포 및 Git commit/push 미수행.
 - Current: 게시글 목록 조회 코드 완료. Next: 현재 temp-board 폴더 업로드 후 실제 게시글 확인.
+
+
+## 게시판 연동 3단계: 작성·수정·삭제·첨부 업로드 — 2026-10-14
+- [x] 2단계 실제 게시글 목록은 사용자 정상 동작 확인. 이번 작업은 작성/수정/삭제/첨부의 로컬 구현 및 격리 검증.
+- [x] 독립 관리자 로그인 유지, 서버 cf_admin의 유효한 최고관리자에 작업 권한 매핑. 공개 G5 로그인 쿠키/다른 회원 세션을 가져오지 않음. POST/CSRF/일회용 작업 토큰 및 변경 여부 검증, 반복 제출 완료 응답 재사용.
+- [x] 설치된 그누보드 원본 common.php + write_update.php/delete.php와 native 요청 토큰/수정 세션/훅을 사용. 직접 저장·삭제 SQL 복제 없음. 원본 그누보드 파일/DB 설정/테이블 수정 없음.
+- [x] 기존 관리자 PC dialog/모바일 바텀시트로 제목·본문 원문·분류·형식·공지/비밀·링크 편집. 원 작성자·메일 옵션·wr_1~10 및 기존 영상 HTML/첨부 설명 보존. 본문 미수정의 브라우저 CRLF 변환 보정.
+- [x] 기존 파일 유지/교체/삭제·설명, 새 파일 미리보기와 저장 시 native data/file 경로 업로드. 실제 MIME·이미지·이중 확장자·용량/개수·폴더 쓰기 권한 검사. 지원 형식 및 PHP/게시판 제한 안내. 저장 전 서버 파일 생성 없음.
+- [x] 저장 중 중복 제출/닫기 방지, 미저장 닫기/삭제 확인, 불명확한 결과의 재등록 방지 안내. 성공 후 목록 갱신, native 경고 전달, private HttpOnly/Lax 세션 정책 유지.
+- [x] 연결 API 32건 + Edge 1440/375px 실제 multipart UI 30건 총 62건 통과. 실제 운영 DB/core 대신 격리 fixture 계약으로 검증한 범위임. 실제 테스트 파일 이동/삭제는 임시 폴더에서 확인. PHP/JS 구문·Git diff 공백 검사 통과. 가로 넘침/새 JS 오류 없음.
+- [ ] 운영 서버 업로드 후 테스트 비밀글 1개로 작성/첨부/제목 수정/기존 첨부 유지/삭제 및 native 게시글 수 확인 필요. 서버 버전/skin/extend 차이 검수 대기.
+- 생성: temp-board/post-action.php, temp-board/post-support.php, temp-board/post-editor.js.
+- 수정: temp-board/posts.js, temp-board/boards.js, temp-board/index.php, css/common.css, temp-board/README.md, RESPONSIVE_PROGRESS.md. 이미지 자산 복사 없음.
+- Current: 게시글 관리·첨부 연결 코드와 격리 검증 완료. Next: 현재 temp-board 및 css/common.css 업로드 후 운영 확인. 게시판 추가·삭제/설정과 나머지 콘텐츠 서버 저장은 후속 작업.
+- 운영 배포/Git commit/push/실제 게시글 생성·수정·삭제·업로드 미수행.

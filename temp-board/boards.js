@@ -11,7 +11,7 @@
             let active = true, loading = false, boards = [], query = '', group = '', page = 1;
             destroy = () => { active = false; controller.abort(); requestController.abort(); };
             root.innerHTML = `<div class="admin-page-heading"><div><h1>게시판 관리</h1><p>운영 그누보드에 등록된 게시판을 확인하세요.</p></div><div class="admin-heading-actions"><button type="button" class="admin-button" data-board-refresh>다시 불러오기</button></div></div>
-                <p class="admin-board-note">현재는 조회만 연결합니다. 게시글 작성·수정·삭제 및 게시판 설정 변경은 다음 단계에서 연결합니다.</p>
+                <p class="admin-board-note">게시글 목록에서 작성·수정·삭제와 첨부파일을 관리할 수 있습니다. 게시판 설정 변경은 다음 단계에서 연결합니다.</p>
                 <section class="admin-panel admin-list-panel"><div data-board-status role="status" aria-live="polite" aria-atomic="true"></div>
                 <div class="admin-list-toolbar" data-board-toolbar hidden><div class="admin-list-summary">게시판 <strong data-board-count>0</strong>개</div><div class="admin-list-controls"><label class="admin-search"><input type="search" data-board-search placeholder="게시판 이름, ID 검색" aria-label="게시판 검색"></label><select data-board-group aria-label="게시판 그룹 필터"><option value="">모든 그룹</option></select></div></div>
                 <div data-board-list></div><div class="admin-pagination" data-board-pagination aria-label="게시판 목록 페이지"></div></section>`;
