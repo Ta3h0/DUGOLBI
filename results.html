@@ -1,35 +1,12 @@
 <?php
-// 과정별 폴더에 이미지를 추가/삭제하면 카드와 탭이 자동으로 반영됩니다.
-// 노출 순서는 아래 과정 순서와 각 폴더의 파일명 순서(results001, results002 ...)입니다.
-$resultsCategories = [
-    '두골비' => ['folder' => 'dugolbi', 'caption' => '두골비'],
-    '두골체' => ['folder' => 'dugolche', 'caption' => '두골체'],
-    '신결비' => ['folder' => 'shingyeolbi', 'caption' => '신결비'],
-    '어린이/청소년 성장관리' => ['folder' => 'growth', 'caption' => '어린이 성장'],
-];
+// Public page and admin preview read the same current image folders.
+require_once __DIR__ . '/includes/results-data.php';
+$resultsCategories = dugolbiResultsCategories();
 $resultsDefaultCategory = null;
 foreach ($resultsCategories as $resultsLabel => $resultsCategory) {
-    $resultsDirectory = __DIR__ . '/images/results/' . $resultsCategory['folder'];
-    $resultsFiles = is_dir($resultsDirectory) ? scandir($resultsDirectory) : [];
-    $resultsFiles = $resultsFiles === false ? [] : $resultsFiles;
-    natsort($resultsFiles);
-    $resultsImages = [];
-    foreach ($resultsFiles as $resultsFile) {
-        $resultsPath = $resultsDirectory . '/' . $resultsFile;
-        if (!is_file($resultsPath) || !in_array(strtolower(pathinfo($resultsFile, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'webp', 'gif'], true)) {
-            continue;
-        }
-        $resultsSize = @getimagesize($resultsPath);
-        if ($resultsSize === false) continue;
-        $resultsImages[] = [
-            'src' => 'images/results/' . $resultsCategory['folder'] . '/' . rawurlencode($resultsFile),
-            'width' => $resultsSize[0],
-            'height' => $resultsSize[1],
-        ];
-    }
-    $resultsCategories[$resultsLabel]['images'] = $resultsImages;
-    if ($resultsDefaultCategory === null && $resultsImages) {
+    if ($resultsCategory['images']) {
         $resultsDefaultCategory = $resultsLabel;
+        break;
     }
 }
 ?>

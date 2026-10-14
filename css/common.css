@@ -12798,6 +12798,14 @@ body.legal-modal-open {
 :where(body.temp-admin) .admin-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 23px 20px; }
 :where(body.temp-admin) .admin-field { min-width: 0; }
 :where(body.temp-admin) .admin-field.is-wide { grid-column: 1 / -1; }
+:where(body.temp-admin) .admin-weekdays { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+:where(body.temp-admin) .admin-weekdays .admin-check { min-height: 44px; }
+:where(body.temp-admin) .admin-curriculum-item { padding: 16px; margin-bottom: 16px; border: 1px solid var(--admin-line); border-radius: 6px; }
+:where(body.temp-admin) .admin-curriculum-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+:where(body.temp-admin) .admin-curriculum-heading strong { font-size: 12px; }
+:where(body.temp-admin) .admin-source-status { display: flex; flex-wrap: wrap; gap: 10px; padding: 16px; margin-bottom: 24px; border: 1px solid #d3def0; border-radius: 6px; background: #f3f6fc; font-size: 12px; }
+:where(body.temp-admin) .admin-source-status p { width: 100%; word-break: keep-all; }
+
 :where(body.temp-admin) .admin-field > label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 8px; }
 :where(body.temp-admin) .admin-required { color: #6b7790; font-size: 9px; font-weight: 400; margin-left: 7px; }
 :where(body.temp-admin) .admin-field-hint { display: block; font-size: 10px; color: var(--admin-muted); margin-top: 7px; }
