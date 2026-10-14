@@ -12839,6 +12839,9 @@ body.legal-modal-open {
 :where(body.temp-admin) .admin-post-toolbar .admin-search input { padding-left: 12px !important; text-align: left; min-height: 44px; }
 :where(body.temp-admin) .admin-post-toolbar .admin-button { min-height: 44px; }
 :where(body.temp-admin) .admin-post-bulk-actions .admin-check { min-height: 44px; }
+:where(body.temp-admin) .admin-board-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+:where(body.temp-admin) .admin-board-settings .admin-field > .admin-check { display: flex; align-items: center; gap: 9px; min-height: 44px; }
+:where(body.temp-admin) .admin-board-settings input:not([type="checkbox"]), :where(body.temp-admin) .admin-board-settings select, :where(body.temp-admin) .admin-board-settings .admin-button { min-height: 44px; }
 :where(body.temp-admin) [data-post-bulk-delete]:disabled { background: #f4f6fa; border-color: var(--admin-line); color: var(--admin-muted); cursor: not-allowed; }
 :where(body.temp-admin) .admin-post-title { display: flex; align-items: flex-start; gap: 4px; }
 :where(body.temp-admin) .admin-post-title > div { min-width: 0; }

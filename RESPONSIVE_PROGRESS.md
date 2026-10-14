@@ -601,3 +601,12 @@
 - [x] Edge 1440/1100/1024/768/375px 조회 응답 대체 검사: 화면 넘침/JS 오류 없음, 선택 개수·전체 선택·검색 후 초기화 정상. 운영 DB 변경 없음.
 - 수정: temp-board/posts.js, css/common.css, temp-board/README.md, 이 문서. 새 파일/이미지 자산 없음.
 - Current: 로컬 레이아웃 보완 완료. Next: posts.js와 css/common.css 운영 업로드 후 실제 화면 확인. 운영 배포/Git commit/push 미수행.
+
+## 기존 게시판 설정 수정 — 2026-10-14
+
+- [x] 게시판별 설정 버튼과 기존 관리자 편집창. PC/모바일 이름·페이지당 글 수, 카테고리, 목록/읽기/작성 권한, 첨부 개수/용량(MB) 편집.
+- [x] 기존 독립 인증 및 그누보드 최고관리자 매핑, CSRF/일회 작업 토큰, 동시 변경 감지, 승인된 설정 열만 서버 저장. 다른 게시판·스킨·상하단 경로·글/댓글 수 보존, 기본 최신글 캐시/설정 이벤트 호출.
+- [x] 저장 후 서버 목록 갱신, 재열기 유지, 미저장 취소 확인, 중복 조작/불명 결과 재전송 방지.
+- [x] 격리 PHP fixture 서버 34개 + Edge 1440/375px UI 16개 검사 통과. MB 표시/변환 변경 후 UI/인증 21개 추가 확인(중복 포함). PHP/JS 구문 및 diff 공백 확인. 실제 운영 DB/MySQL 엔진 저장 테스트는 아님.
+- 생성: temp-board/board-settings.php, temp-board/board-settings.js. 수정: temp-board/boards.js, temp-board/index.php, css/common.css, temp-board/README.md, 이 문서. 신규 이미지 자산 없음.
+- Current: 기존 게시판 설정 편집/서버 연결 코드 완료. Next: temp-board 및 css/common.css 운영 업로드 → 설정 저장/재열기/목록 반영 확인. 게시판 추가·삭제 후속 단계. 운영 배포/Git commit/push 미수행.
