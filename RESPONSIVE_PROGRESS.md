@@ -572,3 +572,9 @@
 - 수정: temp-board/posts.js, temp-board/boards.js, temp-board/index.php, css/common.css, temp-board/README.md, RESPONSIVE_PROGRESS.md. 이미지 자산 복사 없음.
 - Current: 게시글 관리·첨부 연결 코드와 격리 검증 완료. Next: 현재 temp-board 및 css/common.css 업로드 후 운영 확인. 게시판 추가·삭제/설정과 나머지 콘텐츠 서버 저장은 후속 작업.
 - 운영 배포/Git commit/push/실제 게시글 생성·수정·삭제·업로드 미수행.
+
+
+## 게시글 운영 저장 확인 — 2026-10-14
+- [x] 사용자 운영 확인: 새 게시글 정상 저장. 에이전트가 실제 게시글을 발행한 것은 아님.
+- [ ] 제목만 수정 시 원 본문·기존 첨부 유지 확인 대기. 테스트 글 삭제 및 목록/글 수/첨부 정리 확인 대기.
+- Current: 작성·저장 운영 사용자 확인 완료. Next: 같은 테스트 글의 제목 수정 후 기존 본문·첨부 유지 확인.
