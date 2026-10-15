@@ -620,3 +620,14 @@
 - [x] 격리 fixture 서버 48개 + Edge 1440/1100/375px UI 51개 검사 통과. 실제 native client key/삭제 및 junction 보존 추가 확인, 0개 게시판에서 기본 게시판 재생성 모바일 확인. 운영 DB/MySQL 엔진 변경 테스트는 아님.
 - 생성: temp-board/board-action.php, temp-board/board-lifecycle.js. 수정: temp-board/boards.js, temp-board/index.php, css/common.css, temp-board/README.md, 이 문서. 기존 그누보드/사업 데이터 변경 및 이미지 자산 추가 없음.
 - Current: 추가·삭제 연결 코드 및 로컬 검증 완료. Next: temp-board와 css/common.css 업로드 → 테스트 게시판 1개 추가·빈 목록 확인·ID 입력 삭제 확인. 운영 배포/Git commit/push 미수행.
+
+## 콘텐츠 서버 저장·이미지 업로드 연결 — 2026-10-15
+
+- [x] 기존 일정(부산/서울·기간/요일·시간/예약), 반복 예정 일정, 현판 호스팅/대체 이미지 규칙 유지 확인. 지정 로그인 및 기존 게시판 기능 유지.
+- [x] 교육·일정·프로모션·지점·임상·사업정보 서버 저장/로그/재조회, PHP 가드된 상태·이전본, file lock/rename, revision 충돌 방지. 별도 DB 테이블이나 DB 설정 변경 없음.
+- [x] 저장 시 이미지 실제 업로드/고정 이미지 확장자/해시 파일명·기존 파일 보존. 공개 footer 데이터/임상 PHP 목록에 반영, 숨김/삭제/폴더 파일 추가·삭제 탐색.
+- [x] 이전 브라우저 편집본 자동 발행 금지, 조회 실패 시 읽기 전용, 저장 중 잠금 및 실패/충돌 시 입력 유지·재전송 차단. 수료지점 노출/숨김 선택 추가.
+- [x] 격리 PHP 실파일 API 32개, Edge PC1440/Mobile375 UI 32개, 손상 저장본/동시 변경/폴더 삭제 추가 7개 통과. 모바일 신규 지점 게시도 확인. 운영 호스팅/DB 쓰기 테스트는 아님.
+- [x] modify.js 파일 해시 동일, 컨퍼런스 원고/10월1~31 기간/4개 반 예약 링크/74개 지점·개별 연락처/본점 우선 유지. 테스트 변경은 임시 복사본에만 저장.
+- 생성: content-data.php, includes/content-store.php, temp-board/content-api.php. 수정: footer.html, includes/results-data.php, temp-board/seed.php, temp-board/admin.js, temp-board/index.php, .gitignore, temp-board/README.md, 이 문서. 이미지 자산 추가 없음.
+- Current: 콘텐츠 서버 저장/업로드/홈페이지 반영 로컬 구현 완료. Next: 코드 업로드 후 content-private 및 images/content 쓰기 권한·실제 저장 확인, 게시판 추가/삭제 운영 검수. 배포/Git commit/push 미수행. 자동 재개는 1회 실행 후 PAUSED 확인.

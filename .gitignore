@@ -1,3 +1,7 @@
 www.zip
 
 deploy.log
+
+# Runtime content and immutable images are retained on the hosting server.
+temp-board/content-private/
+images/content/

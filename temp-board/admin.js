@@ -1,4 +1,4 @@
-(() => {
+(async () => {
     'use strict';
     const KEY = 'dugolbi-temp-board-v2';
     const LEGACY_KEY = 'dugolbi-temp-board-v1';
@@ -50,14 +50,22 @@
     currentSource.sourceSignature = sourceHash.toString(16);
     let data = clone(currentSource);
     let storageProblem = '', legacyData = null, sourceChanged = false;
+    let serverReady = false, serverRevision = '', serverToken = '', saveBusy = false, saveUncertain = false;
+    try { legacyData = JSON.parse(localStorage.getItem(KEY) || localStorage.getItem(LEGACY_KEY) || 'null'); } catch {}
+    const startupController = new AbortController(), startupTimeout = setTimeout(() => startupController.abort(), 20000);
+    document.getElementById('admin-view').innerHTML = '<p role="status">서버 콘텐츠를 불러오는 중입니다.</p>';
     try {
-        legacyData = JSON.parse(localStorage.getItem(LEGACY_KEY) || 'null');
-        const stored = JSON.parse(localStorage.getItem(KEY) || 'null');
-        if (stored && stored.version === 2 && Object.keys(definitions).every(key => key === 'business' ? stored.business?.locations : Array.isArray(stored[key])) && Array.isArray(stored.logs)) {
-            data = stored;
-            sourceChanged = stored.sourceSignature !== currentSource.sourceSignature;
-        }
-    } catch { storageProblem = '임시 데이터를 읽지 못해 현재 홈페이지 데이터로 시작했습니다.'; }
+        const response = await fetch('content-api.php', { credentials: 'same-origin', cache: 'no-store', signal: startupController.signal });
+        if (response.status === 401) { location.assign('login.php'); return; }
+        const result = await response.json();
+        if (!response.ok || !result.ok || typeof result.revision !== 'string' || typeof result.csrfToken !== 'string' || !result.sections) throw new Error(result.message || '서버 데이터를 확인하지 못했습니다.');
+        for (const key of ['education', 'schedule', 'promotion', 'network', 'results', 'business']) if (Object.hasOwn(result.sections, key)) data[key] = result.sections[key];
+        data.education.forEach((item, index) => { if ((!Object.hasOwn(result.sections, 'education') && Object.getOwnPropertyDescriptor(educationData[index] || {}, 'naverBookingUrl')?.get) || item._bookingFromBusiness) { item._bookingFromBusiness = true; item.naverBookingUrl = data.business.locations.busan.naverUrl; } item.phone = data.business.phone; });
+        data.logs = result.logs; data.updatedAt = result.updatedAt;
+        serverRevision = result.revision; serverToken = result.csrfToken; serverReady = true;
+    } catch { storageProblem = '서버 콘텐츠를 불러오지 못했습니다. 현재는 기본값 보기만 가능하며, 콘텐츠를 수정하려면 새로고침해주세요.'; sourceChanged = true; }
+    finally { clearTimeout(startupTimeout); }
+    window.addEventListener('beforeunload', event => { if (saveBusy) { event.preventDefault(); event.returnValue = ''; } });
     let route = 'overview', query = '', filter = '', page = 1, editContext = null, toastTimer;
     const view = document.getElementById('admin-view');
     const editor = document.getElementById('admin-editor');
@@ -88,12 +96,27 @@
         element.textContent = text; element.hidden = false;
         clearTimeout(toastTimer); toastTimer = setTimeout(() => { element.hidden = true; }, 3500);
     }
-    function save(next, action, title) {
-        next.updatedAt = new Date().toISOString();
-        next.logs = [{ action, title, at: next.updatedAt }, ...next.logs].slice(0, 30);
-        try { localStorage.setItem(KEY, JSON.stringify(next)); }
-        catch { throw new Error('브라우저 저장 공간이 부족하거나 저장이 차단되어 있습니다. 이미지 크기를 줄이거나, 변경 내용을 내보낸 뒤 임시 데이터를 초기화해주세요.'); }
-        data = next;
+    async function save(next, action, title, section) {
+        if (!serverReady || saveUncertain) throw new Error('서버 상태를 다시 확인해야 합니다. 입력한 내용을 보관한 뒤 새로고침해주세요.');
+        if (saveBusy) throw new Error('저장 중입니다. 잠시 기다려주세요.');
+        const sectionItems = clone(next[section]);
+        if (section === 'education') for (const item of sectionItems) item._bookingFromBusiness = item.naverBookingUrl === data.business.locations.busan.naverUrl;
+        saveBusy = true;
+        const controls = editor.open ? [...form.querySelectorAll('input, textarea, select, button')].map(control => [control, control.disabled]) : [];
+        controls.forEach(([control]) => { control.disabled = true; });
+        const saveButton = editor.open ? form.querySelector('[type="submit"]') : null;
+        if (saveButton) saveButton.textContent = '저장 중…';
+        try {
+            const response = await fetch('content-api.php', { method: 'POST', credentials: 'same-origin', cache: 'no-store', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ section, items: sectionItems, action, title, revision: serverRevision, csrf_token: serverToken }) });
+            if (response.status === 401) { location.assign('login.php'); throw new Error('로그인이 필요합니다.'); }
+            const result = await response.json();
+            if (!response.ok || !result.ok) { if (!['INVALID_FIELDS', 'TOO_LARGE'].includes(result.code)) saveUncertain = true; throw new Error(result.message || '저장 결과를 확인하지 못했습니다. 새로고침해주세요.'); }
+            if (result.section !== section || typeof result.revision !== 'string') throw new SyntaxError('Unexpected content result');
+            data[section] = result.items;
+            if (section === 'business') for (const item of data.education) { item.phone = data.business.phone; if (item._bookingFromBusiness) item.naverBookingUrl = data.business.locations.busan.naverUrl; }
+            data.logs = result.logs; data.updatedAt = result.updatedAt; serverRevision = result.revision;
+        } catch (error) { if (error instanceof SyntaxError || error instanceof TypeError) { saveUncertain = true; throw new Error('저장 결과를 확인하지 못했습니다. 다시 요청하지 말고 입력 내용을 보관한 뒤 새로고침해주세요.'); } throw error; }
+        finally { saveBusy = false; controls.forEach(([control, disabled]) => { control.disabled = disabled; }); if (saveButton) { saveButton.textContent = '저장하기'; if (saveUncertain) saveButton.disabled = true; } }
     }
     const weekdays = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
     const isWeekly = item => Array.isArray(item.weekdays) && item.weekdays.length > 0;
@@ -134,7 +157,7 @@
     function renderSourceStatus() {
         const element = document.getElementById('admin-source-status');
         element.hidden = !legacyData && !sourceChanged;
-        element.innerHTML = `${sourceChanged ? '<p>홈페이지 원본이 갱신되었습니다. 현재 화면은 이 브라우저에 저장한 편집본입니다. 변경 내용을 내보낸 뒤 최신 원본으로 초기화할 수 있습니다.</p><button class="admin-button" data-export>현재 편집본 내보내기</button><button class="admin-button" data-reset>최신 원본으로 초기화</button>' : ''}${legacyData ? '<p>이전 시안의 저장 내용은 자동 적용하지 않았습니다. 필요하면 별도 파일로 보관하세요.</p><button class="admin-button" data-export-legacy>이전 저장 내용 내보내기</button>' : ''}`;
+        element.innerHTML = `${sourceChanged ? '<p>서버 데이터를 불러오지 못했습니다. 콘텐츠 저장은 차단되어 있습니다. 입력 내용을 보관하고 새로고침해주세요.</p>' : ''}${legacyData ? '<p>이전 브라우저 임시 편집본은 서버에 자동 반영하지 않았습니다. 필요하면 파일로 내보내 보관하세요.</p><button class="admin-button" data-export-legacy>이전 저장 내용 내보내기</button><button class="admin-button" data-reset>이전 임시 데이터 지우기</button>' : ''}`;
     }
     const actions = (type, item) => `<div class="admin-row-actions"><button class="admin-text-button" data-edit="${escape(item._key)}" aria-label="${escape(titleOf(item))} 수정">수정</button><button class="admin-delete-button" data-delete="${escape(item._key)}" aria-label="${escape(titleOf(item))} 삭제">삭제</button></div>`;
     function header(title, description, buttons = '') {
@@ -155,8 +178,8 @@
                 <section class="admin-panel admin-feature"><div class="admin-panel-heading"><h2>이달의 교육</h2><a href="#education">전체 관리 ${icon('arrow')}</a></div>${education ? `<div class="admin-feature-content">${thumbnail(education.image?.src, 'admin-feature-image')}<div><div class="admin-inline-chips">${status(education)}${education.badge ? `<span class="admin-chip">${escape(education.badge)}</span>` : ''}</div><h3>${escape(titleOf(education))}</h3><p>${date(education.startDate)} – ${date(education.endDate)}<br>총 ${escape(education.durationHours)}시간</p><div class="admin-feature-price">${education.discountPercent ? `<span>${escape(education.discountPercent)}% 할인</span>` : ''}<strong>${money(Math.round(education.originalPrice * (1 - (education.discountPercent || 0) / 100)))}</strong></div><button class="admin-button" data-open-type="education" data-key="${escape(education._key)}">교육 수정 ${icon('edit')}</button></div></div>` : `<div class="admin-empty"><p>등록된 교육이 없습니다.</p><button class="admin-button admin-primary" data-new-type="education">교육 등록</button></div>`}</section>
                 <section class="admin-panel admin-quick"><div class="admin-panel-heading"><h2>자주 하는 작업</h2></div>${[['education', '교육 등록', '교육 소개 · 기간 · 수강료'], ['schedule', '일정 추가', '교육장 · 반복 요일 · 예약 안내'], ['boards', '게시판 확인', '운영 게시판 · 그룹 · 게시글 수'], ['network', '수료지점 등록', '인증 구분 · 지점 정보']].map(([key, title, detail]) => `<button class="admin-quick-row" data-new-type="${key}"><span class="admin-quick-icon">${icon(key)}</span><span><strong>${title}</strong><small>${detail}</small></span>${icon('arrow')}</button>`).join('')}</section>
                 <section class="admin-panel"><div class="admin-panel-heading"><h2>예정된 교육일정</h2><a href="#schedule">일정 관리 ${icon('arrow')}</a></div><div class="admin-upcoming">${upcoming.length ? upcoming.map(({ item, nextDate }) => `<button class="admin-upcoming-row" data-open-type="schedule" data-key="${escape(item._key)}"><span class="admin-date-block"><small>${escape(nextDate.slice(5, 7))}월</small><strong>${escape(nextDate.slice(8))}</strong></span><span><strong>${escape(item.title)}</strong><small>${escape(locationName(item))}<br>${escape(schedulePeriod(item))}</small></span>${icon('arrow')}</button>`).join('') : '<div class="admin-empty"><p>예정된 교육일정이 없습니다.</p></div>'}</div></section>
-                <section class="admin-panel"><div class="admin-panel-heading"><h2>최근 변경 내용</h2><span class="admin-muted">이 브라우저 기준</span></div>${data.logs.length ? `<ol class="admin-log-list">${data.logs.slice(0, 5).map(log => `<li><span class="admin-log-dot" aria-hidden="true"></span><div><strong>${escape(log.title)}</strong><p>${escape(log.action)} · ${escape(new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul' }).format(new Date(log.at)))}</p></div></li>`).join('')}</ol>` : `<div class="admin-history-empty">${icon('edit')}<strong>아직 변경한 내용이 없습니다.</strong><p>등록하거나 수정한 내용이 여기에 표시됩니다.</p></div>`}</section>
-            </div><div class="admin-bottom-note"><p>내용을 수정한 뒤 ‘변경 내용 내보내기’로 보관할 수 있습니다.</p><button class="admin-text-button" data-reset>임시 데이터 초기화</button></div>`;
+                <section class="admin-panel"><div class="admin-panel-heading"><h2>최근 변경 내용</h2><span class="admin-muted">서버 저장 기록</span></div>${data.logs.length ? `<ol class="admin-log-list">${data.logs.slice(0, 5).map(log => `<li><span class="admin-log-dot" aria-hidden="true"></span><div><strong>${escape(log.title)}</strong><p>${escape(log.action)} · ${escape(new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul' }).format(new Date(log.at)))}</p></div></li>`).join('')}</ol>` : `<div class="admin-history-empty">${icon('edit')}<strong>아직 변경한 내용이 없습니다.</strong><p>등록하거나 수정한 내용이 여기에 표시됩니다.</p></div>`}</section>
+            </div><div class="admin-bottom-note"><p>내용을 수정한 뒤 ‘변경 내용 내보내기’로 보관할 수 있습니다.</p><button class="admin-text-button" data-reset>이전 임시 데이터 지우기</button></div>`;
     }
     function optionsFor(type) {
         if (type === 'schedule') return Object.entries(data.business.locations).map(([key, item]) => [key, item.name]);
@@ -238,7 +261,7 @@
             { key: 'naverBookingUrl', label: '네이버 예약 주소', type: 'url', wide: true, hint: '교육장 변경 시 기본 예약 주소도 바뀝니다. 직접 입력한 주소는 유지합니다.' }
         ];
         if (type === 'promotion') return [{ key: 'title', label: '프로모션명', required: true, wide: true }, { key: 'detailTitle', label: '상세 제목', wide: true }, { key: 'startDate', label: '시작일', type: 'date', required: true }, { key: 'endDate', label: '종료일', type: 'date', required: true }, { key: 'category', label: '분류' }, ...common, { key: 'image.src', label: '목록 이미지', type: 'image', wide: true }, { key: 'detailImage.src', label: '상세 이미지', type: 'image', wide: true }, { key: 'description', label: '목록 소개', type: 'textarea', wide: true }, { key: 'paragraphs', label: '상세 내용', type: 'textarea', array: true, wide: true, hint: '문단은 빈 줄로 구분합니다.' }, { key: 'image.alt', label: '목록 이미지 설명', wide: true }, { key: 'detailImage.alt', label: '상세 이미지 설명', wide: true }];
-        if (type === 'network') return [{ key: 'name', label: '지점명', required: true, wide: true }, { key: 'graduateName', label: '수료자명', required: true }, { key: 'certification', label: '인증 구분', type: 'select', options: certifications.map(value => [value, value]) }, { key: 'region', label: '지역', required: true }, { key: 'phone', label: '연락처', type: 'tel', required: true }, { key: 'img', label: '지점 이미지', type: 'image', wide: true, hint: '비워두면 현판 호스팅의 공통 replace.jpg 이미지를 표시합니다.' }, { key: 'regionPriority', label: '목록 우선 표시', type: 'checkbox', optionLabel: '전국 및 해당 지역에서 상단 고정' }];
+        if (type === 'network') return [{ key: 'name', label: '지점명', required: true, wide: true }, { key: 'graduateName', label: '수료자명', required: true }, { key: 'certification', label: '인증 구분', type: 'select', options: certifications.map(value => [value, value]) }, ...common, { key: 'region', label: '지역', required: true }, { key: 'phone', label: '연락처', type: 'tel', required: true }, { key: 'img', label: '지점 이미지', type: 'image', wide: true, hint: '비워두면 현판 호스팅의 공통 replace.jpg 이미지를 표시합니다.' }, { key: 'regionPriority', label: '목록 우선 표시', type: 'checkbox', optionLabel: '전국 및 해당 지역에서 상단 고정' }];
         if (type === 'results') return [{ key: 'category', label: '교육과정', type: 'select', options: courses.map(value => [value, value]) }, ...common, { key: 'caption', label: '관리용 이미지명', required: true, wide: true }, { key: 'src', label: '임상 이미지', type: 'image', wide: true, required: true }];
         if (type === 'boards') return [{ key: 'board', label: '게시판', type: 'select', options: Object.entries(boardNames) }, ...common, { key: 'title', label: '제목', required: true, wide: true }, { key: 'content', label: '본문', type: 'textarea', required: true, wide: true, hint: '임시 버전은 일반 텍스트 입력입니다. 운영 연동 시 기존 에디터와 연결합니다.' }, { key: 'date', label: '작성일', type: 'date', required: true }];
         if (type === 'business') return [{ key: 'name', label: '상호명', required: true, wide: true }, { key: 'representative', label: '대표자', required: true }, { key: 'registrationNumber', label: '사업자등록번호', required: true }, { key: 'email', label: '공개 이메일', type: 'email', required: true }, { key: 'phone', label: '대표 연락처', type: 'tel', required: true }, ...['busan', 'seoul'].flatMap((key, i) => [{ key: `locations.${key}.name`, label: `${i ? '서울' : '부산'} 교육장명`, required: true, wide: true }, { key: `locations.${key}.address`, label: '교육장 주소', required: true, wide: true }, { key: `locations.${key}.hours`, label: '운영시간', type: 'textarea', array: true, lineArray: true, wide: true, hint: '시간 안내를 한 줄씩 입력합니다.' }, { key: `locations.${key}.naverUrl`, label: '네이버 지도 주소', type: 'url' }, { key: `locations.${key}.kakaoUrl`, label: '카카오 지도 주소', type: 'url' }])];
@@ -282,6 +305,7 @@
     }
     function openEditor(type, key) {
         if (type === 'boards') { if (route !== 'boards') location.hash = 'boards'; else render(); return; }
+        if (!serverReady || saveUncertain || saveBusy) { toast('서버 상태를 먼저 확인해주세요. 저장 중이거나 연결을 다시 확인해야 합니다.'); return; }
         const current = type === 'business' ? data.business : data[type].find(item => item._key === key);
         editContext = { type, key, item: clone(current || newItem(type)), fields: fieldsFor(type), dirty: false, pendingUploads: 0 };
         if (type === 'schedule') { editContext.item.location ||= 'busan'; editContext.item._scheduleMode = isWeekly(editContext.item) ? 'weekly' : 'period'; editContext.bookingLocation = editContext.item.location; }
@@ -299,7 +323,7 @@
             else if (field.type === 'checkbox') input = `<label class="admin-check"><input type="checkbox" ${attributes} ${value ? 'checked' : ''}>${field.optionLabel || '임시 일정으로 표시'}</label>`;
             else if (field.type === 'weekdays') input = `<div class="admin-weekdays" role="group" aria-labelledby="${id}-label">${weekdays.map((label, day) => `<label class="admin-check"><input type="checkbox" name="weekdays" value="${day}" ${Array.isArray(value) && value.includes(day) ? 'checked' : ''}>${label}</label>`).join('')}</div>`;
             else if (field.type === 'curriculum') input = `<div data-curriculum>${curriculumMarkup(Array.isArray(value) ? value : [])}</div>`;
-            else if (field.type === 'image') input = `<div class="admin-image-field"><div class="admin-upload-preview" data-preview-for="${field.key}">${thumbnail(value || (type === 'network' ? branchImage(editContext.item) : ''))}</div><div><input type="text" ${attributes} value="${escape(value.startsWith('data:') ? '' : value)}" ${value.startsWith('data:') ? 'data-uploaded="true" placeholder="선택한 이미지가 임시 저장되어 있습니다"' : 'placeholder="images/경로 또는 https://이미지주소"'}><label class="admin-button admin-upload-label">${icon('results')}이미지 선택<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload="${field.key}"></label><small>JPG, PNG, WEBP, GIF · 최대 2MB</small></div></div>`;
+            else if (field.type === 'image') input = `<div class="admin-image-field"><div class="admin-upload-preview" data-preview-for="${field.key}">${thumbnail(value || (type === 'network' ? branchImage(editContext.item) : ''))}</div><div><input type="text" ${attributes} value="${escape(value.startsWith('data:') ? '' : value)}" ${value.startsWith('data:') ? 'data-uploaded="true" placeholder="선택한 이미지는 저장할 때 업로드됩니다"' : 'placeholder="images/경로 또는 https://이미지주소"'}><label class="admin-button admin-upload-label">${icon('results')}이미지 선택<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload="${field.key}"></label><small>JPG, PNG, WEBP, GIF · 최대 2MB</small></div></div>`;
             else input = `<input type="${field.type || 'text'}" ${attributes} value="${escape(value)}" ${field.min !== undefined ? `min="${field.min}"` : ''} ${field.max !== undefined ? `max="${field.max}"` : ''} ${field.type === 'number' ? `step="${field.step || 1}"` : ''} ${field.placeholder ? `placeholder="${escape(field.placeholder)}"` : ''}>`;
             return `<div class="admin-field ${field.wide ? 'is-wide' : ''}" data-field="${field.key}"><label id="${id}-label" ${['weekdays', 'curriculum'].includes(field.type) ? '' : `for="${id}"`}>${field.label}${field.required ? '<span class="admin-required">필수</span>' : ''}</label>${input}${field.hint ? `<small class="admin-field-hint">${field.hint}</small>` : ''}</div>`;
         }).join('')}</div>`;
@@ -319,9 +343,9 @@
         return new Promise(resolve => { confirmDialog.addEventListener('close', () => resolve(confirmDialog.returnValue === 'confirm'), { once: true }); confirmDialog.showModal(); });
     }
     function showFormError(message) { const element = document.getElementById('admin-form-error'); element.textContent = message; element.hidden = false; }
-    form.addEventListener('submit', event => {
+    form.addEventListener('submit', async event => {
         event.preventDefault();
-        if (!editContext || editContext.pendingUploads) return;
+        if (!editContext || editContext.pendingUploads || saveBusy) return;
         const item = clone(editContext.item);
         try {
             for (const field of editContext.fields) {
@@ -362,8 +386,8 @@
             const next = clone(data); const { type, key } = editContext;
             if (type === 'business') next.business = item;
             else { const index = next[type].findIndex(row => row._key === key); if (index >= 0) next[type][index] = item; else next[type].unshift(item); }
-            save(next, key || type === 'business' ? '수정' : '등록', type === 'business' ? '사업정보' : titleOf(item));
-            editor.close(); render(); toast('이 브라우저에 임시 저장했습니다.');
+            await save(next, key || type === 'business' ? '수정' : '등록', type === 'business' ? '사업정보' : titleOf(item), type);
+            editor.close(); render(); toast('서버에 저장했습니다. 홈페이지에 반영됩니다.');
         } catch (error) { showFormError(error.message); }
     });
     form.addEventListener('input', event => {
@@ -395,7 +419,7 @@
             if (editContext !== context || !editor.open) return;
             if (key.endsWith('.src')) { const path = key.slice(0, -4); writePath(context.item, path, { ...(readPath(context.item, path) || {}), ...dimensions }); }
             else if (context.type === 'results') Object.assign(context.item, dimensions);
-            const input = form.elements.namedItem(key); input.value = ''; input.dataset.imageValue = value; input.required = false; input.placeholder = `${file.name} · 임시 이미지 선택됨`;
+            const input = form.elements.namedItem(key); input.value = ''; input.dataset.imageValue = value; input.required = false; input.placeholder = `${file.name} · 저장 시 서버 업로드`;
             const preview = [...form.querySelectorAll('[data-preview-for]')].find(element => element.dataset.previewFor === key);
             preview.innerHTML = thumbnail(value); context.dirty = true; document.getElementById('admin-form-error').hidden = true;
         } catch { if (editContext === context) showFormError('이미지를 읽지 못했습니다. 다른 이미지 파일을 선택해주세요.'); }
@@ -415,6 +439,7 @@
         editContext.dirty = true;
     });
     async function closeEditor() {
+        if (saveBusy || editContext?.pendingUploads) return;
         if (!editContext?.dirty || await confirmAction('수정 중인 내용을 닫을까요?', '저장하지 않은 수정 내용은 사라집니다.', '저장하지 않고 닫기')) editor.close();
     }
     editor.addEventListener('cancel', event => { event.preventDefault(); closeEditor(); });
@@ -434,16 +459,17 @@
         if (target.dataset.page) { page = Number(target.dataset.page); renderListBody(); return; }
         if (target.hasAttribute('data-clear-filter')) { query = ''; filter = ''; page = 1; render(); return; }
         if (target.dataset.delete) {
+            if (!serverReady || saveUncertain || saveBusy) { toast('서버 연결과 저장 상태를 먼저 확인해주세요.'); return; }
             const type = route, item = data[type].find(row => row._key === target.dataset.delete);
-            if (!item || !await confirmAction('항목을 삭제할까요?', `‘${titleOf(item)}’을(를) 임시 목록에서 삭제합니다. 운영 홈페이지에는 영향이 없습니다.`)) return;
-            try { const next = clone(data); next[type] = next[type].filter(row => row._key !== item._key); save(next, '삭제', titleOf(item)); render(); toast('임시 목록에서 삭제했습니다.'); } catch (error) { toast(error.message); }
+            if (!item || !await confirmAction('항목을 삭제할까요?', `‘${titleOf(item)}’을(를) 홈페이지 목록에서 삭제합니다. 원본 이미지 파일은 유지됩니다.`)) return;
+            try { const next = clone(data); next[type] = next[type].filter(row => row._key !== item._key); await save(next, '삭제', titleOf(item), type); render(); toast('서버 목록에서 삭제했습니다.'); } catch (error) { toast(error.message); }
         }
         if (target.hasAttribute('data-export')) {
             exportData(data, `dugolbi-temp-${todayISO()}.json`); toast('임시 변경 내용을 JSON 파일로 내보냈습니다.');
         }
         if (target.hasAttribute('data-export-legacy') && legacyData) { exportData(legacyData, `dugolbi-previous-${todayISO()}.json`); return; }
-        if (target.hasAttribute('data-reset') && await confirmAction('임시 데이터를 초기화할까요?', '이 브라우저에 저장한 수정 내용이 사라집니다. 필요하면 먼저 변경 내용을 내보내주세요.', '초기화하기')) {
-            try { localStorage.removeItem(KEY); data = clone(currentSource); sourceChanged = false; render(); toast('현재 홈페이지 데이터를 기준으로 초기화했습니다.'); } catch { toast('브라우저 저장 공간에 접근할 수 없어 초기화하지 못했습니다.'); }
+        if (target.hasAttribute('data-reset') && await confirmAction('이전 임시 데이터를 지울까요?', '서버 콘텐츠는 유지됩니다. 이 브라우저의 이전 편집본만 지우니 필요하면 먼저 내보내주세요.', '지우기')) {
+            try { localStorage.removeItem(KEY); localStorage.removeItem(LEGACY_KEY); legacyData = null; render(); toast('이전 브라우저 임시 데이터를 지웠습니다.'); } catch { toast('브라우저 저장 공간에 접근할 수 없어 초기화하지 못했습니다.'); }
         }
     });
     view.addEventListener('input', event => { if (event.target.id === 'admin-search-input') { query = event.target.value; page = 1; renderListBody(); } });

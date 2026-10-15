@@ -1,6 +1,6 @@
 <?php
 // Shared read-only clinical image inventory for the public page and admin preview.
-function dugolbiResultsCategories(): array
+function dugolbiResultsInventory(): array
 {
     $categories = [
         '두골비' => ['folder' => 'dugolbi', 'caption' => '두골비'],
@@ -27,5 +27,17 @@ function dugolbiResultsCategories(): array
         }
         $categories[$label]['images'] = $images;
     }
+    return $categories;
+}
+
+function dugolbiResultsCategories(): array
+{
+    $categories = dugolbiResultsInventory();
+    require_once __DIR__ . '/content-store.php';
+    try { $state = dgContentRead(); if (!isset($state['sections']['results'])) return $categories; $items = dgContentResultItems($state); }
+    catch (Throwable $error) { error_log('[DUGOLBI clinical content] Storage unavailable; using image inventory.'); return $categories; }
+    foreach ($categories as &$category) $category['images'] = [];
+    unset($category);
+    foreach ($items as $item) if (($item['_status'] ?? 'visible') !== 'draft' && isset($categories[$item['category']])) $categories[$item['category']]['images'][] = ['src' => $item['src'], 'width' => $item['width'] ?? 1, 'height' => $item['height'] ?? 1];
     return $categories;
 }

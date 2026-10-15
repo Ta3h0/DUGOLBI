@@ -7,7 +7,7 @@ header('Content-Type: application/javascript; charset=UTF-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 $items = [];
-foreach (dugolbiResultsCategories() as $label => $category) {
+foreach (dugolbiResultsInventory() as $label => $category) {
     foreach ($category['images'] as $image) {
         $filename = rawurldecode(basename($image['src']));
         $items[] = [
