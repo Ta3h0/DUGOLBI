@@ -27,7 +27,6 @@ if (startInquirySession()) {
     <main id="wrap">
         <section class="section hero-section">
 
-            <!-- HERO SWIPER -->
             <div class="hero-swiper swiper">
                 <div class="swiper-wrapper">
 
@@ -45,7 +44,6 @@ if (startInquirySession()) {
 
                 </div>
 
-                <!-- pagination + navigation -->
                 <div class="hero-controls">
 
                     <button type="button" class="hero-prev" aria-label="이전 슬라이드">
@@ -62,7 +60,6 @@ if (startInquirySession()) {
             </div>
 
 
-            <!-- 기존 HERO TEXT -->
             <div class="hero-text-box">
 
                 <h1 class="hero-title">
@@ -88,7 +85,6 @@ if (startInquirySession()) {
             <div class="inner">
                 <div class="scroll-text">
 
-                    <!-- 1줄 -->
                     <div class="scroll-line">
                         <div class="scroll-line__base">
                             31년 경험과 2만 명 이상의 <br class="mob">임상 연구 기반 데이터를 통해
@@ -101,7 +97,6 @@ if (startInquirySession()) {
                         </div>
                     </div>
 
-                    <!-- 2줄 -->
                     <div class="scroll-line">
                         <div class="scroll-line__base">
                             방향성과 기준을 제시하고
@@ -112,7 +107,6 @@ if (startInquirySession()) {
                         </div>
                     </div>
 
-                    <!-- 3줄 -->
                     <div class="scroll-line">
                         <div class="scroll-line__base">
                             분명한 결과를 만들어내는 <br class="mob">임상 중심의 교육
@@ -131,17 +125,14 @@ if (startInquirySession()) {
         <section class="section03">
             <div class="container section03-grid">
 
-                <!-- LEFT : VISUAL -->
                 <div class="section03-visual">
 
                     <img src="images/main/section03-skull.png" alt="두개골과 경추 구조" class="section03-skull">
 
-                    <!-- 원 + 점 + STRUCTURE / BALANCE / CHANGE -->
                     <img src="images/main/section03-point.svg" alt="" class="section03-point" aria-hidden="true">
                 </div>
 
 
-                <!-- RIGHT : CONTENT -->
                 <div class="section03-content">
 
                     <span class="section-eyebrow">
@@ -278,7 +269,6 @@ if (startInquirySession()) {
 
                 </div>
 
-                <!-- 반드시 swiper-wrapper 밖 -->
                 <div class="growth-pagination"></div>
 
             </div>
@@ -454,11 +444,9 @@ if (startInquirySession()) {
             </div>
 
 
-            <!-- REVIEW MARQUEE -->
             <div class="review-marquee">
                 <div class="review-marquee-track">
 
-                    <!-- 1세트 -->
                     <div class="review-marquee-group">
                         <div class="review-marquee-item">
                             <img src="images/main/review-01.jpg" alt="두골비 후기">
@@ -481,7 +469,6 @@ if (startInquirySession()) {
                     </div>
 
 
-                    <!-- 무한 반복용 복제 -->
                     <div class="review-marquee-group" aria-hidden="true">
                         <div class="review-marquee-item">
                             <img src="images/main/review-01.jpg" alt="">
@@ -730,7 +717,6 @@ if (startInquirySession()) {
                         <input type="hidden" name="inquiry_token"
                             value="<?= htmlspecialchars($inquiryToken, ENT_QUOTES, 'UTF-8') ?>">
 
-                        <!-- 이름 -->
                         <div class="form-group form-group-full">
                             <label for="user-name">
                                 이름 <span>*</span>
@@ -744,7 +730,6 @@ if (startInquirySession()) {
                         </div>
 
 
-                        <!-- 지역 -->
                         <div class="form-group">
                             <label for="user-region">
                                 지역 <span>*</span>
@@ -759,7 +744,6 @@ if (startInquirySession()) {
                         </div>
 
 
-                        <!-- 연락처 -->
                         <div class="form-group">
                             <label for="user-phone">
                                 연락처 <span>*</span>
@@ -774,7 +758,6 @@ if (startInquirySession()) {
                         </div>
 
 
-                        <!-- 샵 운영 여부 -->
                         <div class="form-group">
                             <label for="shop-status-trigger" id="shop-status-label">
                                 샵 운영 여부 <span>*</span>
@@ -782,7 +765,6 @@ if (startInquirySession()) {
 
                             <div class="select-box">
 
-                                <!-- 실제 폼 전송용 -->
                                 <select id="shop-status" name="shop_status" class="native-select" required tabindex="-1"
                                     aria-hidden="true">
                                     <option value="" selected>선택해주세요</option>
@@ -791,7 +773,6 @@ if (startInquirySession()) {
                                     <option value="계획중">계획중</option>
                                 </select>
 
-                                <!-- 화면 표시용 -->
                                 <div class="custom-select" data-select="shop-status">
 
                                     <button type="button" class="custom-select-trigger" id="shop-status-trigger"
@@ -829,7 +810,6 @@ if (startInquirySession()) {
                         </div>
 
 
-                        <!-- 관심 교육과정 -->
                         <div class="form-group">
                             <label for="education-trigger" id="education-label">
                                 관심 교육과정 <span>*</span>
@@ -837,7 +817,6 @@ if (startInquirySession()) {
 
                             <div class="select-box">
 
-                                <!-- 실제 폼 전송용 -->
                                 <select id="education" name="education" class="native-select" required tabindex="-1"
                                     aria-hidden="true">
 
@@ -851,7 +830,6 @@ if (startInquirySession()) {
                                     <option value="이달의 교육">이달의 교육</option>
                                 </select>
 
-                                <!-- 화면 표시용 -->
                                 <div class="custom-select" data-select="education">
 
                                     <button type="button" class="custom-select-trigger" id="education-trigger"
@@ -895,7 +873,6 @@ if (startInquirySession()) {
                         </div>
 
 
-                        <!-- 알게 된 경로 -->
                         <div class="form-group form-group-full route-group">
                             <p class="form-label">두골비를 알게 된 경로</p>
 
@@ -929,7 +906,6 @@ if (startInquirySession()) {
                         </div>
 
 
-                        <!-- 문의 내용 -->
                         <div class="form-group form-group-full">
                             <label for="message">문의 내용</label>
 
@@ -956,7 +932,6 @@ if (startInquirySession()) {
                         </div>
 
 
-                        <!-- 버튼 -->
                         <div class="form-group form-group-full">
                             <button type="submit" class="submit">
                                 <span>상담 신청</span>

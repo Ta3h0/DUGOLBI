@@ -1,5 +1,4 @@
 <?php
-// Public page and admin preview read the same current image folders.
 require_once __DIR__ . '/includes/results-data.php';
 $resultsCategories = dugolbiResultsCategories();
 $resultsDefaultCategory = null;
@@ -62,13 +61,6 @@ foreach ($resultsCategories as $resultsLabel => $resultsCategory) {
                     </article>
                     <?php endforeach; ?>
                     <?php endforeach; ?>
-                    <!-- 기존 상세 설명: 관리 내용/횟수 확인 전까지 노출하지 않습니다.
-                    <p>두개골 비대칭 윤곽 관리 3회</p>
-                    <p>두골비 3회 임상</p>
-                    <p>두개골 비대칭 윤곽 관리</p>
-                    <p>두골체 비대칭 관리</p>
-                    <p>신결비 비대칭 관리</p>
-                    -->
                 </div>
                 <p class="results-empty" role="status" hidden>
                     등록된 임상 결과가 없습니다.
@@ -101,7 +93,6 @@ foreach ($resultsCategories as $resultsLabel => $resultsCategory) {
                     </dl>
                 </div>
             </div>
-            <!-- 서울청담교육장 위치 -->
             <div class="results-map-panel"><img src="images/results/information-map.png" alt="" data-business-location-alt="seoul" width="948" height="672"><div id="daumRoughmapContainer1790929303745" class="information-map root_daum_roughmap root_daum_roughmap_landing" role="img" data-business-map-label="busan"></div></div>
         </section>
         <?php include __DIR__ . '/footer.html'; ?>
