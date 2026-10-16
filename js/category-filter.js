@@ -8,6 +8,7 @@
         if (!grid) return;
 
         const collator = new Intl.Collator("ko", { numeric: true, sensitivity: "base" });
+        const certificationOrder = ["공식 강사", "교육 마스터점", "교육 인증점", "교육 수료점"];
         const defaultImage = (typeof networkImageBaseUrl === "string" ? networkImageBaseUrl : "https://okay2.speedgabia.com/_dugolbi/cert/").replace(/\/?$/, "/") + "replace.jpg";
         const certificationDescriptions = {
             "공식 강사": "두골비의 기술과 교육을 전달하는 공식 전문 교육진",
@@ -70,7 +71,11 @@
             ? networkData.filter(function (branch) {
                 return branch && typeof branch === "object" && typeof branch.name === "string";
             }).slice().sort(function (first, second) {
-                return collator.compare(first.name.trim(), second.name.trim());
+                const firstRank = certificationOrder.indexOf(first.certification);
+                const secondRank = certificationOrder.indexOf(second.certification);
+                return (firstRank < 0 ? certificationOrder.length : firstRank)
+                    - (secondRank < 0 ? certificationOrder.length : secondRank)
+                    || collator.compare(first.name.trim(), second.name.trim());
             })
             : [];
         const fragment = document.createDocumentFragment();
@@ -82,7 +87,6 @@
                 ? "경남"
                 : (regionName.match(/^(서울|경기|강원|충북|충남|대전|대구|경북|경남|부산|울산|전북|전남|광주)/) || [regionName])[0];
             card.dataset.category = filterRegion;
-            card.dataset.regionPriority = String(Number(branch.regionPriority) || 0);
             const customImage = typeof branch.img === "string" ? branch.img.trim() : "";
             const plaquePrefix = "images/network/plaques/";
             const hostedImage = customImage.startsWith(plaquePrefix) && typeof networkImageBaseUrl === "string"
@@ -185,10 +189,6 @@
                 return selected === "전체" || selected === "전국" || item.dataset.category === selected;
             });
             if (networkGrid) {
-                // Pin the main branch in national/regional views; others stay alphabetical.
-                matching.sort(function (first, second) {
-                    return Number(second.dataset.regionPriority) - Number(first.dataset.regionPriority);
-                });
                 // Reuse the cards so their detail-dialog handlers remain attached.
                 matching.forEach(function (item) { networkGrid.append(item); });
             }

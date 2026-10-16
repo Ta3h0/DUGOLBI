@@ -647,3 +647,8 @@
 - 신규 js/introduce-educators.js가 기존 content-data.php로 제공되는 modify.js 데이터를 읽어 목록 생성. 문자열은 textContent로 표시, strong:true인 항목만 strong 요소 생성. 공통 데이터 공급/관리자 저장 로직 변경 없음.
 - Edge/WebKit 375·1440·1920px 6개 비교: 이전 HTML과 약력/강조/배치 일치, 가로 넘침/JS 예외 없음. 데이터 항목 추가 반영 및 HTML 모양 문구의 안전한 텍스트 표시 확인. 다른 modify.js 데이터 동일 확인, JS/PHP 문법 검사 통과.
 - 생성: js/introduce-educators.js. 수정: introduce-educators.html, js/modify.js, 이 문서. CSS/이미지 변경 없음. 이전 아이폰 보정 작업의 미커밋 변경 유지. 이번 작업 운영 배포/Git commit/push/시스템 종료 미수행.
+## 수료지점 인증 등급·업체명 정렬 — 2026-10-16
+
+- 전국 및 모든 지역 탭을 공식 강사 → 교육 마스터점 → 교육 인증점 → 교육 수료점, 같은 인증 안에서는 업체명 가나다순으로 통일. 기존 regionPriority의 공개 목록 재정렬 제거. 수료지점 데이터/연락처/이미지 보존.
+- Edge/WebKit PC1440·모바일375px에서 각 15개 탭, 29개 페이지 검증. 총 74개 지점 순서, 페이지당 8개, 모바일 페이지 번호 최대 5개, 본점 첫 표시 및 상세 팝업 유지. JS 문법/diff 공백 검사 통과.
+- 수정: js/category-filter.js, js/modify.js의 정렬 설명, 이 문서. 운영 배포/Git commit/push 미수행.
