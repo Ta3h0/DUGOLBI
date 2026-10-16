@@ -631,3 +631,19 @@
 - [x] modify.js 파일 해시 동일, 컨퍼런스 원고/10월1~31 기간/4개 반 예약 링크/74개 지점·개별 연락처/본점 우선 유지. 테스트 변경은 임시 복사본에만 저장.
 - 생성: content-data.php, includes/content-store.php, temp-board/content-api.php. 수정: footer.html, includes/results-data.php, temp-board/seed.php, temp-board/admin.js, temp-board/index.php, .gitignore, temp-board/README.md, 이 문서. 이미지 자산 추가 없음.
 - Current: 콘텐츠 서버 저장/업로드/홈페이지 반영 로컬 구현 완료. Next: 코드 업로드 후 content-private 및 images/content 쓰기 권한·실제 저장 확인, 게시판 추가/삭제 운영 검수. 배포/Git commit/push 미수행. 자동 재개는 1회 실행 후 PAUSED 확인.
+
+## 아이폰 메인 대표 이미지 비율 보정 — 2026-10-15
+
+- 원인: `.section05 .img-box img`의 `height: fit-content`가 WebKit에서 이미지의 원본 높이 807px을 유지. 모바일 너비는 320px로 축소되어 세로 왜곡 재현. Edge에서는 320×443.7px로 정상 계산.
+- 수정: 해당 이미지 높이를 auto로 변경하고 flex 교차축 늘어남 방지. 원본 582×807 크기 속성 추가. 메인 common.css URL에 버전 추가로 기존 캐시 회피. 원본 이미지/나머지 레이아웃 유지.
+- 검증: WebKit/Edge 375·390·402·430·768·844·1024·1440·1920px 18개 및 방향 전환 4개 통과. 비율 오차 0.01% 미만, 가로 넘침/JS 예외 없음. PHP 문법/diff 공백 검사 통과. 외부 CDN 요청은 검사 시 차단; 실제 아이폰 실기기 검사는 수행하지 않음.
+- 배포: 사용자 승인에 따라 저장된 Cafe24 연결로 기존 운영 index.html/common.css 백업 후 index.html과 css/common.css 두 파일 업로드 성공. Git commit/push 없음. 원격 DB·게시판·업로드 데이터 변경 없음.
+- 운영 확인: http://dugolbi.com/index.html 응답 200, 버전 stylesheet/이미지 크기 속성 확인, 공개 CSS SHA256이 로컬 배포본과 일치. WebKit/Edge 모바일 402·가로 844·PC 1440px 6개 검사 통과. 모바일 대표 이미지 320×443.7px.
+- 백업/검사 결과: Windows TEMP의 dugolbi-iphone-release-20261015 및 dugolbi-iphone-*-verification.json. 기계 점검기는 기존 숨김 동적 썸네일/다른 구간 width 전환 경고만 보고하여 요청 범위 밖 코드는 유지.
+- 완료: 운영 반영 확인. 사용자 요청에 따른 Windows 정상 종료 진행.
+## 강사 소개 약력 modify.js 연동 — 2026-10-16
+
+- introduce-educators.html의 김미진·권진이·맹정숙 약력 74개 항목을 js/modify.js의 educatorData[].careerColumns로 이전. 기존 문구·순서·강조 17개·좌우 2열 구분 유지.
+- 신규 js/introduce-educators.js가 기존 content-data.php로 제공되는 modify.js 데이터를 읽어 목록 생성. 문자열은 textContent로 표시, strong:true인 항목만 strong 요소 생성. 공통 데이터 공급/관리자 저장 로직 변경 없음.
+- Edge/WebKit 375·1440·1920px 6개 비교: 이전 HTML과 약력/강조/배치 일치, 가로 넘침/JS 예외 없음. 데이터 항목 추가 반영 및 HTML 모양 문구의 안전한 텍스트 표시 확인. 다른 modify.js 데이터 동일 확인, JS/PHP 문법 검사 통과.
+- 생성: js/introduce-educators.js. 수정: introduce-educators.html, js/modify.js, 이 문서. CSS/이미지 변경 없음. 이전 아이폰 보정 작업의 미커밋 변경 유지. 이번 작업 운영 배포/Git commit/push/시스템 종료 미수행.

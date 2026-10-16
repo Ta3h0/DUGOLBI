@@ -4107,7 +4107,8 @@ body.review .page-button {
 
 :where(body.home) .section05 .container .img-box img {
   width: 400px;
-  height: fit-content;
+  height: auto;
+  align-self: flex-start;
 }
 
 :where(body.home) .section05 .container .profile-box {
